@@ -43,7 +43,7 @@ export const createTicket = (subject, message) => {
 };
 
 /**
- * Para el Admin: Respuesta rápida a un ticket
+ * Para el Admin: Respuesta rápida a un ticket (Lógica Nueva Optimizada)
  */
 export const quickReply = (ticketId, replyText) => {
     const ticket = state.data.tickets.find(t => t.id === ticketId);
@@ -51,8 +51,15 @@ export const quickReply = (ticketId, replyText) => {
         ticket.reply = replyText;
         ticket.status = 'Respondido';
         saveToDisk();
+        
+        // Integración de log con la infraestructura inicial
         logActivity('INFO', `Ticket #${ticketId} respondido`);
-        if (window.app && window.app.router) window.app.router('admin'); // Refresca el panel admin
+        
+        if (window.app && window.app.router) {
+            window.app.router('admin'); // Refresca para ver que el ticket se fue/actualizó
+        }
+        
+        if (window.app?.showToast) window.app.showToast("Respuesta enviada con éxito");
     }
 };
 

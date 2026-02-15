@@ -7,10 +7,13 @@ import * as auth from './auth.js';
 import * as ui from './ui.js';
 import * as admin from './admin.js';
 
-// Definimos el objeto vacío primero para evitar errores de inicialización
+// 1. Creamos el objeto vacío primero
 export const app = {};
 
-// Asignamos todas las funcionalidades manteniendo la infraestructura inicial
+// 2. Lo asignamos a window INMEDIATAMENTE para evitar errores de referencia circular
+window.app = app;
+
+// 3. Llenamos el objeto con todas las funciones manteniendo la infraestructura robusta
 Object.assign(app, {
     // --- Estado y Persistencia ---
     state,
@@ -22,9 +25,9 @@ Object.assign(app, {
     toggleAuthMode: auth.toggleAuthMode,
     router: ui.router,
     enterSystem: ui.enterSystem,
-    renderAdmin: ui.renderAdmin, // Aseguramos que renderAdmin esté disponible globalmente
+    renderAdmin: ui.renderAdmin, // Vital para entrar al admin
 
-    // --- Funciones Administrativas (Lógica Nueva Integrada via Spread) ---
+    // --- Funciones Administrativas (Lógica Nueva Integrada) ---
     ...admin,
 
     // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---
@@ -178,7 +181,7 @@ Object.assign(app, {
     init() {
         console.log("Vortex Core 3.2: Sistema Restablecido.");
         
-        // Cargamos datos del disco antes de arrancar (Persistencia)
+        // 1. Cargamos datos del disco (Persistencia)
         const saved = localStorage.getItem('vortex_v3_data');
         if (saved) {
             try {
@@ -188,13 +191,18 @@ Object.assign(app, {
             }
         }
 
-        // Fondo neural y UI
+        // 2. Fondo neural y UI estética
         this.renderNeuralBackground();
         
-        // Enrutamiento inicial (Lógica Nueva aplicada)
-        this.router(this.state.view || 'login');
+        // 3. Enrutamiento inicial inteligente (Lógica Nueva)
+        if (!this.state.currentUser) {
+            this.router('login');
+        } else {
+            this.router(this.state.view || 'market');
+            this.updateHeaderUI(this.state.currentUser);
+        }
 
-        // Listeners globales para UX
+        // 4. Listeners globales para UX
         document.addEventListener('mousedown', (e) => {
             const menu = document.getElementById('side-menu-vortex');
             const sc = document.getElementById('search-input-container');
@@ -202,7 +210,7 @@ Object.assign(app, {
             if (sc && sc.classList.contains('active') && !sc.contains(e.target) && !e.target.closest('.vortex-search-wrapper')) sc.classList.remove('active');
         });
 
-        // Delegación de eventos para compras
+        // 5. Delegación de eventos para compras dinámicas
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-adquirir, .btn-recarga, .pay-btn'); 
             if (btn && !btn.hasAttribute('onclick') && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
@@ -218,15 +226,12 @@ Object.assign(app, {
             }
         });
 
-        // Carga de historial si el contenedor existe
+        // 6. Carga de historial si el contenedor existe
         if (document.getElementById('history-items-container')) {
             this.loadPurchaseHistory();
         }
     }
 });
 
-// Exponemos al mundo global para compatibilidad con el HTML
-window.app = app;
-
-// Lanzamiento oficial
+// 4. Lanzamiento oficial
 app.init();
