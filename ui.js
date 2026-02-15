@@ -2,29 +2,34 @@
    VORTEX STREAMING - UI & ROUTING (MODULAR UNIFICADO)
    ========================================================================== */
 
-import { app } from './app.js';
+import { state } from './data.js';
 
 /**
- * Lógica Nueva: Entrada al sistema
+ * Lógica Nueva: Entrada al sistema.
+ * Utiliza el objeto global window.app para coordinar la navegación.
  */
 export const enterSystem = () => {
-    // Redirige al catálogo principal (market)
-    app.router('market'); 
+    // Redirige al catálogo principal (market) utilizando la referencia global
+    if (window.app && window.app.router) {
+        window.app.router('market');
+    }
 };
 
 /**
- * Enrutador principal del sistema
+ * Enrutador principal del sistema.
+ * Maneja el renderizado dinámico de vistas manteniendo la estética elite.
  */
-export function router(view) {
-    app.state.view = view;
+export const router = (view) => {
+    state.view = view;
     const container = document.getElementById('app-content');
     const menu = document.getElementById('side-menu-vortex');
     
     if(!container) return;
     if(menu) menu.classList.remove('active');
 
+    // Renderizado de categorías específicas (Streaming / Gaming)
     if (['streaming', 'gaming'].includes(view)) {
-        const list = app.state.data.catalog[view] || [];
+        const list = state.data.catalog[view] || [];
         container.innerHTML = `<h1 class="fade-in">Catálogo ${view.toUpperCase()}</h1><div class="bento-grid" id="grid"></div>`;
         const grid = document.getElementById('grid');
         
@@ -41,13 +46,16 @@ export function router(view) {
                 </div>`;
         });
     } 
+    // Vista Market (Catálogo Principal)
     else if (view === 'market') {
         container.innerHTML = `<h1 class="fade-in">Catálogo Elite</h1><div class="bento-grid" id="grid"></div>`;
         const grid = document.getElementById('grid');
         const category = 'streaming';
-        const source = (app.state.data.catalog && app.state.data.catalog[category]) 
-                       ? app.state.data.catalog[category] 
-                       : app.state.services[category].map(n => ({ name: n, price: 5.00, status: 'Disponible' }));
+        
+        // Priorizar datos del catálogo persistente o fallback a servicios predefinidos
+        const source = (state.data.catalog && state.data.catalog[category]) 
+                       ? state.data.catalog[category] 
+                       : (state.services ? state.services[category].map(n => ({ name: n, price: 5.00, status: 'Disponible' })) : []);
 
         source.forEach(item => {
             const isAgotado = item.status === 'Agotado';
@@ -63,12 +71,27 @@ export function router(view) {
                 </div>`;
         });
     }
+    // Panel de Administración
     else if (view === 'admin') {
-        // Llama a la función de renderizado administrativo desde app
-        app.renderAdmin(container);
+        if (window.app && window.app.renderAdmin) {
+            window.app.renderAdmin(container);
+        }
     }
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+};
+
+/**
+ * Renderizado administrativo (Exportado para el objeto app)
+ */
+export const renderAdmin = (container) => {
+    // Esta función es consumida por el admin.js o inyectada por el core
+    if (window.app && window.app.initAdminPanel) {
+        window.app.initAdminPanel(container);
+    } else {
+        container.innerHTML = `<h1 class="fade-in">Panel de Control</h1><p>Cargando módulos administrativos...</p>`;
+    }
+};
 
 /**
  * Control del campo de búsqueda
@@ -102,7 +125,7 @@ export function toggleUserCard() {
  * Carga de datos del usuario actual en la interfaz
  */
 export function loadCurrentUserData() {
-    const u = app.state.currentUser;
+    const u = state.currentUser;
     if (u) {
         const userVal = document.getElementById('val-user');
         const passVal = document.getElementById('val-pass');

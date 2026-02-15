@@ -3,26 +3,31 @@
    ========================================================================== */
 
 import { state, saveToDisk } from './data.js';
-import { handleAuth, logout, toggleAuthMode } from './auth.js'; 
-import { router, enterSystem } from './ui.js';
-import * as adminFuncs from './admin.js';
+import * as auth from './auth.js';
+import * as ui from './ui.js';
+import * as admin from './admin.js';
 
-export const app = {
+// Definimos el objeto vacío primero para evitar errores de inicialización
+export const app = {};
+
+// Asignamos todas las funcionalidades manteniendo la infraestructura inicial
+Object.assign(app, {
     // --- Estado y Persistencia ---
     state,
     saveToDisk,
 
     // --- Autenticación y Navegación ---
-    handleAuth,
-    logout,
-    toggleAuthMode, // Integrado para alternar entre Login y Registro
-    router,
-    enterSystem,
+    handleAuth: auth.handleAuth,
+    logout: auth.logout,
+    toggleAuthMode: auth.toggleAuthMode,
+    router: ui.router,
+    enterSystem: ui.enterSystem,
+    renderAdmin: ui.renderAdmin,
 
-    // --- Funciones Administrativas (Spread de adminFuncs) ---
-    ...adminFuncs,
+    // --- Funciones Administrativas (CRUD/Logs) ---
+    ...admin,
 
-    // --- Lógica de Compras y Notificaciones ---
+    // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---
     registrarCompra(nombreProducto, precio, tipo) {
         const activeUser = this.state.currentUser;
         if (!activeUser) {
@@ -166,15 +171,23 @@ export const app = {
 
     // --- Inicialización del Sistema ---
     init() {
-        console.log("Vortex Core 3.2: Online & Persistent.");
+        console.log("Vortex Core 3.2: Sistema Restablecido.");
         
-        // Fondo neural
-        this.renderNeuralBackground();
+        // Cargamos datos del disco antes de arrancar (Lógica Nueva)
+        const saved = localStorage.getItem('vortex_v3_data');
+        if (saved) {
+            try {
+                this.state.data = JSON.parse(saved);
+            } catch(e) {
+                console.error("Error al cargar persistencia inicial.");
+            }
+        }
 
-        // Inicializar con la vista actual
+        // Fondo neural y UI
+        this.renderNeuralBackground();
         this.router(this.state.view);
 
-        // Listeners globales para cerrar menús al hacer click fuera
+        // Listeners globales para UX
         document.addEventListener('mousedown', (e) => {
             const menu = document.getElementById('side-menu-vortex');
             const sc = document.getElementById('search-input-container');
@@ -182,7 +195,7 @@ export const app = {
             if (sc && sc.classList.contains('active') && !sc.contains(e.target) && !e.target.closest('.vortex-search-wrapper')) sc.classList.remove('active');
         });
 
-        // Delegación de eventos para botones dinámicos
+        // Delegación de eventos para compras
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-adquirir, .btn-recarga, .pay-btn'); 
             if (btn && !btn.hasAttribute('onclick') && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
@@ -198,15 +211,15 @@ export const app = {
             }
         });
 
-        // Carga inicial de historial
+        // Carga de historial si el contenedor existe
         if (document.getElementById('history-items-container')) {
             this.loadPurchaseHistory();
         }
     }
-};
+});
 
-// Vínculo vital con el ámbito global (DOM)
+// Exponemos al mundo global para compatibilidad con el HTML
 window.app = app;
 
-// Lanzamiento oficial del núcleo
+// Lanzamiento oficial
 app.init();

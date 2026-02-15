@@ -2,12 +2,11 @@
    VORTEX STREAMING - AUTH ENGINE (MODULAR UNIFICADO)
    ========================================================================== */
 
-import { app } from './app.js';
-import { state } from './data.js';
+import { state, saveToDisk } from './data.js';
 
 /**
- * Lógica Nueva: Alterna el modo de autenticación y refresca la vista
- * Exportada para compatibilidad modular.
+ * Lógica Nueva: Alterna el modo de autenticación y refresca la vista.
+ * Se integra el uso de window.app para coordinar con el router.
  */
 export const toggleAuthMode = (isReg) => {
     // Si se pasa un booleano se usa, de lo contrario alterna el estado actual
@@ -25,13 +24,22 @@ export const toggleAuthMode = (isReg) => {
             '¿Ya tienes cuenta? <a href="#" onclick="app.toggleAuthMode(false)">Inicia Sesión</a>' :
             '¿No tienes cuenta? <a href="#" onclick="app.toggleAuthMode(true)">Regístrate</a>';
     }
+
+    // Llamada lógica nueva: Notificar al router (si fuera necesario refrescar la vista de login)
+    if (window.app && window.app.router) {
+        // window.app.router('login'); // Opcional según flujo de UI
+    }
 };
 
 /**
- * Maneja el proceso de Login y Registro
+ * Maneja el proceso de Login y Registro.
+ * Implementa la validación robusta y el uso de window.app para utilidades.
  */
 export const handleAuth = (e) => {
     if(e) e.preventDefault(); 
+    
+    console.log("Validando acceso..."); // Lógica nueva integrada
+
     const emailEl = document.getElementById('auth-email');
     const passEl = document.getElementById('auth-pass');
     const msg = document.getElementById('auth-msg');
@@ -43,7 +51,7 @@ export const handleAuth = (e) => {
 
     if (!email || !pass) {
         msg.innerText = "Ingresa tus credenciales.";
-        app.applyErrorEffect(btn);
+        if (window.app?.applyErrorEffect) window.app.applyErrorEffect(btn);
         return;
     }
 
@@ -51,7 +59,7 @@ export const handleAuth = (e) => {
         // Lógica de Registro
         if (state.data.users.find(u => u.email === email)) {
             msg.innerText = "Correo ya registrado.";
-            app.applyErrorEffect(btn);
+            if (window.app?.applyErrorEffect) window.app.applyErrorEffect(btn);
             return;
         }
         const newUser = { 
@@ -63,7 +71,7 @@ export const handleAuth = (e) => {
             status: "Activo" 
         };
         state.data.users.push(newUser);
-        app.saveToDisk();
+        saveToDisk(); // Usando import directo
         alert("Registro exitoso.");
         toggleAuthMode(false); // Volver a login tras registro
     } else {
@@ -72,23 +80,25 @@ export const handleAuth = (e) => {
         if (found) {
             if (found.status === 'Suspendido' || found.status === 'Baneado') {
                 msg.innerText = "Cuenta suspendida.";
-                app.applyErrorEffect(btn);
+                if (window.app?.applyErrorEffect) window.app.applyErrorEffect(btn);
                 return;
             }
             enterSystem(found);
         } else {
             msg.innerText = "Credenciales incorrectas.";
-            app.applyErrorEffect(btn);
+            if (window.app?.applyErrorEffect) window.app.applyErrorEffect(btn);
         }
     }
 };
 
 /**
- * Ejecuta la entrada al sistema tras validación exitosa
+ * Ejecuta la entrada al sistema tras validación exitosa.
  */
 export function enterSystem(user) {
     state.currentUser = user;
-    app.updateHeaderUI(user);
+    
+    if (window.app?.updateHeaderUI) window.app.updateHeaderUI(user);
+    
     const overlay = document.getElementById('auth-screen');
     
     if(overlay) {
@@ -98,15 +108,24 @@ export function enterSystem(user) {
         
         setTimeout(() => {
             overlay.classList.add('hidden');
-            app.router('market'); 
-            app.showToast(`Bienvenido, ${user.name}`);
+            if (window.app?.router) window.app.router('market'); 
+            if (window.app?.showToast) window.app.showToast(`Bienvenido, ${user.name}`);
         }, 500);
     }
 }
 
 /**
- * Cierra la sesión
+ * Cierra la sesión restableciendo el estado y usando la lógica nueva.
  */
 export function logout() {
-    location.reload();
+    state.currentUser = null;
+    state.view = 'login';
+    
+    // Mantiene compatibilidad con el refresco total o ruteo manual
+    if (window.app && window.app.router) {
+        window.app.router('login');
+        location.reload(); // Recarga para asegurar limpieza de memoria
+    } else {
+        location.reload();
+    }
 }
