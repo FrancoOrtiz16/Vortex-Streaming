@@ -8,7 +8,6 @@ const app = {
         view: 'login',
         currentUser: null,
         isRegisterMode: false,
-        // Lógica que garantiza paridad total entre navegadores e Incógnito
         data: (function() {
             const defaultData = {
                 users: [
@@ -17,7 +16,16 @@ const app = {
                 ],
                 sales: [
                     { id: 101, client: "Admin Principal", service: "NETFLIX 4K", amount: 5.50, date: "2026-02-12", type: "streaming" }
-                ]
+                ],
+                catalog: {
+                    streaming: [
+                        { name: "NETFLIX", price: 5.00, status: "Disponible" },
+                        { name: "DISNEY+", price: 5.00, status: "Disponible" }
+                    ],
+                    gaming: [
+                        { name: "FREE FIRE", price: 5.00, status: "Disponible" }
+                    ]
+                }
             };
             
             const saved = localStorage.getItem('vortex_v3_data');
@@ -25,12 +33,12 @@ const app = {
 
             try {
                 const parsed = JSON.parse(saved);
-                // Validación de integridad: si el storage está corrupto o vacío, inyectamos default
                 if (!parsed.users || parsed.users.length === 0) return defaultData;
                 
-                // Garantía de acceso: re-inyectamos Admin Principal si falta en el storage
                 const adminExists = parsed.users.some(u => u.email === 'admin');
                 if (!adminExists) parsed.users.push(defaultData.users[0]);
+                
+                if (!parsed.catalog) parsed.catalog = defaultData.catalog;
                 
                 return parsed;
             } catch (e) {
@@ -49,10 +57,9 @@ const app = {
         localStorage.setItem('vortex_v3_data', JSON.stringify(this.state.data));
     },
 
-    // 3. LÓGICA DE COMPRAS (MANTENIDA Y REFORZADA)
+    // 3. LÓGICA DE COMPRAS
     registrarCompra(nombreProducto, precio, tipo) {
         const activeUser = this.state.currentUser;
-
         if (!activeUser) {
             this.showToast("Debes iniciar sesión para realizar una compra.");
             return;
@@ -149,7 +156,6 @@ const app = {
     loadPurchaseHistory() {
         const container = document.getElementById('history-items-container');
         if (!container) return;
-
         const activeUser = this.state.currentUser;
         const salesData = this.state.data.sales;
 
@@ -240,13 +246,11 @@ const app = {
     enterSystem(user) {
         this.state.currentUser = user;
         this.updateHeaderUI(user);
-
         const overlay = document.getElementById('auth-screen');
         if(overlay) {
             overlay.style.transition = "opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease";
             overlay.style.opacity = "0";
             overlay.style.transform = "scale(1.1) blur(10px)";
-            
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 this.router('market'); 
@@ -255,40 +259,73 @@ const app = {
         }
     },
 
-    // 6. NAVEGACIÓN Y RENDERIZADO
+    // 6. NAVEGACIÓN Y RENDERIZADO (UNIFICADO)
     router(view) {
         this.state.view = view;
         const container = document.getElementById('app-content');
         const menu = document.getElementById('side-menu-vortex');
+        
         if(!container) return;
+        
+        // Cierre automático del menú (Lógica Nueva)
         if(menu) menu.classList.remove('active');
 
-        if (['market', 'streaming', 'gaming'].includes(view)) {
-            const list = view === 'gaming' ? this.state.services.gaming : this.state.services.streaming;
-            container.innerHTML = `<h1 class="fade-in">Catálogo Elite</h1><div class="bento-grid" id="grid"></div>`;
+        // Integración Lógica Nueva para Streaming y Gaming
+        if (['streaming', 'gaming'].includes(view)) {
+            const list = this.state.data.catalog[view] || [];
+            container.innerHTML = `<h1 class="fade-in">Catálogo ${view.toUpperCase()}</h1><div class="bento-grid" id="grid"></div>`;
             const grid = document.getElementById('grid');
+            
             list.forEach(item => {
                 grid.innerHTML += `
-                    <div class="card vortex-item fade-in">
-                        <div class="badge">VORTEX</div>
-                        <h3 class="title">${item}</h3>
-                        <p class="price">$5.00</p>
-                        <button class="btn-adquirir pay-btn btc">ADQUIERE</button>
+                    <div class="card vortex-item fade-in" style="opacity: ${item.status === 'Agotado' ? '0.5' : '1'}">
+                        <div class="badge">${item.status}</div>
+                        <h3 class="title">${item.name}</h3>
+                        <p class="price">$${item.price.toFixed(2)}</p>
+                        <button class="btn-adquirir" ${item.status === 'Agotado' ? 'disabled' : ''} 
+                                onclick="app.registrarCompra('${item.name}', ${item.price}, '${view}')">
+                            ${item.status === 'Disponible' ? 'ADQUIRIR' : 'SIN STOCK'}
+                        </button>
                     </div>`;
             });
-        } else if (view === 'admin') {
+        } 
+        // Mantener comportamiento para Market (Vista General)
+        else if (view === 'market') {
+            container.innerHTML = `<h1 class="fade-in">Catálogo Elite</h1><div class="bento-grid" id="grid"></div>`;
+            const grid = document.getElementById('grid');
+            const category = 'streaming';
+            const source = (this.state.data.catalog && this.state.data.catalog[category]) 
+                           ? this.state.data.catalog[category] 
+                           : this.state.services[category].map(n => ({ name: n, price: 5.00, status: 'Disponible' }));
+
+            source.forEach(item => {
+                const isAgotado = item.status === 'Agotado';
+                grid.innerHTML += `
+                    <div class="card vortex-item fade-in ${isAgotado ? 'agotado' : ''}">
+                        <div class="badge">${isAgotado ? 'AGOTADO' : 'VORTEX'}</div>
+                        <h3 class="title">${item.name}</h3>
+                        <p class="price">$${parseFloat(item.price).toFixed(2)}</p>
+                        <button class="btn-adquirir pay-btn btc" ${isAgotado ? 'disabled' : ''} 
+                                onclick="app.registrarCompra('${item.name}', ${item.price}, 'streaming')">
+                            ${isAgotado ? 'SIN STOCK' : 'ADQUIERE'}
+                        </button>
+                    </div>`;
+            });
+        }
+        else if (view === 'admin') {
             this.renderAdmin(container);
         }
+        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    /* --- CONTROL DE MANDOS (INFRAESTRUCTURA PROTEGIDA - LÓGICA NUEVA) --- */
+    /* --- CONTROL DE MANDOS (GESTIÓN DINÁMICA & SEGURIDAD) --- */
+    
     updateUserStatus(userId, newStatus) {
         const user = this.state.data.users.find(u => u.id === userId);
         if (user && user.role !== 'ADMIN') {
             user.status = newStatus;
             this.saveToDisk();
-            // Refrescamos la vista actual para ver el cambio
             this.renderAdmin(document.getElementById('app-content'));
             this.showToast(`Estado de ${user.name}: ${newStatus}`);
         }
@@ -302,8 +339,40 @@ const app = {
                 user.pass = newPass;
                 this.saveToDisk();
                 this.renderAdmin(document.getElementById('app-content'));
-                this.showToast("Contraseña actualizada con éxito");
+                this.showToast("Contraseña actualizada");
             }
+        }
+    },
+
+    addService(category) {
+        const name = prompt(`Nombre del nuevo servicio para ${category.toUpperCase()}:`);
+        const price = prompt(`Precio para ${name}:`, "5.00");
+        if (name && price) {
+            if (!this.state.data.catalog) this.state.data.catalog = { streaming: [], gaming: [] };
+            if (!this.state.data.catalog[category]) this.state.data.catalog[category] = [];
+            this.state.data.catalog[category].push({
+                name: name.toUpperCase(),
+                price: parseFloat(price),
+                status: 'Disponible'
+            });
+            this.saveToDisk();
+            this.renderAdmin(document.getElementById('app-content'));
+            this.showToast(`${name} agregado al catálogo`);
+        }
+    },
+
+    toggleServiceStatus(category, index) {
+        const item = this.state.data.catalog[category][index];
+        item.status = item.status === 'Disponible' ? 'Agotado' : 'Disponible';
+        this.saveToDisk();
+        this.renderAdmin(document.getElementById('app-content'));
+    },
+
+    deleteService(category, index) {
+        if (confirm("¿Seguro que quieres eliminar este servicio?")) {
+            this.state.data.catalog[category].splice(index, 1);
+            this.saveToDisk();
+            this.renderAdmin(document.getElementById('app-content'));
         }
     },
 
@@ -327,7 +396,8 @@ const app = {
                     </div>
                 </div>
 
-                <table style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.2); border-radius:10px;">
+                <h3 style="margin-top:30px; font-size:14px; color:var(--primary);">CONTROL DE USUARIOS</h3>
+                <table style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.2); border-radius:10px; margin-bottom:30px;">
                     <tr style="text-align:left; opacity:0.6; font-size:12px;">
                         <th style="padding:10px;">Usuario</th>
                         <th style="padding:10px;">Estado</th>
@@ -349,6 +419,44 @@ const app = {
                         </tr>
                     `).join('')}
                 </table>
+
+                <div class="card" style="background:rgba(255,255,255,0.02); padding:20px; border-radius:15px; border:1px solid rgba(0,242,255,0.2); margin-top:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="font-size:14px; color:var(--primary);">INVENTARIO DE SERVICIOS</h3>
+                        <div>
+                            <button onclick="app.addService('streaming')" style="background:var(--primary); color:black; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px;">+ STREAMING</button>
+                            <button onclick="app.addService('gaming')" style="background:#a855f7; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">+ GAMING</button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                        <div>
+                            <h4 style="font-size:12px; opacity:0.5; margin-bottom:10px;">STREAMING</h4>
+                            ${(this.state.data.catalog?.streaming || []).map((s, i) => `
+                                <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
+                                    <span>${s.name} - <b>$${s.price}</b></span>
+                                    <div>
+                                        <button onclick="app.toggleServiceStatus('streaming', ${i})" style="background:none; border:1px solid ${s.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${s.status}</button>
+                                        <button onclick="app.deleteService('streaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div>
+                            <h4 style="font-size:12px; opacity:0.5; margin-bottom:10px;">GAMING</h4>
+                            ${(this.state.data.catalog?.gaming || []).map((g, i) => `
+                                <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
+                                    <span>${g.name} - <b>$${g.price}</b></span>
+                                    <div>
+                                        <button onclick="app.toggleServiceStatus('gaming', ${i})" style="background:none; border:1px solid ${g.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${g.status}</button>
+                                        <button onclick="app.deleteService('gaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     },
@@ -369,10 +477,7 @@ const app = {
 
     showToast(msg) {
         const t = document.getElementById('toast');
-        if(!t) {
-            this.mostrarNotificacion(msg); 
-            return;
-        }
+        if(!t) { this.mostrarNotificacion(msg); return; }
         t.innerText = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
@@ -380,22 +485,17 @@ const app = {
 
     init() {
         this.renderNeuralBackground();
-
         document.addEventListener('mousedown', (e) => {
             const menu = document.getElementById('side-menu-vortex');
             const sc = document.getElementById('search-input-container');
-
-            if (menu && menu.classList.contains('active') && !menu.contains(e.target) && !e.target.closest('.menu-hamburguer')) {
-                menu.classList.remove('active');
-            }
-            if (sc && sc.classList.contains('active') && !sc.contains(e.target) && !e.target.closest('.vortex-search-wrapper')) {
-                sc.classList.remove('active');
-            }
+            if (menu && menu.classList.contains('active') && !menu.contains(e.target) && !e.target.closest('.menu-hamburguer')) menu.classList.remove('active');
+            if (sc && sc.classList.contains('active') && !sc.contains(e.target) && !e.target.closest('.vortex-search-wrapper')) sc.classList.remove('active');
         });
 
+        // Este listener se mantiene como respaldo, aunque las nuevas cards ya tienen onclick inline.
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-adquirir, .btn-recarga, .pay-btn'); 
-            if (btn && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
+            if (btn && !btn.hasAttribute('onclick') && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
                 e.preventDefault();
                 const card = btn.closest('.card, .product-card, .service-item, .vortex-item');
                 if (card) {
@@ -407,7 +507,6 @@ const app = {
                 }
             }
         });
-
         console.log("Vortex Core 3.2: Online & Persistent.");
     },
 
@@ -441,7 +540,5 @@ const app = {
 
 window.onload = () => {
     app.init();
-    if (document.getElementById('history-items-container')) {
-        app.loadPurchaseHistory();
-    }
+    if (document.getElementById('history-items-container')) app.loadPurchaseHistory();
 };
