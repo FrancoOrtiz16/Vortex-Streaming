@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import { state, saveToDisk } from './data.js';
-import { handleAuth, logout } from './auth.js';
+import { handleAuth, logout, toggleAuthMode } from './auth.js'; 
 import { router, enterSystem } from './ui.js';
 import * as adminFuncs from './admin.js';
 
@@ -15,8 +15,9 @@ export const app = {
     // --- Autenticación y Navegación ---
     handleAuth,
     logout,
+    toggleAuthMode, // Integrado para alternar entre Login y Registro
     router,
-    enterSystem, // Integrado para que onclick="app.enterSystem()" funcione globalmente
+    enterSystem,
 
     // --- Funciones Administrativas (Spread de adminFuncs) ---
     ...adminFuncs,
@@ -204,7 +205,7 @@ export const app = {
     }
 };
 
-// ESTA LÍNEA ES VITAL: Expone 'app' al ámbito global para compatibilidad con el DOM.
+// Vínculo vital con el ámbito global (DOM)
 window.app = app;
 
 // Lanzamiento oficial del núcleo

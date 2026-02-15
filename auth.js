@@ -3,11 +3,34 @@
    ========================================================================== */
 
 import { app } from './app.js';
+import { state } from './data.js';
+
+/**
+ * Lógica Nueva: Alterna el modo de autenticación y refresca la vista
+ * Exportada para compatibilidad modular.
+ */
+export const toggleAuthMode = (isReg) => {
+    // Si se pasa un booleano se usa, de lo contrario alterna el estado actual
+    state.isRegisterMode = (typeof isReg === 'boolean') ? isReg : !state.isRegisterMode;
+    
+    const title = document.getElementById('auth-title');
+    const btnText = document.getElementById('btn-main-auth')?.querySelector('span');
+    const switchText = document.getElementById('auth-switch');
+
+    // Actualización de UI manteniendo la estética inicial
+    if(title) title.innerText = state.isRegisterMode ? "Crear Cuenta" : "Acceso al Sistema";
+    if(btnText) btnText.innerText = state.isRegisterMode ? "Registrarse" : "Entrar";
+    if(switchText) {
+        switchText.innerHTML = state.isRegisterMode ? 
+            '¿Ya tienes cuenta? <a href="#" onclick="app.toggleAuthMode(false)">Inicia Sesión</a>' :
+            '¿No tienes cuenta? <a href="#" onclick="app.toggleAuthMode(true)">Regístrate</a>';
+    }
+};
 
 /**
  * Maneja el proceso de Login y Registro
  */
-export function handleAuth(e) {
+export const handleAuth = (e) => {
     if(e) e.preventDefault(); 
     const emailEl = document.getElementById('auth-email');
     const passEl = document.getElementById('auth-pass');
@@ -24,9 +47,9 @@ export function handleAuth(e) {
         return;
     }
 
-    if (app.state.isRegisterMode) {
+    if (state.isRegisterMode) {
         // Lógica de Registro
-        if (app.state.data.users.find(u => u.email === email)) {
+        if (state.data.users.find(u => u.email === email)) {
             msg.innerText = "Correo ya registrado.";
             app.applyErrorEffect(btn);
             return;
@@ -39,50 +62,32 @@ export function handleAuth(e) {
             role: "USER", 
             status: "Activo" 
         };
-        app.state.data.users.push(newUser);
+        state.data.users.push(newUser);
         app.saveToDisk();
         alert("Registro exitoso.");
-        app.toggleAuthMode(false);
+        toggleAuthMode(false); // Volver a login tras registro
     } else {
         // Lógica de Login
-        const found = app.state.data.users.find(u => u.email === email && u.pass === pass);
+        const found = state.data.users.find(u => u.email === email && u.pass === pass);
         if (found) {
             if (found.status === 'Suspendido' || found.status === 'Baneado') {
                 msg.innerText = "Cuenta suspendida.";
                 app.applyErrorEffect(btn);
                 return;
             }
-            app.enterSystem(found);
+            enterSystem(found);
         } else {
             msg.innerText = "Credenciales incorrectas.";
             app.applyErrorEffect(btn);
         }
     }
-}
-
-/**
- * Alterna la interfaz entre Login y Registro
- */
-export function toggleAuthMode(isReg) {
-    app.state.isRegisterMode = isReg;
-    const title = document.getElementById('auth-title');
-    const btnText = document.getElementById('btn-main-auth')?.querySelector('span');
-    const switchText = document.getElementById('auth-switch');
-
-    if(title) title.innerText = isReg ? "Crear Cuenta" : "Acceso al Sistema";
-    if(btnText) btnText.innerText = isReg ? "Registrarse" : "Entrar";
-    if(switchText) {
-        switchText.innerHTML = isReg ? 
-            '¿Ya tienes cuenta? <a href="#" onclick="app.toggleAuthMode(false)">Inicia Sesión</a>' :
-            '¿No tienes cuenta? <a href="#" onclick="app.toggleAuthMode(true)">Regístrate</a>';
-    }
-}
+};
 
 /**
  * Ejecuta la entrada al sistema tras validación exitosa
  */
 export function enterSystem(user) {
-    app.state.currentUser = user;
+    state.currentUser = user;
     app.updateHeaderUI(user);
     const overlay = document.getElementById('auth-screen');
     
@@ -100,7 +105,7 @@ export function enterSystem(user) {
 }
 
 /**
- * Cierra la sesión (Exportado para compatibilidad modular)
+ * Cierra la sesión
  */
 export function logout() {
     location.reload();
