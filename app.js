@@ -22,21 +22,10 @@ Object.assign(app, {
     toggleAuthMode: auth.toggleAuthMode,
     router: ui.router,
     enterSystem: ui.enterSystem,
-    renderAdmin: ui.renderAdmin,
+    renderAdmin: ui.renderAdmin, // Aseguramos que renderAdmin esté disponible globalmente
 
-    // --- Funciones Administrativas (Lógica Nueva Integrada) ---
-    logActivity: admin.logActivity,
-    editProduct: admin.editProduct,
-    updateUserStatus: admin.updateUserStatus,
-    changeUserPass: admin.changeUserPass,
-    toggleUserBan: admin.toggleUserBan,
-    addService: admin.addService,
-    toggleStock: admin.toggleStock,
-    deleteService: admin.deleteService,
-    
-    // --- Soporte Técnico (Lógica Nueva Unificada) ---
-    createTicket: admin.createTicket,
-    quickReply: admin.quickReply,
+    // --- Funciones Administrativas (Lógica Nueva Integrada via Spread) ---
+    ...admin,
 
     // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---
     registrarCompra(nombreProducto, precio, tipo) {
@@ -185,7 +174,7 @@ Object.assign(app, {
         animate();
     },
 
-    // --- Inicialización del Sistema ---
+    // --- Inicialización del Sistema (Lógica Nueva Integrada) ---
     init() {
         console.log("Vortex Core 3.2: Sistema Restablecido.");
         
@@ -201,7 +190,9 @@ Object.assign(app, {
 
         // Fondo neural y UI
         this.renderNeuralBackground();
-        this.router(this.state.view);
+        
+        // Enrutamiento inicial (Lógica Nueva aplicada)
+        this.router(this.state.view || 'login');
 
         // Listeners globales para UX
         document.addEventListener('mousedown', (e) => {
