@@ -1,5 +1,5 @@
 /* ==========================================================================
-   VORTEX STREAMING - CORE V3.2 (UNIFICADO & INFRAESTRUCTURA PROTEGIDA)
+   VORTEX STREAMING - CORE V3.2 (PARIDAD TOTAL & INFRAESTRUCTURA PROTEGIDA)
    ========================================================================== */
 
 const app = {
@@ -17,14 +17,13 @@ const app = {
                 sales: [
                     { id: 101, client: "Admin Principal", service: "NETFLIX 4K", amount: 5.50, date: "2026-02-12", type: "streaming" }
                 ],
-                logs: [], 
                 catalog: {
                     streaming: [
-                        { name: "NETFLIX", price: 5.00, status: "Disponible", img: "" },
-                        { name: "DISNEY+", price: 5.00, status: "Disponible", img: "" }
+                        { name: "NETFLIX", price: 5.00, status: "Disponible" },
+                        { name: "DISNEY+", price: 5.00, status: "Disponible" }
                     ],
                     gaming: [
-                        { name: "FREE FIRE", price: 5.00, status: "Disponible", img: "" }
+                        { name: "FREE FIRE", price: 5.00, status: "Disponible" }
                     ]
                 }
             };
@@ -40,7 +39,6 @@ const app = {
                 if (!adminExists) parsed.users.push(defaultData.users[0]);
                 
                 if (!parsed.catalog) parsed.catalog = defaultData.catalog;
-                if (!parsed.logs) parsed.logs = []; 
                 
                 return parsed;
             } catch (e) {
@@ -57,20 +55,6 @@ const app = {
     // 2. PERSISTENCIA
     saveToDisk() {
         localStorage.setItem('vortex_v3_data', JSON.stringify(this.state.data));
-    },
-
-    /* --- MONITOR DE ACTIVIDAD (LOGS) --- */
-    logActivity(type, message) {
-        if (!this.state.data.logs) this.state.data.logs = [];
-        const newLog = {
-            id: Date.now(),
-            time: new Date().toLocaleTimeString(),
-            type: type, // 'INFO', 'WARN', 'SALE'
-            msg: message
-        };
-        this.state.data.logs.unshift(newLog); 
-        if (this.state.data.logs.length > 20) this.state.data.logs.pop(); 
-        this.saveToDisk();
     },
 
     // 3. LÓGICA DE COMPRAS
@@ -92,8 +76,6 @@ const app = {
 
         if (!this.state.data.sales) this.state.data.sales = [];
         this.state.data.sales.push(nuevaVenta);
-        
-        this.logActivity('SALE', `Venta: ${nombreProducto} a ${activeUser.name}`);
         
         this.saveToDisk();
         this.mostrarNotificacion(`Has adquirido: ${nombreProducto}`);
@@ -227,7 +209,6 @@ const app = {
             }
             const newUser = { id: Date.now(), name: email.split('@')[0].toUpperCase(), email, pass, role: "USER", status: "Activo" };
             this.state.data.users.push(newUser);
-            this.logActivity('INFO', `Nuevo registro: ${email}`);
             this.saveToDisk();
             alert("Registro exitoso.");
             this.toggleAuthMode(false);
@@ -237,15 +218,12 @@ const app = {
                 if (found.status === 'Suspendido' || found.status === 'Baneado') {
                     msg.innerText = "Cuenta suspendida.";
                     this.applyErrorEffect(btn);
-                    this.logActivity('WARN', `Intento de acceso cuenta suspendida: ${email}`);
                     return;
                 }
-                this.logActivity('INFO', `Sesión iniciada: ${email}`);
                 this.enterSystem(found);
             } else {
                 msg.innerText = "Credenciales incorrectas.";
                 this.applyErrorEffect(btn);
-                this.logActivity('WARN', `Intento fallido: ${email}`);
             }
         }
     },
@@ -281,28 +259,27 @@ const app = {
         }
     },
 
-    // 6. NAVEGACIÓN Y RENDERIZADO (CON NUEVA LÓGICA DE IMAGEN)
+    // 6. NAVEGACIÓN Y RENDERIZADO (UNIFICADO)
     router(view) {
         this.state.view = view;
         const container = document.getElementById('app-content');
         const menu = document.getElementById('side-menu-vortex');
         
         if(!container) return;
+        
+        // Cierre automático del menú (Lógica Nueva)
         if(menu) menu.classList.remove('active');
 
+        // Integración Lógica Nueva para Streaming y Gaming
         if (['streaming', 'gaming'].includes(view)) {
             const list = this.state.data.catalog[view] || [];
             container.innerHTML = `<h1 class="fade-in">Catálogo ${view.toUpperCase()}</h1><div class="bento-grid" id="grid"></div>`;
             const grid = document.getElementById('grid');
             
             list.forEach(item => {
-                // INTEGRACIÓN DE LÓGICA NUEVA: Tarjeta con contenedor de imagen
                 grid.innerHTML += `
                     <div class="card vortex-item fade-in" style="opacity: ${item.status === 'Agotado' ? '0.5' : '1'}">
-                        <div class="badge">${item.status === 'Disponible' ? 'VORTEX' : 'AGOTADO'}</div>
-                        <div class="img-container" style="height:120px; display:flex; justify-content:center; align-items:center;">
-                            <img src="${item.img || 'logo-default.png'}" style="max-height:100px; width:auto;">
-                        </div>
+                        <div class="badge">${item.status}</div>
                         <h3 class="title">${item.name}</h3>
                         <p class="price">$${item.price.toFixed(2)}</p>
                         <button class="btn-adquirir" ${item.status === 'Agotado' ? 'disabled' : ''} 
@@ -312,23 +289,20 @@ const app = {
                     </div>`;
             });
         } 
+        // Mantener comportamiento para Market (Vista General)
         else if (view === 'market') {
             container.innerHTML = `<h1 class="fade-in">Catálogo Elite</h1><div class="bento-grid" id="grid"></div>`;
             const grid = document.getElementById('grid');
             const category = 'streaming';
             const source = (this.state.data.catalog && this.state.data.catalog[category]) 
                            ? this.state.data.catalog[category] 
-                           : this.state.services[category].map(n => ({ name: n, price: 5.00, status: 'Disponible', img: '' }));
+                           : this.state.services[category].map(n => ({ name: n, price: 5.00, status: 'Disponible' }));
 
             source.forEach(item => {
                 const isAgotado = item.status === 'Agotado';
-                // INTEGRACIÓN DE LÓGICA NUEVA EN MARKET TAMBIÉN
                 grid.innerHTML += `
                     <div class="card vortex-item fade-in ${isAgotado ? 'agotado' : ''}">
                         <div class="badge">${isAgotado ? 'AGOTADO' : 'VORTEX'}</div>
-                        <div class="img-container" style="height:120px; display:flex; justify-content:center; align-items:center;">
-                            <img src="${item.img || 'logo-default.png'}" style="max-height:100px; width:auto;">
-                        </div>
                         <h3 class="title">${item.name}</h3>
                         <p class="price">$${parseFloat(item.price).toFixed(2)}</p>
                         <button class="btn-adquirir pay-btn btc" ${isAgotado ? 'disabled' : ''} 
@@ -351,7 +325,6 @@ const app = {
         const user = this.state.data.users.find(u => u.id === userId);
         if (user && user.role !== 'ADMIN') {
             user.status = newStatus;
-            this.logActivity('WARN', `Estado cambiado: ${user.email} -> ${newStatus}`);
             this.saveToDisk();
             this.renderAdmin(document.getElementById('app-content'));
             this.showToast(`Estado de ${user.name}: ${newStatus}`);
@@ -364,26 +337,10 @@ const app = {
             const newPass = prompt(`Nueva clave para ${user.email}:`, user.pass);
             if (newPass) {
                 user.pass = newPass;
-                this.logActivity('INFO', `Password actualizado: ${user.email}`);
                 this.saveToDisk();
                 this.renderAdmin(document.getElementById('app-content'));
                 this.showToast("Contraseña actualizada");
             }
-        }
-    },
-
-    editProduct(category, index) {
-        const item = this.state.data.catalog[category][index];
-        const newPrice = prompt(`Nuevo precio para ${item.name}:`, item.price);
-        const newImg = prompt(`URL de la imagen/logo para ${item.name}:`, item.img || '');
-        
-        if (newPrice !== null) {
-            item.price = parseFloat(newPrice);
-            item.img = newImg;
-            this.logActivity('INFO', `Producto editado: ${item.name} ($${item.price})`);
-            this.saveToDisk();
-            this.renderAdmin(document.getElementById('app-content'));
-            this.showToast("Producto actualizado");
         }
     },
 
@@ -396,10 +353,8 @@ const app = {
             this.state.data.catalog[category].push({
                 name: name.toUpperCase(),
                 price: parseFloat(price),
-                status: 'Disponible',
-                img: ''
+                status: 'Disponible'
             });
-            this.logActivity('INFO', `Nuevo servicio: ${name} en ${category}`);
             this.saveToDisk();
             this.renderAdmin(document.getElementById('app-content'));
             this.showToast(`${name} agregado al catálogo`);
@@ -415,9 +370,7 @@ const app = {
 
     deleteService(category, index) {
         if (confirm("¿Seguro que quieres eliminar este servicio?")) {
-            const name = this.state.data.catalog[category][index].name;
             this.state.data.catalog[category].splice(index, 1);
-            this.logActivity('WARN', `Eliminado: ${name}`);
             this.saveToDisk();
             this.renderAdmin(document.getElementById('app-content'));
         }
@@ -425,45 +378,83 @@ const app = {
 
     renderAdmin(container) {
         const data = this.state.data;
-        const logs = data.logs || [];
-        
+        const totalSales = data.sales.reduce((acc, s) => acc + s.amount, 0).toFixed(2);
+        const totalUsers = data.users.length;
+
         container.innerHTML = `
-            <div class="admin-dashboard fade-in">
-                <h2 style="font-family:Orbitron; color:var(--primary); margin-bottom:20px;">VORTEX CONTROL CENTER</h2>
-                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
-                    <div class="card" style="background:rgba(0,0,0,0.3); padding:20px; border-radius:15px; border:1px solid rgba(255,255,255,0.1);">
-                        <h3 style="font-size:12px; letter-spacing:1px; margin-bottom:15px;">MONITOR DE ACTIVIDAD</h3>
-                        <div id="log-container" style="max-height:200px; overflow-y:auto; font-family:monospace; font-size:11px;">
-                            ${logs.map(l => `
-                                <div style="margin-bottom:8px; border-left:2px solid ${l.type === 'WARN' ? '#ff4d4d' : '#4ade80'}; padding-left:10px;">
-                                    <span style="opacity:0.5;">[${l.time}]</span> <b>${l.type}:</b> ${l.msg}
-                                </div>
-                            `).join('') || '<p style="opacity:0.3;">Sin actividad reciente...</p>'}
-                        </div>
+            <div class="admin-view fade-in" style="padding:20px; color:white;">
+                <h2 style="color:var(--primary); font-family:Orbitron;">DASHBOARD VORTEX</h2>
+                
+                <div style="display:flex; gap:15px; margin:20px 0;">
+                    <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
+                        <small>VENTAS TOTALES</small>
+                        <div style="font-size:20px; color:#4ade80;">$${totalSales}</div>
                     </div>
-                    <div class="card" style="background:var(--primary); color:black; padding:20px; border-radius:15px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                        <p style="font-size:10px; font-weight:bold; margin:0;">ÚLTIMA VENTA</p>
-                        <h2 style="margin:5px 0;">$${data.sales.length ? data.sales[data.sales.length-1].amount.toFixed(2) : '0.00'}</h2>
-                        <small style="font-weight:bold;">${data.sales.length ? data.sales[data.sales.length-1].service : 'Sin ventas'}</small>
+                    <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
+                        <small>USUARIOS</small>
+                        <div style="font-size:20px;">${totalUsers}</div>
                     </div>
                 </div>
-                <div class="card" style="margin-top:30px; background:rgba(255,255,255,0.02); padding:20px; border-radius:15px;">
-                    <h3 style="margin-bottom:20px;">EDITOR DE CATÁLOGO</h3>
+
+                <h3 style="margin-top:30px; font-size:14px; color:var(--primary);">CONTROL DE USUARIOS</h3>
+                <table style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.2); border-radius:10px; margin-bottom:30px;">
+                    <tr style="text-align:left; opacity:0.6; font-size:12px;">
+                        <th style="padding:10px;">Usuario</th>
+                        <th style="padding:10px;">Estado</th>
+                        <th style="padding:10px;">Acciones</th>
+                    </tr>
+                    ${data.users.map(u => `
+                        <tr style="border-top:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:10px;">${u.email}</td>
+                            <td style="padding:10px;"><span style="color:${u.status === 'Activo' ? '#4ade80' : '#ff4d4d'}">${u.status}</span></td>
+                            <td style="padding:10px;">
+                                <button onclick="app.changeUserPass(${u.id})" style="background:#555; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">LLAVE</button>
+                                ${u.role !== 'ADMIN' ? `
+                                    <button onclick="app.updateUserStatus(${u.id}, '${u.status === 'Activo' ? 'Baneado' : 'Activo'}')" 
+                                            style="background:${u.status === 'Activo' ? '#ff4d4d' : '#4ade80'}; color:black; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">
+                                        ${u.status === 'Activo' ? 'BAN' : 'ALTA'}
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </table>
+
+                <div class="card" style="background:rgba(255,255,255,0.02); padding:20px; border-radius:15px; border:1px solid rgba(0,242,255,0.2); margin-top:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="font-size:14px; color:var(--primary);">INVENTARIO DE SERVICIOS</h3>
+                        <div>
+                            <button onclick="app.addService('streaming')" style="background:var(--primary); color:black; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px;">+ STREAMING</button>
+                            <button onclick="app.addService('gaming')" style="background:#a855f7; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:11px; margin-left:10px;">+ GAMING</button>
+                        </div>
+                    </div>
+
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                        ${['streaming', 'gaming'].map(cat => `
-                            <div>
-                                <h4 style="text-transform:uppercase; font-size:11px; opacity:0.6;">${cat}</h4>
-                                ${(data.catalog?.[cat] || []).map((item, i) => `
-                                    <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:10px;">
-                                        <img src="${item.img || 'https://via.placeholder.com/40'}" style="width:30px; height:30px; border-radius:5px; margin-right:10px; object-fit:cover;">
-                                        <div style="flex:1; font-size:12px;">
-                                            <b>${item.name}</b><br>$${item.price}
-                                        </div>
-                                        <button onclick="app.editProduct('${cat}', ${i})" style="background:none; border:1px solid var(--primary); color:var(--primary); padding:4px 8px; border-radius:5px; cursor:pointer; font-size:10px;">EDITAR</button>
+                        <div>
+                            <h4 style="font-size:12px; opacity:0.5; margin-bottom:10px;">STREAMING</h4>
+                            ${(this.state.data.catalog?.streaming || []).map((s, i) => `
+                                <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
+                                    <span>${s.name} - <b>$${s.price}</b></span>
+                                    <div>
+                                        <button onclick="app.toggleServiceStatus('streaming', ${i})" style="background:none; border:1px solid ${s.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${s.status}</button>
+                                        <button onclick="app.deleteService('streaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>
                                     </div>
-                                `).join('')}
-                            </div>
-                        `).join('')}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div>
+                            <h4 style="font-size:12px; opacity:0.5; margin-bottom:10px;">GAMING</h4>
+                            ${(this.state.data.catalog?.gaming || []).map((g, i) => `
+                                <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
+                                    <span>${g.name} - <b>$${g.price}</b></span>
+                                    <div>
+                                        <button onclick="app.toggleServiceStatus('gaming', ${i})" style="background:none; border:1px solid ${g.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${g.status}</button>
+                                        <button onclick="app.deleteService('gaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -501,6 +492,7 @@ const app = {
             if (sc && sc.classList.contains('active') && !sc.contains(e.target) && !e.target.closest('.vortex-search-wrapper')) sc.classList.remove('active');
         });
 
+        // Este listener se mantiene como respaldo, aunque las nuevas cards ya tienen onclick inline.
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-adquirir, .btn-recarga, .pay-btn'); 
             if (btn && !btn.hasAttribute('onclick') && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
@@ -515,7 +507,7 @@ const app = {
                 }
             }
         });
-        console.log("Vortex Core 3.2: Online & Catalog Visuals Integrated.");
+        console.log("Vortex Core 3.2: Online & Persistent.");
     },
 
     renderNeuralBackground() {
@@ -527,21 +519,26 @@ const app = {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             dots = []; for(let i=0; i<60; i++) dots.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.6, vy: (Math.random()-0.5)*0.6});
         }
-        window.onresize = resize;
-        resize();
         const animate = () => {
             ctx.clearRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle="rgba(0,242,255,0.4)"; ctx.strokeStyle="rgba(0,242,255,0.06)";
-            dots.forEach((dot) => {
+            dots.forEach((dot, i) => {
                 dot.x += dot.vx; dot.y += dot.vy;
                 if(dot.x<0 || dot.x>canvas.width) dot.vx*=-1;
                 if(dot.y<0 || dot.y>canvas.height) dot.vy*=-1;
-                ctx.beginPath(); ctx.arc(dot.x, dot.y, 1.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(dot.x, dot.y, 1.2, 0, Math.PI*2); ctx.fill();
+                for(let j=i+1; j<dots.length; j++) {
+                    const d = Math.hypot(dot.x-dots[j].x, dot.y-dots[j].y);
+                    if(d < 160) { ctx.beginPath(); ctx.moveTo(dot.x,dot.y); ctx.lineTo(dots[j].x,dots[j].y); ctx.stroke(); }
+                }
             });
             requestAnimationFrame(animate);
         }
-        animate();
+        window.onresize = resize; resize(); animate();
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => app.init());
+window.onload = () => {
+    app.init();
+    if (document.getElementById('history-items-container')) app.loadPurchaseHistory();
+};
