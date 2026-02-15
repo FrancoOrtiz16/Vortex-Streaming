@@ -209,7 +209,7 @@ const app = {
         } else {
             const found = this.state.data.users.find(u => u.email === email && u.pass === pass);
             if (found) {
-                if (found.status === 'Suspendido') {
+                if (found.status === 'Suspendido' || found.status === 'Baneado') {
                     msg.innerText = "Cuenta suspendida.";
                     this.applyErrorEffect(btn);
                     return;
@@ -243,7 +243,6 @@ const app = {
 
         const overlay = document.getElementById('auth-screen');
         if(overlay) {
-            // Efecto de escala + blur + fade de lógica nueva
             overlay.style.transition = "opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease";
             overlay.style.opacity = "0";
             overlay.style.transform = "scale(1.1) blur(10px)";
@@ -256,7 +255,7 @@ const app = {
         }
     },
 
-    // 6. NAVEGACIÓN Y RENDERIZADO (PROTEGIDO)
+    // 6. NAVEGACIÓN Y RENDERIZADO
     router(view) {
         this.state.view = view;
         const container = document.getElementById('app-content');
@@ -283,28 +282,75 @@ const app = {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
+    /* --- CONTROL DE MANDOS (INFRAESTRUCTURA PROTEGIDA - LÓGICA NUEVA) --- */
+    updateUserStatus(userId, newStatus) {
+        const user = this.state.data.users.find(u => u.id === userId);
+        if (user && user.role !== 'ADMIN') {
+            user.status = newStatus;
+            this.saveToDisk();
+            // Refrescamos la vista actual para ver el cambio
+            this.renderAdmin(document.getElementById('app-content'));
+            this.showToast(`Estado de ${user.name}: ${newStatus}`);
+        }
+    },
+
+    changeUserPass(userId) {
+        const user = this.state.data.users.find(u => u.id === userId);
+        if (user) {
+            const newPass = prompt(`Nueva clave para ${user.email}:`, user.pass);
+            if (newPass) {
+                user.pass = newPass;
+                this.saveToDisk();
+                this.renderAdmin(document.getElementById('app-content'));
+                this.showToast("Contraseña actualizada con éxito");
+            }
+        }
+    },
+
     renderAdmin(container) {
         const data = this.state.data;
         const totalSales = data.sales.reduce((acc, s) => acc + s.amount, 0).toFixed(2);
+        const totalUsers = data.users.length;
+
         container.innerHTML = `
-            <div class="admin-header fade-in">
-                <h2 class="text-4xl font-black italic">ENTERPRISE COMMAND CENTER</h2>
-                <p class="text-cyan-500 text-[10px] font-black tracking-[0.4em] uppercase">Status: SECURE | Revenue: $${totalSales}</p>
-            </div>
-            <div class="bento-grid">
-                <div class="card fade-in">
-                    <h3>Usuarios Totales: ${data.users.length}</h3>
-                    <table style="width:100%; font-size: 12px; margin-top:20px; border-collapse: collapse;">
-                        ${data.users.map(u => `
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05)">
-                                <td style="padding:10px 0">${u.name}<br><small style="opacity:0.5">${u.email}</small></td>
-                                <td style="font-family:monospace">${u.pass}</td>
-                                <td><span style="color:${u.status === 'Activo' ? '#4ade80' : '#f43f5e'}; font-weight:bold">${u.status}</span></td>
-                            </tr>
-                        `).join('')}
-                    </table>
+            <div class="admin-view fade-in" style="padding:20px; color:white;">
+                <h2 style="color:var(--primary); font-family:Orbitron;">DASHBOARD VORTEX</h2>
+                
+                <div style="display:flex; gap:15px; margin:20px 0;">
+                    <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
+                        <small>VENTAS TOTALES</small>
+                        <div style="font-size:20px; color:#4ade80;">$${totalSales}</div>
+                    </div>
+                    <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
+                        <small>USUARIOS</small>
+                        <div style="font-size:20px;">${totalUsers}</div>
+                    </div>
                 </div>
-            </div>`;
+
+                <table style="width:100%; border-collapse:collapse; background:rgba(0,0,0,0.2); border-radius:10px;">
+                    <tr style="text-align:left; opacity:0.6; font-size:12px;">
+                        <th style="padding:10px;">Usuario</th>
+                        <th style="padding:10px;">Estado</th>
+                        <th style="padding:10px;">Acciones</th>
+                    </tr>
+                    ${data.users.map(u => `
+                        <tr style="border-top:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:10px;">${u.email}</td>
+                            <td style="padding:10px;"><span style="color:${u.status === 'Activo' ? '#4ade80' : '#ff4d4d'}">${u.status}</span></td>
+                            <td style="padding:10px;">
+                                <button onclick="app.changeUserPass(${u.id})" style="background:#555; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">LLAVE</button>
+                                ${u.role !== 'ADMIN' ? `
+                                    <button onclick="app.updateUserStatus(${u.id}, '${u.status === 'Activo' ? 'Baneado' : 'Activo'}')" 
+                                            style="background:${u.status === 'Activo' ? '#ff4d4d' : '#4ade80'}; color:black; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">
+                                        ${u.status === 'Activo' ? 'BAN' : 'ALTA'}
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </table>
+            </div>
+        `;
     },
 
     // 7. UTILIDADES E INICIALIZACIÓN
@@ -335,7 +381,6 @@ const app = {
     init() {
         this.renderNeuralBackground();
 
-        // Control de clics fuera para menús (UI Protection)
         document.addEventListener('mousedown', (e) => {
             const menu = document.getElementById('side-menu-vortex');
             const sc = document.getElementById('search-input-container');
@@ -348,7 +393,6 @@ const app = {
             }
         });
 
-        // Manejador de compras dinámico (Integrado)
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-adquirir, .btn-recarga, .pay-btn'); 
             if (btn && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
@@ -395,7 +439,6 @@ const app = {
     }
 };
 
-// INICIALIZACIÓN SEGURA Y CARGA DE HISTORIAL
 window.onload = () => {
     app.init();
     if (document.getElementById('history-items-container')) {
