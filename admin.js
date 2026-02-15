@@ -72,7 +72,7 @@ export function changeUserPass(userId) {
 /**
  * Agrega un nuevo servicio al catálogo (Streaming o Gaming)
  */
-export function addService(category) {
+export const addService = (category) => {
     const name = prompt(`Nombre del nuevo servicio para ${category.toUpperCase()}:`);
     const price = prompt(`Precio para ${name}:`, "5.00");
     if (name && price) {
@@ -82,40 +82,52 @@ export function addService(category) {
         state.data.catalog[category].push({
             name: name.toUpperCase(),
             price: parseFloat(price),
-            status: 'Disponible',
-            img: ''
+            img: "",
+            status: "Disponible"
         });
         
         saveToDisk();
-        logActivity('INFO', `Nuevo servicio agregado: ${name}`);
-        if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
+        logActivity('INFO', `Nuevo servicio: ${name}`);
+        if (window.app && window.app.router) {
+            window.app.router('admin');
+        } else if (window.app?.renderAdmin) {
+            window.app.renderAdmin(document.getElementById('app-content'));
+        }
         if (window.app?.showToast) window.app.showToast(`${name} agregado al catálogo`);
     }
-}
+};
 
 /**
- * Alterna entre Disponible y Agotado
+ * Alterna entre Disponible y Agotado (toggleStock)
  */
-export function toggleServiceStatus(category, index) {
+export const toggleServiceStatus = (category, index) => {
     const item = state.data.catalog[category][index];
-    item.status = item.status === 'Disponible' ? 'Agotado' : 'Disponible';
+    item.status = item.status === "Disponible" ? "Agotado" : "Disponible";
     saveToDisk();
     logActivity('WARN', `${item.name} marcado como ${item.status}`);
-    if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
-}
+    if (window.app && window.app.router) {
+        window.app.router('admin');
+    } else if (window.app?.renderAdmin) {
+        window.app.renderAdmin(document.getElementById('app-content'));
+    }
+};
 
 /**
  * Elimina un servicio del catálogo
  */
-export function deleteService(category, index) {
+export const deleteService = (category, index) => {
     if (confirm("¿Seguro que quieres eliminar este servicio?")) {
         const item = state.data.catalog[category][index];
         logActivity('WARN', `Servicio eliminado: ${item.name}`);
         state.data.catalog[category].splice(index, 1);
         saveToDisk();
-        if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
+        if (window.app && window.app.router) {
+            window.app.router('admin');
+        } else if (window.app?.renderAdmin) {
+            window.app.renderAdmin(document.getElementById('app-content'));
+        }
     }
-}
+};
 
 /**
  * Renderiza la interfaz completa del Dashboard Administrativo

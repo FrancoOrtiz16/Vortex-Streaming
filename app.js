@@ -30,7 +30,7 @@ Object.assign(app, {
     updateUserStatus: admin.updateUserStatus,
     changeUserPass: admin.changeUserPass,
     addService: admin.addService,
-    toggleServiceStatus: admin.toggleServiceStatus,
+    toggleStock: admin.toggleStock, // Mapeado a la nueva lógica
     deleteService: admin.deleteService,
 
     // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---
