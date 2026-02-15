@@ -33,12 +33,12 @@ export const toggleAuthMode = (isReg) => {
 
 /**
  * Maneja el proceso de Login y Registro.
- * Implementa la validación robusta y el uso de window.app para utilidades.
+ * Implementa la validación robusta y el uso de window.app para utilidades y logs.
  */
 export const handleAuth = (e) => {
     if(e) e.preventDefault(); 
     
-    console.log("Validando acceso..."); // Lógica nueva integrada
+    console.log("Validando acceso..."); // Lógica inicial integrada
 
     const emailEl = document.getElementById('auth-email');
     const passEl = document.getElementById('auth-pass');
@@ -85,7 +85,12 @@ export const handleAuth = (e) => {
             }
             enterSystem(found);
         } else {
+            // --- Lógica Nueva Unificada ---
+            if (window.app && window.app.logActivity) {
+                window.app.logActivity('WARN', `Acceso fallido: ${email}`);
+            }
             msg.innerText = "Credenciales incorrectas.";
+            alert("Credenciales incorrectas");
             if (window.app?.applyErrorEffect) window.app.applyErrorEffect(btn);
         }
     }
@@ -97,6 +102,11 @@ export const handleAuth = (e) => {
 export function enterSystem(user) {
     state.currentUser = user;
     
+    // Log de éxito (Opcional, siguiendo la lógica de monitoreo)
+    if (window.app && window.app.logActivity) {
+        window.app.logActivity('INFO', `Sesión iniciada: ${user.email}`);
+    }
+
     if (window.app?.updateHeaderUI) window.app.updateHeaderUI(user);
     
     const overlay = document.getElementById('auth-screen');
@@ -118,13 +128,16 @@ export function enterSystem(user) {
  * Cierra la sesión restableciendo el estado y usando la lógica nueva.
  */
 export function logout() {
+    if (state.currentUser && window.app?.logActivity) {
+        window.app.logActivity('INFO', `Sesión cerrada: ${state.currentUser.email}`);
+    }
+
     state.currentUser = null;
     state.view = 'login';
     
-    // Mantiene compatibilidad con el refresco total o ruteo manual
     if (window.app && window.app.router) {
         window.app.router('login');
-        location.reload(); // Recarga para asegurar limpieza de memoria
+        location.reload(); 
     } else {
         location.reload();
     }

@@ -9,7 +9,6 @@ import { state } from './data.js';
  * Utiliza el objeto global window.app para coordinar la navegación.
  */
 export const enterSystem = () => {
-    // Redirige al catálogo principal (market) utilizando la referencia global
     if (window.app && window.app.router) {
         window.app.router('market');
     }
@@ -52,7 +51,6 @@ export const router = (view) => {
         const grid = document.getElementById('grid');
         const category = 'streaming';
         
-        // Priorizar datos del catálogo persistente o fallback a servicios predefinidos
         const source = (state.data.catalog && state.data.catalog[category]) 
                        ? state.data.catalog[category] 
                        : (state.services ? state.services[category].map(n => ({ name: n, price: 5.00, status: 'Disponible' })) : []);
@@ -73,24 +71,54 @@ export const router = (view) => {
     }
     // Panel de Administración
     else if (view === 'admin') {
-        if (window.app && window.app.renderAdmin) {
-            window.app.renderAdmin(container);
-        }
+        renderAdmin(container);
     }
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 /**
- * Renderizado administrativo (Exportado para el objeto app)
+ * Lógica Nueva Unificada: Renderizado administrativo
+ * Integra el Monitor de Sistema y el Editor de Servicios con Imágenes.
  */
 export const renderAdmin = (container) => {
-    // Esta función es consumida por el admin.js o inyectada por el core
-    if (window.app && window.app.initAdminPanel) {
-        window.app.initAdminPanel(container);
-    } else {
-        container.innerHTML = `<h1 class="fade-in">Panel de Control</h1><p>Cargando módulos administrativos...</p>`;
-    }
+    const { data } = window.app.state;
+    
+    container.innerHTML = `
+        <div class="admin-grid fade-in" style="display: flex; flex-direction: column; gap: 20px; padding: 20px; color: white;">
+            
+            <div class="card" style="background: rgba(0,0,0,0.4); border: 1px solid #00f2ff; padding: 15px; border-radius: 12px;">
+                <h3 style="font-size: 12px; color: #00f2ff; margin-bottom: 10px; font-family: Orbitron;">MONITOR DE SISTEMA</h3>
+                <div style="max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 11px;">
+                    ${(data.logs || []).map(l => `
+                        <div style="margin-bottom: 5px; border-left: 2px solid ${l.type === 'WARN' ? '#ff4d4d' : '#00f2ff'}; padding-left: 8px;">
+                            <span style="opacity: 0.5;">[${l.time}]</span> <b>${l.type}:</b> ${l.msg}
+                        </div>
+                    `).join('') || '<div style="opacity:0.5;">Esperando actividad...</div>'}
+                </div>
+            </div>
+
+            <div class="card" style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <h3 style="margin-bottom: 15px; font-family: Orbitron; font-size: 14px;">EDITOR DE SERVICIOS</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    ${['streaming', 'gaming'].map(cat => `
+                        <div>
+                            <h4 style="font-size: 10px; opacity: 0.6; text-transform: uppercase; margin-bottom: 10px; color: var(--primary);">${cat}</h4>
+                            ${(data.catalog[cat] || []).map((item, i) => `
+                                <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.03);">
+                                    <img src="${item.img || 'https://via.placeholder.com/40'}" style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover; background: #222;">
+                                    <div style="flex: 1; font-size: 11px;"><b>${item.name}</b><br><span style="color: #4ade80;">$${item.price}</span></div>
+                                    <button onclick="app.editProduct('${cat}', ${i})" style="background: none; border: 1px solid #00f2ff; color: #00f2ff; font-size: 9px; padding: 3px 6px; cursor: pointer; border-radius: 4px; font-weight: bold;">EDITAR</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <button onclick="app.router('market')" style="background: #333; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px;">SALIR DEL PANEL</button>
+        </div>
+    `;
 };
 
 /**

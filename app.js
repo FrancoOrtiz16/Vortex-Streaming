@@ -24,8 +24,14 @@ Object.assign(app, {
     enterSystem: ui.enterSystem,
     renderAdmin: ui.renderAdmin,
 
-    // --- Funciones Administrativas (CRUD/Logs) ---
-    ...admin,
+    // --- Funciones Administrativas (Lógica Nueva Integrada) ---
+    logActivity: admin.logActivity,
+    editProduct: admin.editProduct,
+    updateUserStatus: admin.updateUserStatus,
+    changeUserPass: admin.changeUserPass,
+    addService: admin.addService,
+    toggleServiceStatus: admin.toggleServiceStatus,
+    deleteService: admin.deleteService,
 
     // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---
     registrarCompra(nombreProducto, precio, tipo) {
@@ -47,6 +53,11 @@ Object.assign(app, {
         if (!this.state.data.sales) this.state.data.sales = [];
         this.state.data.sales.push(nuevaVenta);
         
+        // Log activity (Lógica Nueva aplicada a compras)
+        if (this.logActivity) {
+            this.logActivity('SALE', `Venta: ${nombreProducto} ($${precio}) - ${activeUser.name}`);
+        }
+
         this.saveToDisk();
         this.mostrarNotificacion(`Has adquirido: ${nombreProducto}`);
         
@@ -173,7 +184,7 @@ Object.assign(app, {
     init() {
         console.log("Vortex Core 3.2: Sistema Restablecido.");
         
-        // Cargamos datos del disco antes de arrancar (Lógica Nueva)
+        // Cargamos datos del disco antes de arrancar (Persistencia)
         const saved = localStorage.getItem('vortex_v3_data');
         if (saved) {
             try {

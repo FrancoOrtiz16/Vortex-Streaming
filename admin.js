@@ -2,18 +2,53 @@
    VORTEX STREAMING - ADMIN PANEL (MODULAR UNIFICADO)
    ========================================================================== */
 
-import { app } from './app.js';
+import { state, saveToDisk } from './data.js';
+
+/**
+ * Lógica Nueva: Registro de logs (Conexiones, fallos, ventas)
+ * Mantiene un límite de 15 entradas para optimizar el almacenamiento.
+ */
+export const logActivity = (type, message) => {
+    if (!state.data.logs) state.data.logs = [];
+    const newLog = {
+        time: new Date().toLocaleTimeString(),
+        type: type, // 'SALE', 'WARN', 'INFO'
+        msg: message
+    };
+    state.data.logs.unshift(newLog); // El más nuevo arriba
+    if (state.data.logs.length > 15) state.data.logs.pop(); 
+    saveToDisk();
+};
+
+/**
+ * Lógica Nueva: Editor de precio e imagen
+ * Permite actualizar metadatos del producto y refresca la vista administrativa.
+ */
+export const editProduct = (category, index) => {
+    const item = state.data.catalog[category][index];
+    const newPrice = prompt(`Nuevo precio para ${item.name}:`, item.price);
+    const newImg = prompt(`URL de la imagen para ${item.name}:`, item.img || '');
+    
+    if (newPrice !== null) {
+        item.price = parseFloat(newPrice);
+        item.img = newImg || item.img;
+        saveToDisk();
+        logActivity('INFO', `Producto ${item.name} editado.`);
+        if (window.app && window.app.router) window.app.router('admin'); 
+    }
+};
 
 /**
  * Cambia el estado (Baneado/Activo) de un usuario
  */
 export function updateUserStatus(userId, newStatus) {
-    const user = app.state.data.users.find(u => u.id === userId);
+    const user = state.data.users.find(u => u.id === userId);
     if (user && user.role !== 'ADMIN') {
         user.status = newStatus;
-        app.saveToDisk();
-        app.renderAdmin(document.getElementById('app-content'));
-        app.showToast(`Estado de ${user.name}: ${newStatus}`);
+        saveToDisk();
+        logActivity('WARN', `Usuario ${user.email} cambiado a ${newStatus}`);
+        if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
+        if (window.app?.showToast) window.app.showToast(`Estado de ${user.name}: ${newStatus}`);
     }
 }
 
@@ -21,14 +56,15 @@ export function updateUserStatus(userId, newStatus) {
  * Modifica la contraseña de un usuario desde el panel
  */
 export function changeUserPass(userId) {
-    const user = app.state.data.users.find(u => u.id === userId);
+    const user = state.data.users.find(u => u.id === userId);
     if (user) {
         const newPass = prompt(`Nueva clave para ${user.email}:`, user.pass);
         if (newPass) {
             user.pass = newPass;
-            app.saveToDisk();
-            app.renderAdmin(document.getElementById('app-content'));
-            app.showToast("Contraseña actualizada");
+            saveToDisk();
+            logActivity('INFO', `Password actualizada para ${user.email}`);
+            if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
+            if (window.app?.showToast) window.app.showToast("Contraseña actualizada");
         }
     }
 }
@@ -40,18 +76,20 @@ export function addService(category) {
     const name = prompt(`Nombre del nuevo servicio para ${category.toUpperCase()}:`);
     const price = prompt(`Precio para ${name}:`, "5.00");
     if (name && price) {
-        if (!app.state.data.catalog) app.state.data.catalog = { streaming: [], gaming: [] };
-        if (!app.state.data.catalog[category]) app.state.data.catalog[category] = [];
+        if (!state.data.catalog) state.data.catalog = { streaming: [], gaming: [] };
+        if (!state.data.catalog[category]) state.data.catalog[category] = [];
         
-        app.state.data.catalog[category].push({
+        state.data.catalog[category].push({
             name: name.toUpperCase(),
             price: parseFloat(price),
-            status: 'Disponible'
+            status: 'Disponible',
+            img: ''
         });
         
-        app.saveToDisk();
-        app.renderAdmin(document.getElementById('app-content'));
-        app.showToast(`${name} agregado al catálogo`);
+        saveToDisk();
+        logActivity('INFO', `Nuevo servicio agregado: ${name}`);
+        if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
+        if (window.app?.showToast) window.app.showToast(`${name} agregado al catálogo`);
     }
 }
 
@@ -59,10 +97,11 @@ export function addService(category) {
  * Alterna entre Disponible y Agotado
  */
 export function toggleServiceStatus(category, index) {
-    const item = app.state.data.catalog[category][index];
+    const item = state.data.catalog[category][index];
     item.status = item.status === 'Disponible' ? 'Agotado' : 'Disponible';
-    app.saveToDisk();
-    app.renderAdmin(document.getElementById('app-content'));
+    saveToDisk();
+    logActivity('WARN', `${item.name} marcado como ${item.status}`);
+    if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
 }
 
 /**
@@ -70,9 +109,11 @@ export function toggleServiceStatus(category, index) {
  */
 export function deleteService(category, index) {
     if (confirm("¿Seguro que quieres eliminar este servicio?")) {
-        app.state.data.catalog[category].splice(index, 1);
-        app.saveToDisk();
-        app.renderAdmin(document.getElementById('app-content'));
+        const item = state.data.catalog[category][index];
+        logActivity('WARN', `Servicio eliminado: ${item.name}`);
+        state.data.catalog[category].splice(index, 1);
+        saveToDisk();
+        if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
     }
 }
 
@@ -81,8 +122,8 @@ export function deleteService(category, index) {
  */
 export function renderAdmin(container) {
     if (!container) return;
-    const data = app.state.data;
-    const totalSales = data.sales.reduce((acc, s) => acc + s.amount, 0).toFixed(2);
+    const data = state.data;
+    const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
     const totalUsers = data.users.length;
 
     container.innerHTML = `
@@ -98,6 +139,16 @@ export function renderAdmin(container) {
                     <small>USUARIOS</small>
                     <div style="font-size:20px;">${totalUsers}</div>
                 </div>
+            </div>
+
+            <h3 style="margin-top:20px; font-size:14px; color:#00f2ff;">MONITOR DE SISTEMA</h3>
+            <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; font-family:monospace; font-size:11px; margin-bottom:20px; border-left:3px solid #00f2ff;">
+                ${(data.logs || []).length > 0 ? data.logs.map(l => `
+                    <div style="margin-bottom:4px;">
+                        <span style="color:rgba(255,255,255,0.4)">[${l.time}]</span> 
+                        <span style="color:${l.type === 'SALE' ? '#4ade80' : l.type === 'WARN' ? '#f43f5e' : '#00f2ff'}">${l.type}</span>: ${l.msg}
+                    </div>
+                `).join('') : '<span style="opacity:0.5;">Esperando actividad...</span>'}
             </div>
 
             <h3 style="margin-top:30px; font-size:14px; color:var(--primary);">CONTROL DE USUARIOS</h3>
@@ -136,9 +187,9 @@ export function renderAdmin(container) {
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
                     <div>
                         <h4 style="font-size:12px; opacity:0.5; margin-bottom:10px;">STREAMING</h4>
-                        ${(app.state.data.catalog?.streaming || []).map((s, i) => `
+                        ${(data.catalog?.streaming || []).map((s, i) => `
                             <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
-                                <span>${s.name} - <b>$${s.price}</b></span>
+                                <span onclick="app.editProduct('streaming', ${i})" style="cursor:pointer;" title="Editar Precio/Imagen">${s.name} - <b>$${s.price}</b></span>
                                 <div>
                                     <button onclick="app.toggleServiceStatus('streaming', ${i})" style="background:none; border:1px solid ${s.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${s.status}</button>
                                     <button onclick="app.deleteService('streaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>
@@ -149,9 +200,9 @@ export function renderAdmin(container) {
                     
                     <div>
                         <h4 style="font-size:12px; opacity:0.5; margin-bottom:10px;">GAMING</h4>
-                        ${(app.state.data.catalog?.gaming || []).map((g, i) => `
+                        ${(data.catalog?.gaming || []).map((g, i) => `
                             <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
-                                <span>${g.name} - <b>$${g.price}</b></span>
+                                <span onclick="app.editProduct('gaming', ${i})" style="cursor:pointer;" title="Editar Precio/Imagen">${g.name} - <b>$${g.price}</b></span>
                                 <div>
                                     <button onclick="app.toggleServiceStatus('gaming', ${i})" style="background:none; border:1px solid ${g.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${g.status}</button>
                                     <button onclick="app.deleteService('gaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>

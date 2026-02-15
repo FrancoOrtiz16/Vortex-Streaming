@@ -4,12 +4,12 @@
 
 /**
  * Estado Global del Sistema
- * Se exporta con la estructura requerida por la Lógica Nueva
+ * Se unifica la estructura de la Lógica Nueva con la robustez inicial.
  */
 export const state = {
     view: 'login',
     currentUser: null,
-    isRegisterMode: false,
+    isRegisterMode: false, // Control de interfaz para Auth
     data: (function() {
         const defaultData = {
             users: [
@@ -19,7 +19,7 @@ export const state = {
             sales: [
                 { id: 101, client: "Admin Principal", service: "NETFLIX 4K", amount: 5.50, date: "2026-02-12", type: "streaming" }
             ],
-            logs: [], // Campo requerido para auditoría
+            logs: [], // <--- Lógica Nueva: Para el monitor en tiempo real y auditoría
             catalog: {
                 streaming: [
                     { name: "NETFLIX", price: 5.00, status: "Disponible" },
@@ -31,32 +31,32 @@ export const state = {
             }
         };
         
-        // Intento de recuperación desde almacenamiento local
+        // Intento de recuperación desde almacenamiento local (Persistencia)
         const saved = localStorage.getItem('vortex_v3_data');
         if (!saved) return defaultData;
 
         try {
             const parsed = JSON.parse(saved);
             
-            // --- VALIDACIONES DE INFRAESTRUCTURA ---
+            // --- VALIDACIONES DE INFRAESTRUCTURA PARA INTEGRIDAD ---
             if (!parsed.users || parsed.users.length === 0) return defaultData;
             
-            // Asegurar que el administrador de emergencia siempre exista
+            // Asegurar que el administrador de emergencia siempre exista por seguridad
             const adminExists = parsed.users.some(u => u.email === 'admin');
             if (!adminExists) parsed.users.push(defaultData.users[0]);
             
-            // Asegurar integridad de catálogo y logs
+            // Asegurar integridad de catálogo y la nueva rama de logs
             if (!parsed.catalog) parsed.catalog = defaultData.catalog;
-            if (!parsed.logs) parsed.logs = [];
+            if (!parsed.logs) parsed.logs = []; // Garantiza que el monitor tenga donde escribir
             
             return parsed;
         } catch (e) {
-            console.error("Vortex Data Error: Restaurando default por seguridad.");
+            console.error("Vortex Data Error: Fallo en parsing, restaurando valores de fábrica.");
             return defaultData;
         }
     })(),
 
-    // Mantenemos la lista de servicios para autogeneración de vistas rápidas
+    // Servicios base para generación de vistas y fallbacks
     services: {
         streaming: ["NETFLIX", "DISNEY+", "MAX", "Crunchyroll", "PARAMOUNT+", "VIX", "CANVA PRO", "Spotify", "Prime Video", "CapCut Pro"],
         gaming: ["Free Fire", "Roblox", "Valorant", "Mobile Legends", "Genshin Impact"]
@@ -64,9 +64,13 @@ export const state = {
 };
 
 /**
- * Lógica Nueva: Persistencia en disco local
- * Guarda exclusivamente la rama 'data' del estado para optimizar espacio
+ * Lógica Nueva: Persistencia en disco local.
+ * Serializa exclusivamente la rama 'data' del estado para mantener la ligereza.
  */
 export const saveToDisk = () => {
-    localStorage.setItem('vortex_v3_data', JSON.stringify(state.data));
+    try {
+        localStorage.setItem('vortex_v3_data', JSON.stringify(state.data));
+    } catch (e) {
+        console.error("Vortex Critical Error: No se pudo guardar en disco.", e);
+    }
 };
