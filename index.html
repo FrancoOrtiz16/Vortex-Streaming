@@ -220,6 +220,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        /* --- FUNCIONES DE INTERFAZ --- */
         function toggleSearchField() {
             const container = document.getElementById('search-input-container');
             container.classList.toggle('search-field-visible');
@@ -262,6 +263,17 @@
         });
     </script>
     
-    <script src="app.js?v=3.0"></script>
+    <script type="module">
+        import { app } from './app.js';
+        
+        // Exponemos 'app' al objeto global window para que los 
+        // eventos 'onclick' de tu HTML sigan funcionando sin romperse.
+        window.app = app;
+        
+        // Inicialización del sistema
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
 </body>
 </html>
