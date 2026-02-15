@@ -2,7 +2,10 @@
    VORTEX STREAMING - DATA & STATE (MODULAR UNIFICADO)
    ========================================================================== */
 
-// Exportamos el estado con la estructura de la Lógica Nueva
+/**
+ * Estado Global del Sistema
+ * Se exporta con la estructura requerida por la Lógica Nueva
+ */
 export const state = {
     view: 'login',
     currentUser: null,
@@ -16,7 +19,7 @@ export const state = {
             sales: [
                 { id: 101, client: "Admin Principal", service: "NETFLIX 4K", amount: 5.50, date: "2026-02-12", type: "streaming" }
             ],
-            logs: [], // Campo requerido por la nueva lógica
+            logs: [], // Campo requerido para auditoría
             catalog: {
                 streaming: [
                     { name: "NETFLIX", price: 5.00, status: "Disponible" },
@@ -28,20 +31,21 @@ export const state = {
             }
         };
         
+        // Intento de recuperación desde almacenamiento local
         const saved = localStorage.getItem('vortex_v3_data');
         if (!saved) return defaultData;
 
         try {
             const parsed = JSON.parse(saved);
             
-            // Verificaciones de integridad para no dañar la infraestructura
+            // --- VALIDACIONES DE INFRAESTRUCTURA ---
             if (!parsed.users || parsed.users.length === 0) return defaultData;
             
-            // Asegurar que el administrador siempre exista
+            // Asegurar que el administrador de emergencia siempre exista
             const adminExists = parsed.users.some(u => u.email === 'admin');
             if (!adminExists) parsed.users.push(defaultData.users[0]);
             
-            // Asegurar existencia de catálogo y logs
+            // Asegurar integridad de catálogo y logs
             if (!parsed.catalog) parsed.catalog = defaultData.catalog;
             if (!parsed.logs) parsed.logs = [];
             
@@ -51,7 +55,8 @@ export const state = {
             return defaultData;
         }
     })(),
-    // Mantenemos la lista de servicios iniciales para mapeos rápidos
+
+    // Mantenemos la lista de servicios para autogeneración de vistas rápidas
     services: {
         streaming: ["NETFLIX", "DISNEY+", "MAX", "Crunchyroll", "PARAMOUNT+", "VIX", "CANVA PRO", "Spotify", "Prime Video", "CapCut Pro"],
         gaming: ["Free Fire", "Roblox", "Valorant", "Mobile Legends", "Genshin Impact"]
@@ -59,8 +64,8 @@ export const state = {
 };
 
 /**
- * Persistencia en disco local
- * Exportada individualmente según la Lógica Nueva
+ * Lógica Nueva: Persistencia en disco local
+ * Guarda exclusivamente la rama 'data' del estado para optimizar espacio
  */
 export const saveToDisk = () => {
     localStorage.setItem('vortex_v3_data', JSON.stringify(state.data));

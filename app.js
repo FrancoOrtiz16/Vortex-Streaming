@@ -4,7 +4,7 @@
 
 import { state, saveToDisk } from './data.js';
 import { handleAuth, logout } from './auth.js';
-import { router } from './ui.js';
+import { router, enterSystem } from './ui.js';
 import * as adminFuncs from './admin.js';
 
 export const app = {
@@ -16,6 +16,7 @@ export const app = {
     handleAuth,
     logout,
     router,
+    enterSystem, // Integrado para que onclick="app.enterSystem()" funcione globalmente
 
     // --- Funciones Administrativas (Spread de adminFuncs) ---
     ...adminFuncs,
@@ -164,7 +165,7 @@ export const app = {
 
     // --- Inicialización del Sistema ---
     init() {
-        console.log("Vortex Modular Engine 3.2: Online & Persistent.");
+        console.log("Vortex Core 3.2: Online & Persistent.");
         
         // Fondo neural
         this.renderNeuralBackground();

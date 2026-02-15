@@ -5,6 +5,14 @@
 import { app } from './app.js';
 
 /**
+ * Lógica Nueva: Entrada al sistema
+ */
+export const enterSystem = () => {
+    // Redirige al catálogo principal (market)
+    app.router('market'); 
+};
+
+/**
  * Enrutador principal del sistema
  */
 export function router(view) {
