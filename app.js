@@ -29,8 +29,9 @@ Object.assign(app, {
     editProduct: admin.editProduct,
     updateUserStatus: admin.updateUserStatus,
     changeUserPass: admin.changeUserPass,
+    toggleUserBan: admin.toggleUserBan, // Nueva lógica de baneo integrada
     addService: admin.addService,
-    toggleStock: admin.toggleStock, // Mapeado a la nueva lógica
+    toggleStock: admin.toggleStock, // Mapeado a la nueva función de stock
     deleteService: admin.deleteService,
 
     // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---

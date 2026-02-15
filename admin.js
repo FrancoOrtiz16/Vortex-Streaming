@@ -5,7 +5,7 @@
 import { state, saveToDisk } from './data.js';
 
 /**
- * Lógica Nueva: Registro de logs (Conexiones, fallos, ventas)
+ * Registro de logs (Conexiones, fallos, ventas)
  * Mantiene un límite de 15 entradas para optimizar el almacenamiento.
  */
 export const logActivity = (type, message) => {
@@ -20,9 +20,57 @@ export const logActivity = (type, message) => {
     saveToDisk();
 };
 
+// --- GESTIÓN DE USUARIOS (Lógica Nueva Integrada) ---
+
 /**
- * Lógica Nueva: Editor de precio e imagen
- * Permite actualizar metadatos del producto y refresca la vista administrativa.
+ * Modifica la contraseña de un usuario desde el panel
+ */
+export const changeUserPass = (userId) => {
+    const user = state.data.users.find(u => u.id === userId);
+    if (user) {
+        const newPass = prompt(`Nueva clave para ${user.email}:`, user.pass);
+        if (newPass) {
+            user.pass = newPass;
+            saveToDisk();
+            logActivity('INFO', `Password actualizada para ${user.email}`);
+            if (window.app && window.app.router) window.app.router('admin');
+            if (window.app?.showToast) window.app.showToast("Contraseña actualizada");
+        }
+    }
+};
+
+/**
+ * Alterna el baneo de un usuario
+ */
+export const toggleUserBan = (userId) => {
+    const user = state.data.users.find(u => u.id === userId);
+    if (user && user.role !== 'ADMIN') {
+        user.status = user.status === 'Activo' ? 'Baneado' : 'Activo';
+        saveToDisk();
+        logActivity('WARN', `Usuario ${user.email} -> ${user.status}`);
+        if (window.app && window.app.router) window.app.router('admin');
+        if (window.app?.showToast) window.app.showToast(`Estado de ${user.name}: ${user.status}`);
+    }
+};
+
+/**
+ * Función heredada para compatibilidad de estados específicos
+ */
+export function updateUserStatus(userId, newStatus) {
+    const user = state.data.users.find(u => u.id === userId);
+    if (user && user.role !== 'ADMIN') {
+        user.status = newStatus;
+        saveToDisk();
+        logActivity('WARN', `Usuario ${user.email} cambiado a ${newStatus}`);
+        if (window.app && window.app.router) window.app.router('admin');
+        if (window.app?.showToast) window.app.showToast(`Estado de ${user.name}: ${newStatus}`);
+    }
+}
+
+// --- GESTIÓN DE STOCK Y CATÁLOGO (Lógica Nueva Integrada) ---
+
+/**
+ * Editor de precio e imagen: Permite actualizar metadatos del producto
  */
 export const editProduct = (category, index) => {
     const item = state.data.catalog[category][index];
@@ -39,35 +87,20 @@ export const editProduct = (category, index) => {
 };
 
 /**
- * Cambia el estado (Baneado/Activo) de un usuario
+ * Alterna entre Disponible y Agotado (Lógica Nueva)
  */
-export function updateUserStatus(userId, newStatus) {
-    const user = state.data.users.find(u => u.id === userId);
-    if (user && user.role !== 'ADMIN') {
-        user.status = newStatus;
-        saveToDisk();
-        logActivity('WARN', `Usuario ${user.email} cambiado a ${newStatus}`);
-        if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
-        if (window.app?.showToast) window.app.showToast(`Estado de ${user.name}: ${newStatus}`);
-    }
-}
+export const toggleStock = (category, index) => {
+    const item = state.data.catalog[category][index];
+    item.status = item.status === 'Disponible' ? 'Agotado' : 'Disponible';
+    saveToDisk();
+    logActivity('INFO', `${item.name} ahora está ${item.status}`);
+    if (window.app && window.app.router) window.app.router('admin'); 
+};
 
 /**
- * Modifica la contraseña de un usuario desde el panel
+ * Alias para compatibilidad con lógica inicial
  */
-export function changeUserPass(userId) {
-    const user = state.data.users.find(u => u.id === userId);
-    if (user) {
-        const newPass = prompt(`Nueva clave para ${user.email}:`, user.pass);
-        if (newPass) {
-            user.pass = newPass;
-            saveToDisk();
-            logActivity('INFO', `Password actualizada para ${user.email}`);
-            if (window.app?.renderAdmin) window.app.renderAdmin(document.getElementById('app-content'));
-            if (window.app?.showToast) window.app.showToast("Contraseña actualizada");
-        }
-    }
-}
+export const toggleServiceStatus = (category, index) => toggleStock(category, index);
 
 /**
  * Agrega un nuevo servicio al catálogo (Streaming o Gaming)
@@ -90,25 +123,8 @@ export const addService = (category) => {
         logActivity('INFO', `Nuevo servicio: ${name}`);
         if (window.app && window.app.router) {
             window.app.router('admin');
-        } else if (window.app?.renderAdmin) {
-            window.app.renderAdmin(document.getElementById('app-content'));
         }
         if (window.app?.showToast) window.app.showToast(`${name} agregado al catálogo`);
-    }
-};
-
-/**
- * Alterna entre Disponible y Agotado (toggleStock)
- */
-export const toggleServiceStatus = (category, index) => {
-    const item = state.data.catalog[category][index];
-    item.status = item.status === "Disponible" ? "Agotado" : "Disponible";
-    saveToDisk();
-    logActivity('WARN', `${item.name} marcado como ${item.status}`);
-    if (window.app && window.app.router) {
-        window.app.router('admin');
-    } else if (window.app?.renderAdmin) {
-        window.app.renderAdmin(document.getElementById('app-content'));
     }
 };
 
@@ -121,11 +137,7 @@ export const deleteService = (category, index) => {
         logActivity('WARN', `Servicio eliminado: ${item.name}`);
         state.data.catalog[category].splice(index, 1);
         saveToDisk();
-        if (window.app && window.app.router) {
-            window.app.router('admin');
-        } else if (window.app?.renderAdmin) {
-            window.app.renderAdmin(document.getElementById('app-content'));
-        }
+        if (window.app && window.app.router) window.app.router('admin');
     }
 };
 
@@ -177,7 +189,7 @@ export function renderAdmin(container) {
                         <td style="padding:10px;">
                             <button onclick="app.changeUserPass(${u.id})" style="background:#555; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">LLAVE</button>
                             ${u.role !== 'ADMIN' ? `
-                                <button onclick="app.updateUserStatus(${u.id}, '${u.status === 'Activo' ? 'Baneado' : 'Activo'}')" 
+                                <button onclick="app.toggleUserBan(${u.id})" 
                                         style="background:${u.status === 'Activo' ? '#ff4d4d' : '#4ade80'}; color:black; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">
                                     ${u.status === 'Activo' ? 'BAN' : 'ALTA'}
                                 </button>
@@ -203,7 +215,7 @@ export function renderAdmin(container) {
                             <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
                                 <span onclick="app.editProduct('streaming', ${i})" style="cursor:pointer;" title="Editar Precio/Imagen">${s.name} - <b>$${s.price}</b></span>
                                 <div>
-                                    <button onclick="app.toggleServiceStatus('streaming', ${i})" style="background:none; border:1px solid ${s.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${s.status}</button>
+                                    <button onclick="app.toggleStock('streaming', ${i})" style="background:none; border:1px solid ${s.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${s.status}</button>
                                     <button onclick="app.deleteService('streaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>
                                 </div>
                             </div>
@@ -216,7 +228,7 @@ export function renderAdmin(container) {
                             <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px; font-size:12px;">
                                 <span onclick="app.editProduct('gaming', ${i})" style="cursor:pointer;" title="Editar Precio/Imagen">${g.name} - <b>$${g.price}</b></span>
                                 <div>
-                                    <button onclick="app.toggleServiceStatus('gaming', ${i})" style="background:none; border:1px solid ${g.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${g.status}</button>
+                                    <button onclick="app.toggleStock('gaming', ${i})" style="background:none; border:1px solid ${g.status === 'Disponible' ? '#4ade80' : '#f43f5e'}; color:white; font-size:9px; cursor:pointer; padding:2px 5px; border-radius:4px;">${g.status}</button>
                                     <button onclick="app.deleteService('gaming', ${i})" style="background:none; border:none; color:#f43f5e; cursor:pointer; font-weight:bold; margin-left:5px;">×</button>
                                 </div>
                             </div>

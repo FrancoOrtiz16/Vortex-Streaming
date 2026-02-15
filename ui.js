@@ -69,7 +69,7 @@ export const router = (view) => {
                 </div>`;
         });
     }
-    // Panel de Administración (Command Center Unificado)
+    // Panel de Administración (Command Center Unificado - Lógica Nueva)
     else if (view === 'admin') {
         renderAdmin(container);
     }
@@ -79,58 +79,63 @@ export const router = (view) => {
 
 /**
  * Lógica Nueva Unificada: Renderizado administrativo (COMMAND CENTER)
- * Integra el Monitor de Actividad, Widget de ventas y Editor de Servicios.
+ * Integra el Monitor de Actividad, Widget de ventas, Gestión de Usuarios e Inventario.
  */
 export const renderAdmin = (container) => {
     const { data } = window.app.state;
-    
+    const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
+    const totalUsers = data.users.length;
+
     container.innerHTML = `
-        <div class="admin-dashboard fade-in" style="padding: 20px; color: white; font-family: sans-serif;">
-            <h2 style="color: #00f2ff; font-family: 'Orbitron', sans-serif; margin-bottom: 20px;">COMMAND CENTER</h2>
-            
-            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 20px; margin-bottom: 30px;">
-                <div class="card" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0,242,255,0.3); padding: 20px; border-radius: 15px;">
-                    <h3 style="font-size: 12px; color: #00f2ff; margin-bottom: 15px; font-family: 'Orbitron';">MONITOR DE ACTIVIDAD</h3>
-                    <div style="max-height: 180px; overflow-y: auto; font-family: monospace; font-size: 11px;">
-                        ${(data.logs || []).map(l => `
-                            <div style="margin-bottom: 8px; border-left: 2px solid ${l.type === 'WARN' ? '#ff4d4d' : '#4ade80'}; padding-left: 10px;">
-                                <span style="opacity: 0.5;">[${l.time}]</span> <b>${l.type}:</b> ${l.msg}
-                            </div>
-                        `).join('') || '<div style="opacity:0.5;">Esperando datos...</div>'}
-                    </div>
+        <div class="admin-dashboard fade-in" style="padding:20px; color:white;">
+            <h2 style="color:var(--primary); font-family:Orbitron; margin-bottom:20px;">VORTEX COMMAND CENTER</h2>
+
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom:25px;">
+                <div class="card" style="background:rgba(0,242,255,0.1); border:1px solid var(--primary); padding:15px; border-radius:10px; text-align:center;">
+                    <small>VENTAS TOTALES</small><h3 style="margin:5px 0; font-family:Orbitron;">$${totalSales}</h3>
                 </div>
-                <div class="card" style="background: #00f2ff; color: black; padding: 20px; border-radius: 15px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
-                    <p style="font-size: 10px; font-weight: bold; margin: 0;">ÚLTIMA VENTA</p>
-                    <h2 style="margin: 10px 0; font-family: 'Orbitron';">$${data.sales && data.sales.length ? data.sales[data.sales.length-1].amount.toFixed(2) : '0.00'}</h2>
-                    <small style="font-weight: bold; opacity: 0.7;">${data.sales && data.sales.length ? data.sales[data.sales.length-1].service : 'No hay ventas'}</small>
+                <div class="card" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; text-align:center;">
+                    <small>USUARIOS TOTALES</small><h3 style="margin:5px 0; font-family:Orbitron;">${totalUsers}</h3>
+                </div>
+                <div class="card" style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px;">
+                    <small style="color:var(--primary)">MONITOR LOGS</small>
+                    <div style="font-size:9px; height:40px; overflow-y:auto; margin-top:5px; font-family: monospace;">
+                        ${(data.logs || []).slice(0,3).map(l => `<div>[${l.time}] ${l.msg}</div>`).join('') || 'Esperando...'}
+                    </div>
                 </div>
             </div>
 
-            <div class="card" style="background: rgba(255,255,255,0.02); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="font-size: 14px; font-family: 'Orbitron';">INVENTARIO DE PRODUCTOS</h3>
-                    <div>
-                        <button onclick="app.addService('streaming')" style="background: #00f2ff; border:none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor:pointer;">+ STREAMING</button>
-                        <button onclick="app.addService('gaming')" style="background: #a855f7; color:white; border:none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor:pointer; margin-left: 10px;">+ GAMING</button>
-                    </div>
-                </div>
+            <div class="card" style="background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; margin-bottom:25px; border: 1px solid rgba(255,255,255,0.05);">
+                <h4 style="margin-bottom:10px; font-size:12px; font-family:Orbitron;">GESTIÓN DE USUARIOS</h4>
+                <table style="width:100%; font-size:11px; text-align:left;">
+                    <tr style="opacity:0.5;"><th>Email</th><th>Password</th><th>Acciones</th></tr>
+                    ${data.users.map(u => `
+                        <tr style="border-top:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 5px 0;">${u.email}</td><td>${u.pass}</td>
+                            <td>
+                                <button onclick="app.changeUserPass(${u.id})" style="background:#555; color:white; border:none; padding:3px 7px; border-radius:3px; cursor:pointer;">LLAVE</button>
+                                ${u.role !== 'ADMIN' ? `<button onclick="app.toggleUserBan(${u.id})" style="background:${u.status === 'Activo' ? '#ff4d4d' : '#4ade80'}; color:black; border:none; padding:3px 7px; border-radius:3px; cursor:pointer; font-weight:bold; margin-left:5px;">${u.status === 'Activo' ? 'BAN' : 'ALTA'}</button>` : ''}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </table>
+            </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card" style="background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h4 style="font-size:12px; font-family:Orbitron;">INVENTARIO Y STOCK</h4>
+                    <button onclick="app.addService('streaming')" style="background:var(--primary); color:black; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">+ PRODUCTO</button>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                     ${['streaming', 'gaming'].map(cat => `
                         <div>
-                            <h4 style="font-size: 11px; opacity: 0.5; text-transform: uppercase; margin-bottom: 15px; color: #00f2ff;">${cat}</h4>
+                            <small style="opacity:0.5; text-transform:uppercase; color:var(--primary);">${cat}</small>
                             ${(data.catalog[cat] || []).map((item, i) => `
-                                <div style="display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px; gap: 10px; border: 1px solid rgba(255,255,255,0.03);">
-                                    <img src="${item.img || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #222;">
-                                    <div style="flex: 1;">
-                                        <div style="font-size: 13px; font-weight: bold;">${item.name}</div>
-                                        <div style="font-size: 11px; color: #4ade80;">$${item.price.toFixed(2)}</div>
-                                    </div>
-                                    <div style="display: flex; gap: 5px;">
-                                        <button onclick="app.editProduct('${cat}', ${i})" style="background:none; border: 1px solid #00f2ff; color: #00f2ff; font-size: 9px; padding: 4px 8px; cursor:pointer; border-radius: 4px; font-weight: bold;">EDITAR</button>
-                                        <button onclick="app.toggleStock('${cat}', ${i})" style="background:${item.status === 'Disponible' ? '#4ade80' : '#ff4d4d'}; color: black; border:none; font-size: 9px; padding: 4px 8px; cursor:pointer; border-radius: 4px; font-weight:bold;">${item.status === 'Disponible' ? 'ACTIVO' : 'OFF'}</button>
-                                        <button onclick="app.deleteService('${cat}', ${i})" style="background:none; border:none; color: #ff4d4d; font-size: 18px; cursor:pointer; font-weight:bold; line-height: 1;">&times;</button>
-                                    </div>
+                                <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; margin-top:5px; border: 1px solid rgba(255,255,255,0.03);">
+                                    <img src="${item.img || ''}" style="width:25px; height:25px; background:#333; border-radius:4px; object-fit: cover;">
+                                    <div style="flex:1; font-size:11px;"><b>${item.name}</b></div>
+                                    <button onclick="app.toggleStock('${cat}', ${i})" style="background:${item.status === 'Disponible' ? '#4ade80' : '#ff4d4d'}; color:black; border:none; padding:4px 8px; border-radius:4px; font-size:9px; font-weight:bold; cursor:pointer;">${item.status === 'Disponible' ? 'ACTIVO' : 'OFF'}</button>
+                                    <button onclick="app.editProduct('${cat}', ${i})" style="background:none; border:1px solid #777; color:white; padding:4px; border-radius:4px; font-size:9px; cursor:pointer;">✎</button>
                                 </div>
                             `).join('')}
                         </div>
