@@ -2,10 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title>Vortex Streaming | Plataforma Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=1.1">
+    
+    <link rel="stylesheet" href="style.css?v=2.0">
+    
     <style>
         /* --- ESTILOS CRÍTICOS (Lógica Inicial) --- */
         :root { --primary: #00f2ff; --border: rgba(255, 255, 255, 0.1); }
@@ -128,6 +131,7 @@
             </p>
         </div>
     </div>
+
     <nav class="vortex-nav-modern">
         <div class="logo" onclick="app.router('market')" style="cursor: pointer;">VORTEX<span>STREAMING</span></div>
         <div class="nav-right-group">
@@ -239,10 +243,6 @@
         function toggleHistory() {
             const historyList = document.getElementById('user-history-list');
             historyList.classList.toggle('hidden');
-            
-            if(!historyList.classList.contains('hidden')) {
-                console.log("Historial abierto");
-            }
         }
 
         function revealPass() {
@@ -262,6 +262,6 @@
         });
     </script>
     
-    <script src="app.js?v=2.1"></script>
+    <script src="app.js?v=1.1"></script>
 </body>
 </html>

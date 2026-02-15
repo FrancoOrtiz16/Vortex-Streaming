@@ -1,6 +1,13 @@
 /* ==========================================================================
-   VORTEX STREAMING - DESIGN SYSTEM ELITE (UNIFICADO V3.2)
+   VORTEX STREAMING - DESIGN SYSTEM ELITE (UNIFICADO V3.2 + SEGURIDAD MÓVIL)
    ========================================================================== */
+
+/* Lógica Nueva: RESET DE SEGURIDAD PARA MÓVILES */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 :root {
     --primary: #00f2ff;
@@ -14,12 +21,6 @@
     --menu-bg: #0b0e14;
 }
 
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-}
-
 body { 
     background: var(--dark-bg); 
     color: white; 
@@ -28,17 +29,19 @@ body {
     line-height: 1.6;
 }
 
-/* Fondo de Red Neuronal */
+/* --- LÓGICA UNIFICADA: FONDO DE RED NEURONAL --- */
 #canvas-network { 
     position: fixed; 
     top: 0; 
     left: 0; 
+    width: 100% !important; 
+    height: 100% !important; 
     z-index: -1; 
     opacity: 0.4; 
 }
 
 /* ==========================================================================
-   LÓGICA NUEVA: ANIMACIONES DE ENTRADA Y ESTADOS
+   LÓGICA: ANIMACIONES DE ENTRADA Y ESTADOS
    ========================================================================== */
 
 @keyframes vortexEntrance {
@@ -46,22 +49,78 @@ body {
     100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
 
-/* Aplicado a la tarjeta de autenticación */
+/* ==========================================================================
+   LÓGICA UNIFICADA: PANTALLA DE ACCESO (FUERZA CENTRADO TOTAL V4.0)
+   ========================================================================== */
+
+.auth-overlay {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 100dvh !important; 
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important; 
+    z-index: 99999 !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(20px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-overlay.hidden { 
+    opacity: 0 !important; 
+    visibility: hidden !important; 
+    pointer-events: none !important;
+    transform: scale(1.05); 
+}
+
 .auth-card {
-    animation: vortexEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-    background: rgba(10, 11, 14, 0.85) !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 350px !important;
+    margin: auto !important;
+    background: rgba(15, 15, 15, 0.98) !important;
     backdrop-filter: blur(25px) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 242, 255, 0.05);
+    border: 1px solid var(--primary, #00f2ff) !important;
+    border-radius: 24px !important;
+    padding: 30px !important;
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.1);
+    animation: vortexEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    text-align: center;
     transition: all 0.3s ease;
-    /* Conservando dimensiones de lógica inicial */
-    padding: 40px; border-radius: 30px;
-    text-align: center; width: 90%; max-width: 420px;
 }
 
 .auth-card:hover {
     border-color: rgba(0, 242, 255, 0.5) !important;
     box-shadow: 0 0 50px rgba(0, 242, 255, 0.15);
+}
+
+.auth-card input, .vortex-input-group input {
+    width: 100% !important;
+    font-size: 16px !important; 
+    padding: 14px !important;
+    margin-bottom: 15px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+
+.auth-card input:focus, .vortex-input-group input:focus { 
+    border-color: var(--primary) !important; 
+    outline: none; 
+    background: rgba(0,0,0,0.5) !important; 
+    transform: translateX(5px); 
+    box-shadow: -5px 0 15px rgba(0, 242, 255, 0.2); 
 }
 
 /* ==========================================================================
@@ -87,7 +146,6 @@ body {
     gap: 15px;
 }
 
-/* Animación Lupa */
 .vortex-search-wrapper {
     display: flex;
     align-items: center;
@@ -116,7 +174,6 @@ body {
     outline: none;
 }
 
-/* Botón Hamburguesa */
 .menu-hamburguer {
     background: none;
     border: none;
@@ -135,7 +192,6 @@ body {
     transition: 0.3s;
 }
 
-/* Menú Lateral Deslizable */
 #side-menu-vortex {
     position: fixed;
     top: 0;
@@ -213,7 +269,6 @@ body {
     padding: 10px 0 20px 0;
 }
 
-/* --- INTEGRACIÓN: TARJETA DE CREDENCIALES --- */
 .credential-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(0, 242, 255, 0.1);
@@ -260,6 +315,28 @@ body {
 .view-btn:hover { opacity: 1; }
 
 /* ==========================================================================
+   PANEL DE ADMINISTRACIÓN (LÓGICA NUEVA INTEGRADA)
+   ========================================================================== */
+
+.admin-dashboard table tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.stats-grid .card:hover {
+    transform: translateY(-5px);
+    transition: 0.3s;
+}
+
+/* Scrollbar suave para la tabla/tarjetas en móviles */
+.card::-webkit-scrollbar {
+    height: 4px;
+}
+.card::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+/* ==========================================================================
    PANEL DE HISTORIAL (INTEGRADO)
    ========================================================================== */
 
@@ -304,7 +381,6 @@ body {
     padding: 20px 0;
 }
 
-/* Scrollbar personalizada para el historial */
 .history-panel::-webkit-scrollbar { width: 4px; }
 .history-panel::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 10px; }
 
@@ -349,35 +425,6 @@ body {
     gap: 15px;
 }
 
-.auth-overlay {
-    position: fixed; inset: 0;
-    background: var(--dark-bg);
-    z-index: 9999; display: flex;
-    align-items: center; justify-content: center;
-    backdrop-filter: blur(20px);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.auth-overlay.hidden { opacity: 0; visibility: hidden; transform: scale(1.05); }
-
-/* --- INPUTS CON LÓGICA DE ANIMACIÓN NUEVA --- */
-.input-group input, .vortex-input-group input { 
-    width: 100%; padding: 15px; 
-    background: rgba(0,0,0,0.3); 
-    border: 1px solid var(--border); 
-    color: white; border-radius: 12px; 
-    margin: 8px 0; 
-    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
-}
-
-.input-group input:focus, .vortex-input-group input:focus { 
-    border-color: var(--primary) !important; 
-    outline: none; 
-    background: rgba(0,0,0,0.5); 
-    transform: translateX(5px); 
-    box-shadow: -5px 0 15px rgba(0, 242, 255, 0.2); 
-}
-
 .btn-neon-pulse {
     width: 100%; padding: 16px; border: none; border-radius: 12px;
     background: #fff; color: #000; font-family: 'Orbitron', sans-serif;
@@ -402,7 +449,7 @@ body {
 }
 
 /* ==========================================================================
-   LÓGICA NUEVA: TARJETAS VORTEX-ITEM (ESTILO FIJO Y PARIDAD)
+   TARJETAS VORTEX-ITEM
    ========================================================================== */
 
 .card { 
@@ -414,7 +461,6 @@ body {
     text-align: center; position: relative;
 }
 
-/* Integración de lógica nueva para paridad total */
 .card.vortex-item {
     min-height: 200px;
     display: flex;
@@ -423,12 +469,10 @@ body {
     background: rgba(255, 255, 255, 0.02) !important;
     border: 1px solid rgba(0, 242, 255, 0.1) !important;
     backdrop-filter: blur(10px);
-    /* Sobrescribe la transición general con la específica de la lógica nueva */
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
                 border-color 0.3s, box-shadow 0.3s;
 }
 
-/* Hover optimizado de lógica nueva */
 .card.vortex-item:hover {
     transform: translateY(-8px);
     border-color: var(--primary) !important;
@@ -471,9 +515,71 @@ body {
     animation: slideIn 0.3s ease-out;
 }
 
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+.hidden { display: none !important; }
+
+/* ==========================================================================
+   LÓGICA UNIFICADA: VORTEX MOBILE ADAPTATION - COMPATIBILIDAD UNIVERSAL
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .bento-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 12px !important;
+        padding: 10px !important;
+    }
+
+    .card.vortex-item {
+        min-height: 180px !important;
+        padding: 15px !important;
+    }
+
+    .card.vortex-item h3.title {
+        font-size: 0.9rem !important;
+    }
+
+    .card.vortex-item .price {
+        font-size: 1.1rem !important;
+    }
+
+    #side-menu-vortex {
+        width: 80% !important;
+        max-width: 280px !important;
+    }
+
+    header {
+        padding: 10px 15px !important;
+    }
+
+    .logo {
+        font-size: 1.1rem !important;
+    }
+
+    .btn-adquirir, .btn-main-auth {
+        padding: 12px !important;
+        font-size: 0.8rem !important;
+        min-height: 44px;
+    }
 }
 
-.hidden { display: none !important; }
+@media (max-width: 600px) {
+    .bento-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+        padding: 15px !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .vortex-item {
+        width: 100% !important;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 360px) {
+    .bento-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
