@@ -179,7 +179,7 @@
                     </div>
 
                     <div class="user-history-section">
-                        <button class="menu-item-btn" onclick="toggleHistory()">
+                        <button class="menu-item-btn" onclick="app.toggleHistory()">
                             <span class="emoji">📜</span> Historial de Compras
                         </button>
                         <div id="user-history-list" class="history-panel hidden">
@@ -207,20 +207,11 @@
     </nav>
 
     <main id="app-content" class="main-viewport">
-        <div class="product-card card-paramount" style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 15px; border: 1px solid var(--border); width: fit-content;">
-            <div class="logo-container" style="margin-bottom: 15px;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Network.svg" class="service-logo" style="height: 30px; opacity: 0.8;">
-            </div>
-            <h3 style="margin: 0; font-size: 1.1rem;">Plan Anual</h3>
-            <p class="price" style="color: var(--primary); font-weight: 800; font-size: 1.4rem; margin: 10px 0;">$2.50</p>
-            <button class="btn-adquirir" onclick="app.registrarCompra('Paramount+', 2.50, 'streaming')" style="background: white; color: black; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 700; width: 100%;">ADQUIRIR</button>
-        </div>
-    </main>
+        </main>
 
     <div id="toast" class="toast"></div>
 
     <script>
-        /* --- FUNCIONES DE INTERFAZ --- */
         function toggleSearchField() {
             const container = document.getElementById('search-input-container');
             container.classList.toggle('search-field-visible');
@@ -241,39 +232,14 @@
             }
         }
 
-        function toggleHistory() {
-            const historyList = document.getElementById('user-history-list');
-            historyList.classList.toggle('hidden');
-        }
-
         function revealPass() {
             const passEl = document.getElementById('val-pass');
             const realPass = app.state.currentUser?.pass || '****';
             passEl.textContent = (passEl.textContent === '••••••••') ? realPass : '••••••••';
         }
-
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('side-menu-vortex');
-            const btn = document.querySelector('.menu-hamburguer');
-            if (menu && menu.classList.contains('active')) {
-                if (!menu.contains(e.target) && !btn.contains(e.target)) {
-                    menu.classList.remove('active');
-                }
-            }
-        });
     </script>
     
-    <script type="module">
-        import { app } from './app.js';
-        
-        // Exponemos 'app' al objeto global window para que los 
-        // eventos 'onclick' de tu HTML sigan funcionando sin romperse.
-        window.app = app;
-        
-        // Inicialización del sistema
-        document.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
-    </script>
+    <script type="module" src="app.js?v=5.0"></script>
+
 </body>
 </html>

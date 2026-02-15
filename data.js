@@ -1,8 +1,9 @@
 /* ==========================================================================
-   VORTEX STREAMING - DATA & STATE
+   VORTEX STREAMING - DATA & STATE (MODULAR UNIFICADO)
    ========================================================================== */
 
-const appState = {
+// Exportamos el estado con la estructura de la Lógica Nueva
+export const state = {
     view: 'login',
     currentUser: null,
     isRegisterMode: false,
@@ -15,6 +16,7 @@ const appState = {
             sales: [
                 { id: 101, client: "Admin Principal", service: "NETFLIX 4K", amount: 5.50, date: "2026-02-12", type: "streaming" }
             ],
+            logs: [], // Campo requerido por la nueva lógica
             catalog: {
                 streaming: [
                     { name: "NETFLIX", price: 5.00, status: "Disponible" },
@@ -31,12 +33,17 @@ const appState = {
 
         try {
             const parsed = JSON.parse(saved);
+            
+            // Verificaciones de integridad para no dañar la infraestructura
             if (!parsed.users || parsed.users.length === 0) return defaultData;
             
+            // Asegurar que el administrador siempre exista
             const adminExists = parsed.users.some(u => u.email === 'admin');
             if (!adminExists) parsed.users.push(defaultData.users[0]);
             
+            // Asegurar existencia de catálogo y logs
             if (!parsed.catalog) parsed.catalog = defaultData.catalog;
+            if (!parsed.logs) parsed.logs = [];
             
             return parsed;
         } catch (e) {
@@ -44,12 +51,17 @@ const appState = {
             return defaultData;
         }
     })(),
+    // Mantenemos la lista de servicios iniciales para mapeos rápidos
     services: {
         streaming: ["NETFLIX", "DISNEY+", "MAX", "Crunchyroll", "PARAMOUNT+", "VIX", "CANVA PRO", "Spotify", "Prime Video", "CapCut Pro"],
         gaming: ["Free Fire", "Roblox", "Valorant", "Mobile Legends", "Genshin Impact"]
     }
 };
 
-const saveToDisk = () => {
-    localStorage.setItem('vortex_v3_data', JSON.stringify(app.state.data));
+/**
+ * Persistencia en disco local
+ * Exportada individualmente según la Lógica Nueva
+ */
+export const saveToDisk = () => {
+    localStorage.setItem('vortex_v3_data', JSON.stringify(state.data));
 };

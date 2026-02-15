@@ -20,7 +20,7 @@ export const app = {
     // --- Funciones Administrativas (Spread de adminFuncs) ---
     ...adminFuncs,
 
-    // --- Lógica de Compras y Notificaciones (Lógica Inicial) ---
+    // --- Lógica de Compras y Notificaciones ---
     registrarCompra(nombreProducto, precio, tipo) {
         const activeUser = this.state.currentUser;
         if (!activeUser) {
@@ -128,11 +128,18 @@ export const app = {
         let dots = [];
         const resize = () => {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            dots = []; for(let i=0; i<60; i++) dots.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.6, vy: (Math.random()-0.5)*0.6});
+            dots = []; 
+            for(let i=0; i<60; i++) dots.push({
+                x: Math.random()*canvas.width, 
+                y: Math.random()*canvas.height, 
+                vx: (Math.random()-0.5)*0.6, 
+                vy: (Math.random()-0.5)*0.6
+            });
         }
         const animate = () => {
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle="rgba(0,242,255,0.4)"; ctx.strokeStyle="rgba(0,242,255,0.06)";
+            ctx.fillStyle="rgba(0,242,255,0.4)"; 
+            ctx.strokeStyle="rgba(0,242,255,0.06)";
             dots.forEach((dot, i) => {
                 dot.x += dot.vx; dot.y += dot.vy;
                 if(dot.x<0 || dot.x>canvas.width) dot.vx*=-1;
@@ -140,25 +147,32 @@ export const app = {
                 ctx.beginPath(); ctx.arc(dot.x, dot.y, 1.2, 0, Math.PI*2); ctx.fill();
                 for(let j=i+1; j<dots.length; j++) {
                     const d = Math.hypot(dot.x-dots[j].x, dot.y-dots[j].y);
-                    if(d < 160) { ctx.beginPath(); ctx.moveTo(dot.x,dot.y); ctx.lineTo(dots[j].x,dots[j].y); ctx.stroke(); }
+                    if(d < 160) { 
+                        ctx.beginPath(); 
+                        ctx.moveTo(dot.x,dot.y); 
+                        ctx.lineTo(dots[j].x,dots[j].y); 
+                        ctx.stroke(); 
+                    }
                 }
             });
             requestAnimationFrame(animate);
         }
-        window.onresize = resize; resize(); animate();
+        window.onresize = resize; 
+        resize(); 
+        animate();
     },
 
     // --- Inicialización del Sistema ---
     init() {
-        console.log("Vortex Modular Engine Active: Online & Persistent.");
+        console.log("Vortex Modular Engine 3.2: Online & Persistent.");
         
-        // Ejecutar fondo neural
+        // Fondo neural
         this.renderNeuralBackground();
 
-        // Inicializar Router con la vista actual
+        // Inicializar con la vista actual
         this.router(this.state.view);
 
-        // Listeners de interfaz (Clicks fuera del menú y búsqueda)
+        // Listeners globales para cerrar menús al hacer click fuera
         document.addEventListener('mousedown', (e) => {
             const menu = document.getElementById('side-menu-vortex');
             const sc = document.getElementById('search-input-container');
@@ -166,7 +180,7 @@ export const app = {
             if (sc && sc.classList.contains('active') && !sc.contains(e.target) && !e.target.closest('.vortex-search-wrapper')) sc.classList.remove('active');
         });
 
-        // Delegación de eventos para botones de compra dinámicos
+        // Delegación de eventos para botones dinámicos
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-adquirir, .btn-recarga, .pay-btn'); 
             if (btn && !btn.hasAttribute('onclick') && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
@@ -182,9 +196,15 @@ export const app = {
             }
         });
 
-        // Cargar historial si el contenedor existe
+        // Carga inicial de historial
         if (document.getElementById('history-items-container')) {
             this.loadPurchaseHistory();
         }
     }
 };
+
+// ESTA LÍNEA ES VITAL: Expone 'app' al ámbito global para compatibilidad con el DOM.
+window.app = app;
+
+// Lanzamiento oficial del núcleo
+app.init();
