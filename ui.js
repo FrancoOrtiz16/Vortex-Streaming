@@ -2,7 +2,23 @@
    VORTEX STREAMING - UI & ROUTING (MODULAR UNIFICADO)
    ========================================================================== */
 
-import { state } from './data.js';
+import { state, saveToDisk } from './data.js';
+
+/**
+ * Registro de logs (Conexiones, fallos, ventas)
+ * Mantiene un límite de 15 entradas para optimizar el almacenamiento.
+ */
+export const logActivity = (type, message) => {
+    if (!state.data.logs) state.data.logs = [];
+    const newLog = {
+        time: new Date().toLocaleTimeString(),
+        type: type, // 'SALE', 'WARN', 'INFO'
+        msg: message
+    };
+    state.data.logs.unshift(newLog); // El más nuevo arriba
+    if (state.data.logs.length > 15) state.data.logs.pop(); 
+    saveToDisk();
+};
 
 /**
  * Lógica Nueva: Entrada al sistema.
@@ -112,12 +128,109 @@ export const router = (view) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+// --- LÓGICA DE ADMINISTRACIÓN UNIFICADA ---
+
+export const createTicket = (subject, message) => {
+    const newTicket = {
+        id: Date.now(),
+        user: state.currentUser.email,
+        subject: subject,
+        message: message,
+        status: 'Abierto',
+        reply: '',
+        date: new Date().toLocaleDateString()
+    };
+    if (!state.data.tickets) state.data.tickets = [];
+    state.data.tickets.unshift(newTicket);
+    saveToDisk();
+    logActivity('INFO', `Nuevo ticket de ${state.currentUser.email}`);
+    if (window.app && window.app.router) window.app.router('support');
+};
+
+export const quickReply = (ticketId, replyText) => {
+    const ticket = state.data.tickets.find(t => t.id === ticketId);
+    if (ticket) {
+        ticket.reply = replyText;
+        ticket.status = 'Respondido';
+        saveToDisk();
+        logActivity('INFO', `Ticket #${ticketId} respondido`);
+        if (window.app && window.app.router) window.app.router('admin');
+        if (window.app?.showToast) window.app.showToast("Respuesta enviada con éxito");
+    }
+};
+
+export const changeUserPass = (userId) => {
+    const user = state.data.users.find(u => u.id === userId);
+    if (user) {
+        const newPass = prompt(`Nueva clave para ${user.email}:`, user.pass);
+        if (newPass) {
+            user.pass = newPass;
+            saveToDisk();
+            logActivity('INFO', `Password actualizada para ${user.email}`);
+            if (window.app && window.app.router) window.app.router('admin');
+            if (window.app?.showToast) window.app.showToast("Contraseña actualizada");
+        }
+    }
+};
+
+export const toggleUserBan = (userId) => {
+    const user = state.data.users.find(u => u.id === userId);
+    if (user && user.role !== 'ADMIN') {
+        user.status = user.status === 'Activo' ? 'Baneado' : 'Activo';
+        saveToDisk();
+        logActivity('WARN', `Usuario ${user.email} -> ${user.status}`);
+        if (window.app && window.app.router) window.app.router('admin');
+        if (window.app?.showToast) window.app.showToast(`Estado de ${user.name}: ${user.status}`);
+    }
+};
+
+export const editProduct = (category, index) => {
+    const item = state.data.catalog[category][index];
+    const newPrice = prompt(`Nuevo precio para ${item.name}:`, item.price);
+    const newImg = prompt(`URL de la imagen para ${item.name}:`, item.img || '');
+    
+    if (newPrice !== null) {
+        item.price = parseFloat(newPrice);
+        item.img = newImg || item.img;
+        saveToDisk();
+        logActivity('INFO', `Producto ${item.name} editado.`);
+        if (window.app && window.app.router) window.app.router('admin'); 
+    }
+};
+
+export const toggleStock = (category, index) => {
+    const item = state.data.catalog[category][index];
+    item.status = item.status === 'Disponible' ? 'Agotado' : 'Disponible';
+    saveToDisk();
+    logActivity('INFO', `${item.name} ahora está ${item.status}`);
+    if (window.app && window.app.router) window.app.router('admin'); 
+};
+
+export const addService = (category) => {
+    const name = prompt(`Nombre del nuevo servicio para ${category.toUpperCase()}:`);
+    const price = prompt(`Precio para ${name}:`, "5.00");
+    if (name && price) {
+        if (!state.data.catalog) state.data.catalog = { streaming: [], gaming: [] };
+        if (!state.data.catalog[category]) state.data.catalog[category] = [];
+        
+        state.data.catalog[category].push({
+            name: name.toUpperCase(),
+            price: parseFloat(price),
+            img: "",
+            status: "Disponible"
+        });
+        
+        saveToDisk();
+        logActivity('INFO', `Nuevo servicio: ${name}`);
+        if (window.app && window.app.router) window.app.router('admin');
+        if (window.app?.showToast) window.app.showToast(`${name} agregado`);
+    }
+};
+
 /**
  * Lógica Nueva Unificada: Renderizado administrativo (COMMAND CENTER)
- * Extrae datos directamente de window.app.state sin re-declarar 'state' localmente.
  */
 export const renderAdmin = (container) => {
-    // CAMBIO CLAVE: Referencia global directa para el estado
     const { data } = window.app.state; 
     const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
     const totalUsers = data.users.length;

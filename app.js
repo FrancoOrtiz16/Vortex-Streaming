@@ -19,13 +19,13 @@ Object.assign(app, {
     state,
     saveToDisk,
 
-    // --- Autenticación y Navegación ---
+    // --- Autenticación y Navegación (Lógica Unificada) ---
     handleAuth: auth.handleAuth,
     logout: auth.logout,
     toggleAuthMode: auth.toggleAuthMode,
-    router: ui.router,
+    router: ui.router,           // <--- Lógica unificada: Mapeado desde ui.js
+    renderAdmin: ui.renderAdmin, // <--- Lógica unificada: Vital para el acceso administrativo
     enterSystem: ui.enterSystem,
-    renderAdmin: ui.renderAdmin, // Vital para entrar al admin
 
     // --- Funciones Administrativas (Lógica Nueva Integrada) ---
     ...admin,

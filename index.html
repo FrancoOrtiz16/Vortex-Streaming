@@ -84,11 +84,13 @@
         .view-btn:hover { filter: grayscale(0); transform: scale(1.2); }
         .hidden { display: none !important; }
 
-        .menu-items-vertical a {
+        .menu-items-vertical a, .menu-items-vertical button.nav-link-btn {
             display: flex; align-items: center; gap: 15px; color: white;
             text-decoration: none; padding: 15px; border-radius: 12px; transition: 0.3s;
+            width: 100%; background: none; border: none; font-size: 1rem; cursor: pointer;
+            text-align: left; font-family: inherit;
         }
-        .menu-items-vertical a:hover { background: rgba(0,242,255,0.1); color: var(--primary); }
+        .menu-items-vertical a:hover, .menu-items-vertical button.nav-link-btn:hover { background: rgba(0,242,255,0.1); color: var(--primary); }
         .menu-divider { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
         .logout-link { color: #ff4d4d !important; }
 
@@ -195,6 +197,11 @@
 
                     <a href="#" onclick="app.router('streaming')"><span class="emoji">📺</span> Servicios Streaming</a> 
                     <a href="#" onclick="app.router('gaming')"><span class="emoji">🎮</span> Recargas Gaming</a> 
+                    
+                    <button class="nav-link-btn" onclick="app.router('admin')">
+                        <span class="emoji">🛠️</span> PANEL CONTROL
+                    </button>
+
                     <a href="#" id="admin-link-el" style="display: none; color: var(--primary);" onclick="app.router('admin')"><span class="emoji">🔐</span> Panel de Control</a>
                 </nav>
 
