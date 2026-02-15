@@ -19,7 +19,7 @@ export const state = {
             sales: [
                 { id: 101, client: "Admin Principal", service: "NETFLIX 4K", amount: 5.50, date: "2026-02-12", type: "streaming" }
             ],
-            logs: [], // <--- Lógica Nueva: Para el monitor en tiempo real y auditoría
+            logs: [], // Lógica Nueva: Para el monitor en tiempo real y auditoría
             catalog: {
                 streaming: [
                     { name: "NETFLIX", price: 5.00, status: "Disponible" },
@@ -28,7 +28,8 @@ export const state = {
                 gaming: [
                     { name: "FREE FIRE", price: 5.00, status: "Disponible" }
                 ]
-            }
+            },
+            tickets: [] // <--- NUEVO: Almacén de reportes integrado
         };
         
         // Intento de recuperación desde almacenamiento local (Persistencia)
@@ -45,9 +46,10 @@ export const state = {
             const adminExists = parsed.users.some(u => u.email === 'admin');
             if (!adminExists) parsed.users.push(defaultData.users[0]);
             
-            // Asegurar integridad de catálogo y la nueva rama de logs
+            // Asegurar integridad de catálogo y las nuevas ramas de datos
             if (!parsed.catalog) parsed.catalog = defaultData.catalog;
             if (!parsed.logs) parsed.logs = []; // Garantiza que el monitor tenga donde escribir
+            if (!parsed.tickets) parsed.tickets = []; // <--- Lógica Nueva: Garantiza que el almacén de reportes exista
             
             return parsed;
         } catch (e) {

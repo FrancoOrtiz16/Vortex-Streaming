@@ -69,9 +69,34 @@ export const router = (view) => {
                 </div>`;
         });
     }
-    // Panel de Administración (Command Center Unificado - Lógica Nueva)
+    // Panel de Administración (Command Center Unificado)
     else if (view === 'admin') {
         renderAdmin(container);
+    }
+    // Centro de Soporte (Vista de Usuario)
+    else if (view === 'support') {
+        const userTickets = state.data.tickets.filter(t => t.user === state.currentUser.email);
+        container.innerHTML = `
+            <div class="support-view fade-in" style="padding:20px;">
+                <h2 style="color:var(--primary); font-family:Orbitron;">CENTRO DE SOPORTE</h2>
+                <div class="card" style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; margin-bottom:20px;">
+                    <h4 style="margin-bottom:10px;">Enviar nuevo reporte</h4>
+                    <input id="tk-subject" placeholder="Asunto (Ej: Falla en Netflix)" style="width:100%; margin-bottom:10px; background:#111; color:white; border:1px solid #333; padding:10px; border-radius:8px;">
+                    <textarea id="tk-msg" placeholder="Describe el problema..." style="width:100%; height:80px; background:#111; color:white; border:1px solid #333; padding:10px; border-radius:8px;"></textarea>
+                    <button onclick="app.createTicket(document.getElementById('tk-subject').value, document.getElementById('tk-msg').value)" style="background:var(--primary); color:black; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; margin-top:10px;">ENVIAR TICKET</button>
+                </div>
+
+                <h4 style="opacity:0.6; font-family:Orbitron; font-size:12px; margin-top:20px;">MIS TICKETS</h4>
+                ${userTickets.length > 0 ? userTickets.map(t => `
+                    <div class="ticket-card" style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; margin-top:10px; border-left:4px solid ${t.status === 'Abierto' ? '#ff4d4d' : '#4ade80'};">
+                        <div style="display:flex; justify-content:space-between; font-size:10px;"><small>${t.date}</small> <b>${t.status.toUpperCase()}</b></div>
+                        <p style="margin:5px 0;"><b>${t.subject}</b></p>
+                        <p style="font-size:12px; opacity:0.7;">${t.message}</p>
+                        ${t.reply ? `<div style="background:rgba(74,222,128,0.1); padding:10px; border-radius:5px; margin-top:10px; color:#4ade80; font-size:12px;"><b>Respuesta:</b> ${t.reply}</div>` : ''}
+                    </div>
+                `).join('') : '<p style="opacity:0.5; font-size:11px; margin-top:10px;">No tienes reportes activos.</p>'}
+            </div>
+        `;
     }
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -79,12 +104,13 @@ export const router = (view) => {
 
 /**
  * Lógica Nueva Unificada: Renderizado administrativo (COMMAND CENTER)
- * Integra el Monitor de Actividad, Widget de ventas, Gestión de Usuarios e Inventario.
+ * Integra el Monitor de Actividad, Gestión de Usuarios, Inventario y Bandeja de Tickets.
  */
 export const renderAdmin = (container) => {
     const { data } = window.app.state;
     const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
     const totalUsers = data.users.length;
+    const openTickets = data.tickets.filter(t => t.status === 'Abierto');
 
     container.innerHTML = `
         <div class="admin-dashboard fade-in" style="padding:20px; color:white;">
@@ -142,31 +168,43 @@ export const renderAdmin = (container) => {
                     `).join('')}
                 </div>
             </div>
-            
-            <button onclick="app.router('market')" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; cursor: pointer; font-size: 12px; margin-top: 20px; width: 100%; font-weight: bold;">SALIR AL CATÁLOGO</button>
+    `;
+
+    // Inyección de la Bandeja de Soporte (Lógica Nueva)
+    container.querySelector('.admin-dashboard').innerHTML += `
+        <div class="card" style="margin-top:25px; background:rgba(255,255,255,0.02); padding:15px; border-radius:10px; border: 1px solid rgba(255,255,255,0.05);">
+            <h4 style="font-size:12px; color:#ff4d4d; font-family:Orbitron;">BANDEJA DE SOPORTE (${openTickets.length})</h4>
+            ${openTickets.map(t => `
+                <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-top:10px; border: 1px solid rgba(255,255,255,0.03);">
+                    <div style="font-size:11px; opacity:0.6;">Usuario: ${t.user} | Asunto: ${t.subject}</div>
+                    <p style="font-size:13px; margin:5px 0;">${t.message}</p>
+                    <div style="display:flex; gap:5px; margin-top:10px;">
+                        <button onclick="app.quickReply(${t.id}, 'Tu cuenta ha sido reactivada. Por favor revisa.')" style="background:#222; color:#4ade80; border:1px solid #4ade80; font-size:10px; padding:5px; cursor:pointer; border-radius:4px;">REACTIVADA</button>
+                        <button onclick="app.quickReply(${t.id}, 'Revisa tu correo, te enviamos las nuevas credenciales.')" style="background:#222; color:#00f2ff; border:1px solid #00f2ff; font-size:10px; padding:5px; cursor:pointer; border-radius:4px;">REVISAR CORREO</button>
+                        <button onclick="app.quickReply(${t.id}, 'Estamos en mantenimiento, en breve se solucionará.')" style="background:#222; color:#fbbf24; border:1px solid #fbbf24; font-size:10px; padding:5px; cursor:pointer; border-radius:4px;">MANTENIMIENTO</button>
+                    </div>
+                </div>
+            `).join('') || '<p style="font-size:11px; opacity:0.4; margin-top:10px;">No hay tickets pendientes.</p>'}
+        </div>
+        
+        <button onclick="app.router('market')" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; cursor: pointer; font-size: 12px; margin-top: 20px; width: 100%; font-weight: bold;">SALIR AL CATÁLOGO</button>
         </div>
     `;
 };
 
 /**
- * Control del campo de búsqueda
+ * Control del campo de búsqueda y utilidades de UI
  */
 export function toggleSearchField() {
     const sc = document.getElementById('search-input-container');
     if (sc) sc.classList.toggle('active');
 }
 
-/**
- * Control del menú lateral
- */
 export function toggleModernMenu() {
     const menu = document.getElementById('side-menu-vortex');
     if (menu) menu.classList.toggle('active');
 }
 
-/**
- * Control de la tarjeta de usuario
- */
 export function toggleUserCard() {
     const card = document.getElementById('user-info-card');
     if (!card) return;
@@ -176,9 +214,6 @@ export function toggleUserCard() {
     }
 }
 
-/**
- * Carga de datos del usuario actual en la interfaz
- */
 export function loadCurrentUserData() {
     const u = state.currentUser;
     if (u) {
@@ -193,9 +228,6 @@ export function loadCurrentUserData() {
     }
 }
 
-/**
- * Revelar/Ocultar contraseña en la interfaz
- */
 export function revealPass() {
     const ps = document.getElementById('val-pass');
     if (!ps) return;

@@ -29,10 +29,14 @@ Object.assign(app, {
     editProduct: admin.editProduct,
     updateUserStatus: admin.updateUserStatus,
     changeUserPass: admin.changeUserPass,
-    toggleUserBan: admin.toggleUserBan, // Nueva lógica de baneo integrada
+    toggleUserBan: admin.toggleUserBan,
     addService: admin.addService,
-    toggleStock: admin.toggleStock, // Mapeado a la nueva función de stock
+    toggleStock: admin.toggleStock,
     deleteService: admin.deleteService,
+    
+    // --- Soporte Técnico (Lógica Nueva Unificada) ---
+    createTicket: admin.createTicket,
+    quickReply: admin.quickReply,
 
     // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---
     registrarCompra(nombreProducto, precio, tipo) {

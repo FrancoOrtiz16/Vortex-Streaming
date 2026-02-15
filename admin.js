@@ -20,6 +20,42 @@ export const logActivity = (type, message) => {
     saveToDisk();
 };
 
+// --- GESTIÓN DE TICKETS Y SOPORTE (Lógica Nueva Integrada) ---
+
+/**
+ * Para el Usuario: Crear un nuevo reporte de soporte
+ */
+export const createTicket = (subject, message) => {
+    const newTicket = {
+        id: Date.now(),
+        user: state.currentUser.email,
+        subject: subject,
+        message: message,
+        status: 'Abierto', // Abierto, Respondido, Cerrado
+        reply: '',
+        date: new Date().toLocaleDateString()
+    };
+    if (!state.data.tickets) state.data.tickets = [];
+    state.data.tickets.unshift(newTicket);
+    saveToDisk();
+    logActivity('INFO', `Nuevo ticket de ${state.currentUser.email}`);
+    if (window.app && window.app.router) window.app.router('support'); // Refresca vista de soporte
+};
+
+/**
+ * Para el Admin: Respuesta rápida a un ticket
+ */
+export const quickReply = (ticketId, replyText) => {
+    const ticket = state.data.tickets.find(t => t.id === ticketId);
+    if (ticket) {
+        ticket.reply = replyText;
+        ticket.status = 'Respondido';
+        saveToDisk();
+        logActivity('INFO', `Ticket #${ticketId} respondido`);
+        if (window.app && window.app.router) window.app.router('admin'); // Refresca el panel admin
+    }
+};
+
 // --- GESTIÓN DE USUARIOS (Lógica Nueva Integrada) ---
 
 /**
@@ -149,6 +185,7 @@ export function renderAdmin(container) {
     const data = state.data;
     const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
     const totalUsers = data.users.length;
+    const pendingTickets = (data.tickets || []).filter(t => t.status === 'Abierto').length;
 
     container.innerHTML = `
         <div class="admin-view fade-in" style="padding:20px; color:white;">
@@ -163,6 +200,10 @@ export function renderAdmin(container) {
                     <small>USUARIOS</small>
                     <div style="font-size:20px;">${totalUsers}</div>
                 </div>
+                <div class="stat-box" style="background:rgba(0,242,255,0.1); padding:15px; border-radius:12px; flex:1; border:1px solid var(--primary);">
+                    <small>TICKETS PENDIENTES</small>
+                    <div style="font-size:20px; color:var(--primary);">${pendingTickets}</div>
+                </div>
             </div>
 
             <h3 style="margin-top:20px; font-size:14px; color:#00f2ff;">MONITOR DE SISTEMA</h3>
@@ -173,6 +214,22 @@ export function renderAdmin(container) {
                         <span style="color:${l.type === 'SALE' ? '#4ade80' : l.type === 'WARN' ? '#f43f5e' : '#00f2ff'}">${l.type}</span>: ${l.msg}
                     </div>
                 `).join('') : '<span style="opacity:0.5;">Esperando actividad...</span>'}
+            </div>
+
+            <h3 style="margin-top:30px; font-size:14px; color:var(--primary); font-family:Orbitron;">BANDEJA DE SOPORTE</h3>
+            <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; margin-bottom:30px;">
+                ${(data.tickets || []).length > 0 ? data.tickets.map(t => `
+                    <div style="border-bottom:1px solid rgba(255,255,255,0.05); padding:10px; font-size:12px;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <b>${t.subject} <small style="opacity:0.5;">(${t.user})</small></b>
+                            <span style="color:${t.status === 'Abierto' ? '#ff4d4d' : '#4ade80'}">${t.status.toUpperCase()}</span>
+                        </div>
+                        <p style="margin:5px 0; opacity:0.8;">${t.message}</p>
+                        ${t.status === 'Abierto' ? `
+                            <button onclick="const r = prompt('Respuesta:'); if(r) app.quickReply(${t.id}, r)" style="background:var(--primary); color:black; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:10px;">RESPONDER</button>
+                        ` : `<div style="color:#4ade80; font-size:10px;">R: ${t.reply}</div>`}
+                    </div>
+                `).join('') : '<div style="padding:10px; opacity:0.5; font-size:11px;">No hay reportes pendientes.</div>'}
             </div>
 
             <h3 style="margin-top:30px; font-size:14px; color:var(--primary);">CONTROL DE USUARIOS</h3>
