@@ -181,11 +181,14 @@ Object.assign(app, {
     init() {
         console.log("Vortex Core 3.2: Sistema Restablecido.");
         
-        // 1. Cargamos datos del disco (Persistencia)
+        // 1. Cargamos datos del disco (Persistencia con Garantía de Infraestructura)
         const saved = localStorage.getItem('vortex_v3_data');
         if (saved) {
             try {
-                this.state.data = JSON.parse(saved);
+                const parsedData = JSON.parse(saved);
+                // Lógica Nueva: Garantizamos que tickets sea al menos un array vacío para evitar undefined
+                if (!parsedData.tickets) parsedData.tickets = [];
+                this.state.data = parsedData;
             } catch(e) {
                 console.error("Error al cargar persistencia inicial.");
             }

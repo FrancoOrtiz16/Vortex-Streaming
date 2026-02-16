@@ -29,7 +29,7 @@ export const state = {
                     { name: "FREE FIRE", price: 5.00, status: "Disponible" }
                 ]
             },
-            tickets: [] // <--- NUEVO: Almacén de reportes integrado
+            tickets: [] // <--- Lógica Nueva: Almacén de reportes integrado y asegurado
         };
         
         // Intento de recuperación desde almacenamiento local (Persistencia)
@@ -49,7 +49,7 @@ export const state = {
             // Asegurar integridad de catálogo y las nuevas ramas de datos
             if (!parsed.catalog) parsed.catalog = defaultData.catalog;
             if (!parsed.logs) parsed.logs = []; // Garantiza que el monitor tenga donde escribir
-            if (!parsed.tickets) parsed.tickets = []; // <--- Lógica Nueva: Garantiza que el almacén de reportes exista
+            if (!parsed.tickets) parsed.tickets = []; // <--- Lógica Nueva: Garantiza que el almacén de reportes exista tras la carga
             
             return parsed;
         } catch (e) {

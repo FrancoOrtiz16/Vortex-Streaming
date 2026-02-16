@@ -101,7 +101,7 @@ export const router = (view) => {
     }
     // Centro de Soporte (Vista de Usuario)
     else if (view === 'support') {
-        const userTickets = state.data.tickets.filter(t => t.user === state.currentUser.email);
+        const userTickets = (state.data.tickets || []).filter(t => t.user === state.currentUser.email);
         container.innerHTML = `
             <div class="support-view fade-in" style="padding:20px;">
                 <h2 style="color:var(--primary); font-family:Orbitron;">CENTRO DE SOPORTE</h2>
@@ -231,10 +231,11 @@ export const addService = (category) => {
  * Lógica Nueva Unificada: Renderizado administrativo (COMMAND CENTER)
  */
 export const renderAdmin = (container) => {
+    // Usamos una protección (data.tickets || []) para evitar el error de 'undefined'
     const { data } = window.app.state; 
     const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
     const totalUsers = data.users.length;
-    const openTickets = data.tickets.filter(t => t.status === 'Abierto');
+    const openTickets = (data.tickets || []).filter(t => t.status === 'Abierto');
 
     container.innerHTML = `
         <div class="admin-dashboard fade-in" style="padding:20px; color:white;">
@@ -305,7 +306,7 @@ export const renderAdmin = (container) => {
                             <button onclick="app.quickReply(${t.id}, 'Estamos en mantenimiento, en breve se solucionará.')" style="background:#222; color:#fbbf24; border:1px solid #fbbf24; font-size:10px; padding:5px; cursor:pointer; border-radius:4px;">MANTENIMIENTO</button>
                         </div>
                     </div>
-                `).join('') || '<p style="font-size:11px; opacity:0.4; margin-top:10px;">No hay tickets pendientes.</p>'}
+                `).join('') || '<p style="font-size:11px; opacity:0.4; padding:10px;">No hay tickets pendientes.</p>'}
             </div>
 
             <button onclick="app.router('market')" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; cursor: pointer; font-size: 12px; margin-top: 20px; width: 100%; font-weight: bold;">SALIR AL CATÁLOGO</button>
