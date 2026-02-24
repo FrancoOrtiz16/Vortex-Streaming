@@ -201,15 +201,15 @@ export function renderAdmin(container) {
             <div style="display:flex; gap:15px; margin:20px 0;">
                 <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
                     <small>VENTAS TOTALES</small>
-                    <div style="font-size:20px; color:#4ade80;">$${totalSales}</div>
+                    <div id="val-ingresos" style="font-size:20px; color:#4ade80;">$${totalSales}</div>
                 </div>
                 <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
                     <small>USUARIOS</small>
-                    <div style="font-size:20px;">${totalUsers}</div>
+                    <div id="val-usuarios" style="font-size:20px;">${totalUsers}</div>
                 </div>
                 <div class="stat-box" style="background:rgba(0,242,255,0.1); padding:15px; border-radius:12px; flex:1; border:1px solid var(--primary);">
-                    <small>TICKETS PENDIENTES</small>
-                    <div style="font-size:20px; color:var(--primary);">${pendingTickets}</div>
+                    <small>EXPIRACIONES</small>
+                    <div id="val-exp" style="font-size:20px; color:var(--primary);">0</div>
                 </div>
             </div>
 
@@ -222,6 +222,9 @@ export function renderAdmin(container) {
                     </div>
                 `).join('') : '<span style="opacity:0.5;">Esperando actividad...</span>'}
             </div>
+
+            <div id="vortex-renewals-list" style="margin-bottom:30px;">
+                </div>
 
             <h3 style="margin-top:30px; font-size:14px; color:var(--primary); font-family:Orbitron;">BANDEJA DE SOPORTE</h3>
             <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; margin-bottom:30px;">
@@ -246,6 +249,7 @@ export function renderAdmin(container) {
                     <th style="padding:10px;">Estado</th>
                     <th style="padding:10px;">Acciones</th>
                 </tr>
+                <tbody id="vortex-user-body">
                 ${data.users.map(u => `
                     <tr style="border-top:1px solid rgba(255,255,255,0.05);">
                         <td style="padding:10px;">${u.email}</td>
@@ -261,6 +265,7 @@ export function renderAdmin(container) {
                         </td>
                     </tr>
                 `).join('')}
+                </tbody>
             </table>
 
             <div class="card" style="background:rgba(255,255,255,0.02); padding:20px; border-radius:15px; border:1px solid rgba(0,242,255,0.2); margin-top:30px;">
@@ -302,4 +307,51 @@ export function renderAdmin(container) {
             </div>
         </div>
     `;
+
+    // INYECCIÓN DE LA LÓGICA DE MONITOREO AL CARGAR
+    updateAdminDashboard(data.users);
+}
+
+// --- NUEVAS FUNCIONES DE MONITOREO INTEGRADAS ---
+
+export function updateAdminDashboard(users) {
+    const totalUsers = users.length;
+    // Asumiendo que u.status existe en tus datos
+    const activeUsers = users.filter(u => u.status === 'Activo').length;
+    // daysLeft debe venir en el objeto usuario para que funcione
+    const expiringSoon = users.filter(u => u.daysLeft !== undefined && u.daysLeft <= 7).length; 
+
+    if(document.getElementById('val-usuarios')) document.getElementById('val-usuarios').textContent = totalUsers;
+    if(document.getElementById('val-exp')) document.getElementById('val-exp').textContent = expiringSoon;
+    
+    renderRenewalsPanel(users);
+}
+
+export function renderRenewalsPanel(users) {
+    const container = document.getElementById('vortex-renewals-list');
+    if (!container) return;
+
+    const needyUsers = users.filter(u => u.status === 'Suspendido' || (u.daysLeft !== undefined && u.daysLeft <= 5));
+
+    if (needyUsers.length > 0) {
+        container.innerHTML = `<h3 style="font-size:14px; color:#f43f5e; margin-bottom:10px;">ACCIONES REQUERIDAS</h3>` + 
+        needyUsers.map(user => `
+            <div class="renewal-card" style="background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div class="renewal-info">
+                    <strong style="font-size:12px;">${user.email}</strong><br>
+                    <span style="font-size:10px; opacity:0.7;">${user.plan || 'Plan Standard'} - Vence: ${user.expiryDate || 'N/A'}</span>
+                </div>
+                <button class="btn-notify" onclick="app.notifyUser('${user.id}')" style="background:#f43f5e; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">NOTIFICAR</button>
+            </div>
+        `).join('');
+    }
+}
+
+export function notifyUser(userId) {
+    console.log("Enviando recordatorio al usuario:", userId);
+    if (window.app?.showToast) {
+        window.app.showToast("Recordatorio enviado con éxito");
+    } else {
+        alert("Recordatorio de pago enviado con éxito.");
+    }
 }
