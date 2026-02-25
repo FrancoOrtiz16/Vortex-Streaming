@@ -15,7 +15,7 @@
         .auth-overlay {
             position: fixed; inset: 0; background: rgba(10, 11, 14, 0.98);
             backdrop-filter: blur(20px); display: flex; justify-content: center;
-            align-items: center; z-10000; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            align-items: center; z-index: 10000; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .auth-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.1); }
         .btn-neon-pulse {
@@ -50,7 +50,6 @@
         }
         #side-menu-vortex.active { right: 0; box-shadow: -20px 0 50px rgba(0,0,0,0.8); }
         
-        /* BLOQUE COMÚN: BOTONES DE MENÚ */
         .menu-item-btn {
             width: 100%; display: flex; align-items: center; gap: 15px; background: none;
             border: none; color: white; padding: 15px; border-radius: 12px; cursor: pointer;
@@ -58,11 +57,9 @@
         }
         .menu-item-btn:hover { background: rgba(0,242,255,0.1); color: var(--primary); }
 
-        /* ESTILOS: CREDENTIAL CARD */
         .user-credential-section { margin-bottom: 5px; }
         .credential-card { margin-top: 5px; padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; }
         
-        /* INTEGRACIÓN: ESTILOS HISTORIAL */
         .history-panel { 
             margin-top: 5px; padding: 15px; background: rgba(255,255,255,0.02); 
             border: 1px solid var(--border); border-radius: 12px; font-size: 13px;
@@ -75,7 +72,6 @@
         }
         .empty-log { color: #475569; font-style: italic; text-align: center; padding: 10px 0; }
 
-        /* UTILIDADES */
         .card-inner .field { margin-bottom: 12px; }
         .card-inner label { display: block; font-size: 10px; color: var(--primary); letter-spacing: 1px; margin-bottom: 4px; }
         .card-inner span { font-family: 'monospace'; font-size: 14px; color: #fff; }
@@ -100,13 +96,7 @@
         .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: white; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-size: 0.8rem; margin-left: 2px; }
 
-        /* --- ESTILOS LÓGICA NUEVA (KPIs, Renovaciones y Logout Group) --- */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .status-online { color: #10b981; }
-        .status-offline { color: #ef4444; }
-
-        /* Implementación CSS de la lógica nueva para el botón logout */
+        /* --- ESTILOS LÓGICA NUEVA --- */
         .logout-btn-new {
             padding: 8px; background: transparent; border-radius: 8px; transition: all 0.3s;
             border: none; cursor: pointer; display: flex; align-items: center;
@@ -114,6 +104,14 @@
         .logout-btn-new:hover { background: rgba(239, 68, 68, 0.2); }
         .logout-btn-new span { transition: transform 0.3s; display: inline-block; font-size: 1.2rem; }
         .logout-btn-new:hover span { transform: scale(1.1); }
+        
+        /* Estilos del botón de Toggle Admin */
+        .admin-toggle-btn {
+            background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 10px;
+            text-transform: uppercase; font-size: 10px; font-weight: 900; color: white;
+            border: 1px solid var(--border); cursor: pointer; transition: 0.3s;
+        }
+        .admin-toggle-btn:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -150,7 +148,14 @@
 
     <nav class="vortex-nav-modern">
         <div class="logo" onclick="app.router('market')" style="cursor: pointer;">VORTEX<span>STREAMING</span></div>
+        
         <div class="nav-right-group">
+            <button id="admin-view-toggle" class="admin-toggle-btn" style="display: none;" onclick="app.toggleAdminView()">
+                Ver Panel Admin
+            </button>
+
+            <span id="nav-user-name" style="text-transform: uppercase; font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 1px;" class="hidden-mobile"></span>
+
             <div class="vortex-search-wrapper">
                 <div id="search-input-container" class="search-field-hidden">
                     <input type="text" placeholder="Escribe lo que estas buscando..." class="vortex-input-modern" onkeyup="app.filter(this.value)" />
@@ -158,7 +163,7 @@
                 <button class="icon-btn search-trigger" onclick="toggleSearchField()" style="background: none; border: none; cursor: pointer; color: var(--primary); font-size: 1.2rem;"> 🔍 </button>
             </div>
 
-            <button onclick="window.handleLogout()" class="logout-btn-new" title="Cerrar Sesión">
+            <button onclick="window.logoutVortex ? window.logoutVortex() : app.handleLogout()" class="logout-btn-new" title="Cerrar Sesión">
                 <span>🚪</span>
             </button>
 
@@ -231,14 +236,52 @@
     </nav>
 
     <main id="app-content" class="pt-28 px-6 max-w-7xl mx-auto main-viewport">
-        <div id="vortex-main-container">
-            </div>
+        <div id="vortex-main-container"></div>
     </main>
 
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- FUNCIONES DE UI (Lógica Inicial) ---
+        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
+        function updateUIFromSession() {
+            const saved = localStorage.getItem('vortex_session');
+            if (saved) {
+                const user = JSON.parse(saved);
+                
+                // Actualizar nombre en nav
+                const navName = document.getElementById('nav-user-name');
+                if(navName) navName.textContent = user.name || user.email.split('@')[0];
+
+                // Mostrar botón de admin si el rol es correcto
+                const adminBtn = document.getElementById('admin-view-toggle');
+                if(adminBtn && user.role === 'ADMIN') {
+                    adminBtn.style.display = 'block';
+                }
+
+                // Ocultar auth screen
+                document.getElementById('auth-screen').classList.add('hidden');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateUIFromSession();
+            // Observador para cuando la app cambie de vista
+            if(window.app) {
+                const originalRouter = app.router;
+                app.router = function(route) {
+                    const adminBtn = document.getElementById('admin-view-toggle');
+                    if(adminBtn) adminBtn.textContent = route === 'admin' ? 'Ver Tienda' : 'Ver Panel Admin';
+                    return originalRouter.apply(this, arguments);
+                };
+                
+                app.toggleAdminView = function() {
+                    const currentRoute = this.state.currentRoute || 'market';
+                    this.router(currentRoute === 'admin' ? 'market' : 'admin');
+                };
+            }
+        });
+
+        // --- FUNCIONES DE UI ORIGINALES ---
         function toggleSearchField() {
             const container = document.getElementById('search-input-container');
             container.classList.toggle('search-field-visible');
@@ -267,6 +310,5 @@
     </script>
     
     <script type="module" src="app.js?v=5.0"></script>
-
 </body>
 </html>

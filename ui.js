@@ -26,6 +26,25 @@ export const enterSystem = () => {
 };
 
 /**
+ * Lógica Nueva: Componente de Bienvenida (Adaptado para Inserción en DOM)
+ */
+const renderWelcomeMessage = (name) => `
+    <div class="mb-8 animate__animated animate__fadeInDown">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="height: 40px; width: 4px; background: #06b6d4; box-shadow: 0 0 15px #22d3ee;"></div>
+            <div>
+                <h1 style="color: white; font-weight: 900; font-style: italic; letter-spacing: -0.05em; font-size: 30px; text-transform: uppercase; margin: 0; line-height: 1;">
+                    BIENVENIDO, ${name}
+                </h1>
+                <p class="animate__animated animate__fadeIn animate__delay-1s" style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5em; margin: 4px 0 0 0;">
+                    Sistema de Control Operativo Activo
+                </p>
+            </div>
+        </div>
+    </div>
+`;
+
+/**
  * Enrutador principal del sistema.
  */
 export const router = (view) => {
@@ -38,9 +57,15 @@ export const router = (view) => {
     if(!container) return;
     if(menu) menu.classList.remove('active');
 
+    const userName = state.currentUser ? (state.currentUser.name || state.currentUser.email.split('@')[0]).toUpperCase() : "INVITADO";
+
     if (['streaming', 'gaming'].includes(view)) {
         const list = state.data.catalog[view] || [];
-        container.innerHTML = `<h1 class="fade-in">Catálogo ${view.toUpperCase()}</h1><div class="bento-grid" id="grid"></div>`;
+        container.innerHTML = `
+            ${renderWelcomeMessage(userName)}
+            <h1 class="fade-in">Catálogo ${view.toUpperCase()}</h1>
+            <div class="bento-grid" id="grid"></div>
+        `;
         const grid = document.getElementById('grid');
         
         list.forEach(item => {
@@ -57,7 +82,11 @@ export const router = (view) => {
         });
     } 
     else if (view === 'market') {
-        container.innerHTML = `<h1 class="fade-in">Catálogo Elite</h1><div class="bento-grid" id="grid"></div>`;
+        container.innerHTML = `
+            ${renderWelcomeMessage(userName)}
+            <h1 class="fade-in">Catálogo Elite</h1>
+            <div class="bento-grid" id="grid"></div>
+        `;
         const grid = document.getElementById('grid');
         const category = 'streaming';
         
@@ -92,6 +121,7 @@ export const router = (view) => {
     else if (view === 'support') {
         const userTickets = (state.data.tickets || []).filter(t => t.user === state.currentUser.email);
         container.innerHTML = `
+            ${renderWelcomeMessage(userName)}
             <div class="support-view fade-in" style="padding:20px;">
                 <h2 style="color:var(--primary); font-family:Orbitron;">CENTRO DE SOPORTE</h2>
                 <div class="card" style="background:rgba(255,255,255,0.05); padding:20px; border-radius:15px; margin-bottom:20px;">
@@ -233,19 +263,7 @@ export const renderAdmin = (container) => {
     container.innerHTML = `
         <div class="animate__animated animate__fadeIn space-y-10" style="padding:20px; color:white;">
             
-            <div class="mb-8 animate__animated animate__backInDown" style="margin-bottom: 32px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="height: 40px; width: 4px; background: #06b6d4; box-shadow: 0 0 15px #22d3ee;" class="animate-pulse"></div>
-                    <div>
-                        <h1 style="color: white; font-weight: 900; font-style: italic; letter-spacing: -0.05em; font-size: 30px; text-transform: uppercase; margin: 0; line-height: 1;">
-                            Bienvenido, ${adminName}
-                        </h1>
-                        <p class="animate__animated animate__fadeIn animate__delay-1s" style="font-size: 10px; color: #22d3ee; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5em; margin: 4px 0 0 0;">
-                            Acceso de Administrador Autorizado
-                        </p>
-                    </div>
-                </div>
-            </div>
+            ${renderWelcomeMessage(adminName)}
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                 <h2 style="font-size:24px; font-weight:900; text-transform:uppercase; font-style:italic; letter-spacing:-0.05em; color:white;">ENTERPRISE COMMAND CENTER</h2>

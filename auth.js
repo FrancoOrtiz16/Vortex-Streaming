@@ -20,12 +20,13 @@ export const getSession = () => {
 
 export const removeSession = () => {
     localStorage.removeItem('vortex_session');
-    // Forzamos la recarga para limpiar el estado de React/App completamente
-    window.location.reload(); 
+    // CORRECCIÓN LÓGICA NUEVA: Redirigir/Recargar para limpiar el estado por completo
+    window.location.href = window.location.pathname; 
 };
 
-// Vinculamos al objeto window para que los botones de HTML encuentren las funciones
+// Vinculación global para que el icono del menú y botones HTML reconozcan las funciones
 window.handleLogout = removeSession;
+window.logoutVortex = removeSession; 
 // -----------------------------------------------------
 
 /**
@@ -156,7 +157,7 @@ export function enterSystem(user) {
  */
 export function logout() {
     if (state.currentUser && window.app?.logActivity) {
-        window.app.logActivity('INFO', `Sesión cerrara: ${state.currentUser.email}`);
+        window.app.logActivity('INFO', `Sesión cerrada: ${state.currentUser.email}`);
     }
 
     // Integración Lógica Nueva: Limpieza de persistencia y recarga global
