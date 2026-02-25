@@ -4,6 +4,35 @@
 
 import { state, saveToDisk } from './data.js';
 
+// --- NUEVA LÓGICA: SISTEMA DE MONITOREO DE SALUD (HEARTBEAT) ---
+const STREAM_SERVER_URL = "URL_DE_TU_SERVIDOR_DE_STREAMING"; // Reemplaza con tu IP o dominio
+
+export async function checkServerStatus() {
+    const statusElement = document.getElementById('val-server');
+    if (!statusElement) return;
+
+    try {
+        // Hacemos una petición rápida (HEAD) para no consumir ancho de banda
+        const response = await fetch(STREAM_SERVER_URL, { method: 'HEAD', mode: 'no-cors' });
+        
+        // Si llegamos aquí, el servidor está arriba
+        statusElement.textContent = "ONLINE";
+        statusElement.style.color = "#00ffcc";
+        statusElement.classList.add('status-online');
+        statusElement.classList.remove('status-offline');
+    } catch (error) {
+        // Si hay error de conexión
+        statusElement.textContent = "OFFLINE";
+        statusElement.style.color = "#ff4d4d";
+        statusElement.classList.add('status-offline');
+        statusElement.classList.remove('status-online');
+        console.error("Alerta: El servidor de streaming no responde.");
+    }
+}
+
+// Iniciar el monitoreo cada 30 segundos
+setInterval(checkServerStatus, 30000);
+
 /**
  * Registro de logs (Conexiones, fallos, ventas)
  * Mantiene un límite de 15 entradas para optimizar el almacenamiento.
@@ -196,7 +225,12 @@ export function renderAdmin(container) {
 
     container.innerHTML = `
         <div class="admin-view fade-in" style="padding:20px; color:white;">
-            <h2 style="color:var(--primary); font-family:Orbitron;">DASHBOARD VORTEX</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="color:var(--primary); font-family:Orbitron;">DASHBOARD VORTEX</h2>
+                <div style="font-size:10px; background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:20px; border:1px solid rgba(0,242,255,0.2);">
+                    SERVER: <span id="val-server" style="font-weight:bold;">COMPROBANDO...</span>
+                </div>
+            </div>
             
             <div style="display:flex; gap:15px; margin:20px 0;">
                 <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
@@ -309,6 +343,7 @@ export function renderAdmin(container) {
     `;
 
     // INYECCIÓN DE LA LÓGICA DE MONITOREO AL CARGAR
+    checkServerStatus();
     updateAdminDashboard(data.users);
 }
 
@@ -316,9 +351,6 @@ export function renderAdmin(container) {
 
 export function updateAdminDashboard(users) {
     const totalUsers = users.length;
-    // Asumiendo que u.status existe en tus datos
-    const activeUsers = users.filter(u => u.status === 'Activo').length;
-    // daysLeft debe venir en el objeto usuario para que funcione
     const expiringSoon = users.filter(u => u.daysLeft !== undefined && u.daysLeft <= 7).length; 
 
     if(document.getElementById('val-usuarios')) document.getElementById('val-usuarios').textContent = totalUsers;
