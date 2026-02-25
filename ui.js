@@ -229,19 +229,20 @@ export const renderAdmin = (container) => {
     const limit = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const upcomingExpirations = (data.sales || []).filter(s => new Date(s.exp) < limit);
 
-    // Integración de Lógica Nueva: WelcomeHeader
-    const adminName = currentUser ? currentUser.name || currentUser.email.split('@')[0] : "Administrador";
+    // Integración de Lógica Nueva: WelcomeMessage Component (Adaptado a String Literal)
+    const adminName = currentUser ? (currentUser.name || currentUser.email.split('@')[0]).toUpperCase() : "ADMINISTRADOR";
 
     container.innerHTML = `
         <div class="animate__animated animate__fadeIn space-y-10" style="padding:20px; color:white;">
             
-            <div class="animate__animated animate__fadeInDown mb-6" style="margin-bottom: 24px;">
-                <h1 style="font-size: 24px; font-weight: 700; color: white; display: flex; align-items: center; gap: 12px; margin: 0;">
-                    <span style="width: 4px; height: 32px; background-color: #06b6d4; border-radius: 9999px; display: inline-block;"></span>
-                    Bienvenido, ${adminName}
+            <div class="mb-8 animate__animated animate__fadeInLeft" style="margin-bottom: 32px;">
+                <h1 style="color: white; font-weight: 900; font-style: italic; letter-spacing: -0.05em; font-size: 24px; display: flex; align-items: center; gap: 8px; margin: 0;">
+                    <span class="animate__animated animate__pulse animate__infinite" style="color: #06b6d4;">●</span>
+                    BIENVENIDO, ${adminName}
                 </h1>
-                <p style="font-size: 10px; color: #64748b; text-transform: uppercase; tracking: 0.3em; font-weight: 900; margin-left: 16px; letter-spacing: 0.3em;">
-                    Sistema de Control de Operaciones
+                <div style="height: 2px; width: 96px; background: linear-gradient(to right, #06b6d4, transparent); margin-top: 4px;"></div>
+                <p class="animate__animated animate__fadeIn animate__delay-1s" style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4em; mt-8px; margin-top: 8px;">
+                    Admin Principal • Vortex Control System
                 </p>
             </div>
 

@@ -4,6 +4,21 @@
 
 import { state, saveToDisk } from './data.js';
 
+// --- Lógica Nueva: Gestión de sesión y persistencia ---
+export const saveSession = (userData) => {
+    localStorage.setItem('vortex_session', JSON.stringify(userData));
+};
+
+export const getSession = () => {
+    const session = localStorage.getItem('vortex_session');
+    return session ? JSON.parse(session) : null;
+};
+
+export const removeSession = () => {
+    localStorage.removeItem('vortex_session');
+};
+// -----------------------------------------------------
+
 /**
  * Lógica Nueva: Alterna el modo de autenticación y refresca la vista.
  * Se integra el uso de window.app para coordinar con el router.
@@ -102,6 +117,9 @@ export const handleAuth = (e) => {
 export function enterSystem(user) {
     state.currentUser = user;
     
+    // Integración Lógica Nueva: Persistencia de sesión
+    saveSession(user);
+    
     // Log de éxito (Opcional, siguiendo la lógica de monitoreo)
     if (window.app && window.app.logActivity) {
         window.app.logActivity('INFO', `Sesión iniciada: ${user.email}`);
@@ -131,6 +149,9 @@ export function logout() {
     if (state.currentUser && window.app?.logActivity) {
         window.app.logActivity('INFO', `Sesión cerrada: ${state.currentUser.email}`);
     }
+
+    // Integración Lógica Nueva: Limpieza de persistencia
+    removeSession();
 
     state.currentUser = null;
     state.view = 'login';

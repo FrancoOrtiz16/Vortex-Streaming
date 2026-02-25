@@ -97,7 +97,6 @@
         .menu-hamburguer { background: none; border: none; cursor: pointer; display: grid; gap: 5px; }
         .bar { width: 25px; height: 2px; background: var(--primary); transition: 0.3s; }
         
-        /* Logo Vortex Global */
         .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: white; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-size: 0.8rem; margin-left: 2px; }
 
@@ -211,7 +210,7 @@
 
                 <div class="footer-menu">
                     <hr class="menu-divider" />
-                    <a href="#" onclick="location.reload()" class="logout-link"><span class="emoji">🚪</span> Cerrar Sesión</a>
+                    <a href="#" onclick="app.handleLogout()" class="logout-link"><span class="emoji">🚪</span> Cerrar Sesión</a>
                 </div>
             </div>
         </aside>
@@ -225,6 +224,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // --- FUNCIONES DE UI (Lógica Inicial) ---
         function toggleSearchField() {
             const container = document.getElementById('search-input-container');
             container.classList.toggle('search-field-visible');
