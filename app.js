@@ -19,10 +19,17 @@ Object.assign(app, {
     state,
     saveToDisk,
 
-    // --- Autenticación y Navegación (Lógica Unificada) ---
+    // --- Autenticación y Navegación (Lógica Unificada Integrada) ---
     handleAuth: auth.handleAuth,
     logout: auth.logout,
     toggleAuthMode: auth.toggleAuthMode,
+    
+    // [LÓGICA NUEVA: SETVIEW / DASHBOARD]
+    // Mapeamos setView al router existente para compatibilidad con la nueva lógica del Nav
+    setView: function(viewName) {
+        this.router(viewName);
+    },
+
     router: ui.router,           // <--- Lógica unificada: Mapeado desde ui.js
     renderAdmin: ui.renderAdmin, // <--- Lógica unificada: Vital para el acceso administrativo
     enterSystem: ui.enterSystem,
@@ -144,6 +151,18 @@ Object.assign(app, {
         const adminTag = document.getElementById('admin-link-el');
         if(nameDisp) nameDisp.innerText = user.name;
         if(adminTag) adminTag.style.display = (user.role === 'ADMIN') ? 'block' : 'none';
+        
+        // [LÓGICA NUEVA: Actualización de estados activos en botones Nav]
+        const currentView = this.state.view || 'market';
+        document.querySelectorAll('.nav-btn-vortex').forEach(btn => {
+            if (btn.getAttribute('onclick')?.includes(currentView)) {
+                btn.classList.add('bg-cyan-500', 'text-black');
+                btn.classList.remove('bg-white/10');
+            } else {
+                btn.classList.remove('bg-cyan-500', 'text-black');
+                btn.classList.add('bg-white/10');
+            }
+        });
     },
 
     showToast(msg) {
@@ -204,7 +223,6 @@ Object.assign(app, {
         if (saved) {
             try {
                 const parsedData = JSON.parse(saved);
-                // Lógica Nueva: Garantizamos que tickets sea al menos un array vacío para evitar undefined
                 if (!parsedData.tickets) parsedData.tickets = [];
                 this.state.data = parsedData;
             } catch(e) {
@@ -219,7 +237,9 @@ Object.assign(app, {
         if (!this.state.currentUser) {
             this.router('login');
         } else {
-            this.router(this.state.view || 'market');
+            // Se sincroniza con 'admin' si el botón de la nueva lógica solicita 'dashboard'
+            const startView = this.state.view === 'dashboard' ? 'admin' : (this.state.view || 'market');
+            this.router(startView);
             this.updateHeaderUI(this.state.currentUser);
         }
 
@@ -254,7 +274,6 @@ Object.assign(app, {
             }
         });
 
-        // 6. Carga de historial si el contenedor existe
         if (document.getElementById('history-items-container')) {
             this.loadPurchaseHistory();
         }

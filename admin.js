@@ -4,24 +4,31 @@
 
 import { state, saveToDisk } from './data.js';
 
-// --- CONFIGURACIÓN Y HEARTBEAT (LÓGICA NUEVA ACTUALIZADA) ---
+// --- CONFIGURACIÓN Y HEARTBEAT (LÓGICA NUEVA INTEGRADA) ---
 const STREAM_SERVER_URL = "https://vortex-streaming-psi.vercel.app"; 
 
 export async function checkServerStatus() {
-    // Intenta encontrar ambos IDs para compatibilidad de versiones
     const statusElement = document.getElementById('val-server') || document.getElementById('server-status-val');
-    if (!statusElement) return;
+    if (!statusElement) return "OFFLINE";
 
     try {
-        await fetch(STREAM_SERVER_URL, { method: 'HEAD', mode: 'no-cors' });
+        // Implementación de Lógica Nueva: HEAD request para eficiencia
+        await fetch(STREAM_SERVER_URL, { 
+            method: 'HEAD', 
+            mode: 'no-cors',
+            cache: 'no-cache' 
+        });
+        
         statusElement.textContent = "ONLINE";
         statusElement.style.color = "#00ffcc";
-        statusElement.className = "text-3xl font-black status-online"; // Clase de Lógica Nueva
+        statusElement.className = "text-3xl font-black status-online animate-pulse"; 
+        return "ONLINE";
     } catch (error) {
         statusElement.textContent = "OFFLINE";
         statusElement.style.color = "#ff4d4d";
-        statusElement.className = "text-3xl font-black status-offline"; // Clase de Lógica Nueva
+        statusElement.className = "text-3xl font-black status-offline";
         console.error("Alerta: El servidor de streaming no responde.");
+        return "OFFLINE";
     }
 }
 
@@ -46,16 +53,17 @@ export const logActivity = (type, message) => {
 // --- GESTIÓN DE RENOVACIONES (LÓGICA NUEVA INTEGRADA) ---
 
 export function renderRenewalsPanel(salesOrUsers) {
-    // Usamos el contenedor unificado de la lógica inicial o el nuevo
     const container = document.getElementById('vortex-renewals-list') || document.getElementById('renovations-list');
     if (!container) return;
 
-    const today = new Date();
-    const sevenDaysFromNow = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000));
+    const today = Date.now();
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
 
-    // Si recibimos ventas (Lógica Nueva) las filtramos por fecha de expiración
     const sales = state.data.sales || [];
-    const expiring = sales.filter(s => new Date(s.exp) <= sevenDaysFromNow);
+    const expiring = sales.filter(s => {
+        const expDate = new Date(s.exp).getTime();
+        return expDate <= (today + sevenDaysInMs);
+    });
 
     if (expiring.length > 0) {
         container.innerHTML = `<h3 style="font-size:14px; color:#f43f5e; margin-bottom:10px;">ACCIONES REQUERIDAS (RENOVACIONES)</h3>` + 
@@ -186,26 +194,31 @@ export const deleteService = (category, index) => {
     }
 };
 
-// --- LÓGICA DE KPIs Y DASHBOARD (UNIFICADA) ---
+// --- LÓGICA DE KPIs Y DASHBOARD (UNIFICADA CON LÓGICA NUEVA) ---
 
 export function calculateKPIs(data) {
-    const totalUsers = data.users.length;
-    const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0);
+    const sales = data.sales || [];
+    const users = data.users || [];
     
-    // Filtro para expiraciones (7 días)
-    const today = new Date();
-    const sevenDaysFromNow = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000));
-    const expiringSoonCount = (data.sales || []).filter(s => new Date(s.exp) <= sevenDaysFromNow).length;
+    // Implementación de Lógica Nueva: Reducción y filtrado optimizado
+    const stats = {
+        totalIncome: sales.reduce((acc, s) => acc + s.amount, 0).toFixed(2),
+        totalUsers: users.length,
+        upcomingExp: sales.filter(s => {
+            const expDate = new Date(s.exp).getTime();
+            const limit = Date.now() + 7 * 24 * 60 * 60 * 1000;
+            return expDate < limit;
+        }).length
+    };
 
-    // Actualizar elementos (Compatibilidad con todos los IDs posibles)
     const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val; };
     
-    setVal('val-usuarios', totalUsers);
-    setVal('total-users', totalUsers);
-    setVal('val-ingresos', `$${totalSales.toFixed(2)}`);
-    setVal('total-income', `$${totalSales.toFixed(2)}`);
-    setVal('val-exp', expiringSoonCount);
-    setVal('kpi-expiraciones', expiringSoonCount);
+    setVal('val-usuarios', stats.totalUsers);
+    setVal('total-users', stats.totalUsers);
+    setVal('val-ingresos', `$${stats.totalIncome}`);
+    setVal('total-income', `$${stats.totalIncome}`);
+    setVal('val-exp', stats.upcomingExp);
+    setVal('kpi-expiraciones', stats.upcomingExp);
 }
 
 // Inicialización del Panel (Lógica Nueva + Inicial)
@@ -233,7 +246,7 @@ export function renderAdmin(container) {
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="color:var(--primary); font-family:Orbitron;">DASHBOARD VORTEX</h2>
                 <div style="font-size:10px; background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:20px; border:1px solid rgba(0,242,255,0.2);">
-                    SERVER: <span id="val-server" class="status-online" style="font-weight:bold;">COMPROBANDO...</span>
+                    SERVER: <span id="val-server" style="font-weight:bold;">COMPROBANDO...</span>
                 </div>
             </div>
             
@@ -346,6 +359,5 @@ export function renderAdmin(container) {
         </div>
     `;
 
-    // INYECCIÓN DE LA LÓGICA DE MONITOREO Y KPIs AL CARGAR
     initAdminPanel(data);
 }
