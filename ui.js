@@ -225,25 +225,26 @@ export const renderAdmin = (container) => {
     const totalUsers = data.users.length;
     const openTickets = (data.tickets || []).filter(t => t.status === 'Abierto');
     
-    // Filtro para próximas expiraciones (Lógica nueva)
     const limit = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const upcomingExpirations = (data.sales || []).filter(s => new Date(s.exp) < limit);
 
-    // Integración de Lógica Nueva: WelcomeMessage Component (Adaptado a String Literal)
     const adminName = currentUser ? (currentUser.name || currentUser.email.split('@')[0]).toUpperCase() : "ADMINISTRADOR";
 
     container.innerHTML = `
         <div class="animate__animated animate__fadeIn space-y-10" style="padding:20px; color:white;">
             
-            <div class="mb-8 animate__animated animate__fadeInLeft" style="margin-bottom: 32px;">
-                <h1 style="color: white; font-weight: 900; font-style: italic; letter-spacing: -0.05em; font-size: 24px; display: flex; align-items: center; gap: 8px; margin: 0;">
-                    <span class="animate__animated animate__pulse animate__infinite" style="color: #06b6d4;">●</span>
-                    BIENVENIDO, ${adminName}
-                </h1>
-                <div style="height: 2px; width: 96px; background: linear-gradient(to right, #06b6d4, transparent); margin-top: 4px;"></div>
-                <p class="animate__animated animate__fadeIn animate__delay-1s" style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4em; mt-8px; margin-top: 8px;">
-                    Admin Principal • Vortex Control System
-                </p>
+            <div class="mb-8 animate__animated animate__backInDown" style="margin-bottom: 32px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="height: 40px; width: 4px; background: #06b6d4; box-shadow: 0 0 15px #22d3ee;" class="animate-pulse"></div>
+                    <div>
+                        <h1 style="color: white; font-weight: 900; font-style: italic; letter-spacing: -0.05em; font-size: 30px; text-transform: uppercase; margin: 0; line-height: 1;">
+                            Bienvenido, ${adminName}
+                        </h1>
+                        <p class="animate__animated animate__fadeIn animate__delay-1s" style="font-size: 10px; color: #22d3ee; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5em; margin: 4px 0 0 0;">
+                            Acceso de Administrador Autorizado
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">

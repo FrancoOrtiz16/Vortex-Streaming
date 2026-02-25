@@ -11,12 +11,21 @@ export const saveSession = (userData) => {
 
 export const getSession = () => {
     const session = localStorage.getItem('vortex_session');
-    return session ? JSON.parse(session) : null;
+    try {
+        return session ? JSON.parse(session) : null;
+    } catch (e) {
+        return null;
+    }
 };
 
 export const removeSession = () => {
     localStorage.removeItem('vortex_session');
+    // Forzamos la recarga para limpiar el estado de React/App completamente
+    window.location.reload(); 
 };
+
+// Vinculamos al objeto window para que los botones de HTML encuentren las funciones
+window.handleLogout = removeSession;
 // -----------------------------------------------------
 
 /**
@@ -147,19 +156,12 @@ export function enterSystem(user) {
  */
 export function logout() {
     if (state.currentUser && window.app?.logActivity) {
-        window.app.logActivity('INFO', `Sesión cerrada: ${state.currentUser.email}`);
+        window.app.logActivity('INFO', `Sesión cerrara: ${state.currentUser.email}`);
     }
 
-    // Integración Lógica Nueva: Limpieza de persistencia
+    // Integración Lógica Nueva: Limpieza de persistencia y recarga global
     removeSession();
 
     state.currentUser = null;
     state.view = 'login';
-    
-    if (window.app && window.app.router) {
-        window.app.router('login');
-        location.reload(); 
-    } else {
-        location.reload();
-    }
 }

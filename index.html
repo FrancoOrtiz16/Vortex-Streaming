@@ -15,7 +15,7 @@
         .auth-overlay {
             position: fixed; inset: 0; background: rgba(10, 11, 14, 0.98);
             backdrop-filter: blur(20px); display: flex; justify-content: center;
-            align-items: center; z-index: 10000; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            align-items: center; z-10000; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .auth-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; transform: scale(1.1); }
         .btn-neon-pulse {
@@ -100,18 +100,27 @@
         .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: white; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-size: 0.8rem; margin-left: 2px; }
 
-        /* --- ESTILOS LÓGICA NUEVA (KPIs y Renovaciones) --- */
+        /* --- ESTILOS LÓGICA NUEVA (KPIs, Renovaciones y Logout Group) --- */
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
         .status-online { color: #10b981; }
         .status-offline { color: #ef4444; }
+
+        /* Implementación CSS de la lógica nueva para el botón logout */
+        .logout-btn-new {
+            padding: 8px; background: transparent; border-radius: 8px; transition: all 0.3s;
+            border: none; cursor: pointer; display: flex; align-items: center;
+        }
+        .logout-btn-new:hover { background: rgba(239, 68, 68, 0.2); }
+        .logout-btn-new span { transition: transform 0.3s; display: inline-block; font-size: 1.2rem; }
+        .logout-btn-new:hover span { transform: scale(1.1); }
     </style>
 </head>
 <body>
     <canvas id="canvas-network"></canvas>
 
     <div id="auth-screen" class="auth-overlay">
-        <div class="auth-card" style="padding: 40px; border-radius: 24px; width: 350px;">
+        <form id="auth-form" class="auth-card" style="padding: 40px; border-radius: 24px; width: 350px;" onsubmit="app.handleAuth(event)">
             <div class="logo" style="text-align: center; margin-bottom: 30px; font-size: 1.5rem; letter-spacing: 2px;">
                 VORTEX<span style="color:var(--primary); font-size: 0.9rem;">STREAMING</span>
             </div>
@@ -121,14 +130,14 @@
             <div id="auth-msg" style="color: #ff4d4d; font-size: 0.75rem; text-align: center; margin-bottom: 15px; min-height: 1em; font-weight: 600;"></div>
             
             <div style="display: grid; gap: 15px;" class="vortex-input-group">
-                <input type="text" id="auth-email" placeholder="Correo Electrónico" 
+                <input type="text" id="auth-email" name="email" placeholder="Correo Electrónico" required
                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;"> 
                 
-                <input type="password" id="auth-pass" placeholder="Contraseña" 
+                <input type="password" id="auth-pass" name="pass" placeholder="Contraseña" required
                        style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;">
             </div>
 
-            <button id="btn-main-auth" class="btn-neon-pulse" onclick="app.handleAuth(event)" 
+            <button type="submit" id="btn-main-auth" class="btn-neon-pulse" 
                     style="width:100%; margin-top: 25px; height: 50px; text-transform: uppercase; letter-spacing: 2px;">
                 <span>Entrar</span>
             </button>
@@ -136,7 +145,7 @@
             <p id="auth-switch" style="text-align: center; font-size: 0.8rem; margin-top: 20px; color: #888;">
                 ¿No tienes Cuenta? <a href="#" onclick="app.toggleAuthMode()" style="color: var(--primary); text-decoration: none; font-weight: 700;">Regístrate aquí</a>
             </p>
-        </div>
+        </form>
     </div>
 
     <nav class="vortex-nav-modern">
@@ -148,6 +157,11 @@
                 </div>
                 <button class="icon-btn search-trigger" onclick="toggleSearchField()" style="background: none; border: none; cursor: pointer; color: var(--primary); font-size: 1.2rem;"> 🔍 </button>
             </div>
+
+            <button onclick="window.handleLogout()" class="logout-btn-new" title="Cerrar Sesión">
+                <span>🚪</span>
+            </button>
+
             <button class="menu-hamburguer" onclick="toggleModernMenu()">
                 <div class="bar"></div>
                 <div class="bar"></div>
@@ -210,7 +224,7 @@
 
                 <div class="footer-menu">
                     <hr class="menu-divider" />
-                    <a href="#" onclick="app.handleLogout()" class="logout-link"><span class="emoji">🚪</span> Cerrar Sesión</a>
+                    <a href="#" onclick="app.handleLogout()" class="logout-link"><span class="emoji">❌</span> Cerrar Sesión</a>
                 </div>
             </div>
         </aside>
@@ -241,13 +255,13 @@
             const card = document.getElementById('user-info-card');
             card.classList.toggle('hidden');
             if(!card.classList.contains('hidden')) {
-                document.getElementById('val-user').textContent = app.state.currentUser?.email || 'Invitado';
+                document.getElementById('val-user').textContent = (window.app && window.app.state && window.app.state.currentUser) ? window.app.state.currentUser.email : 'Invitado';
             }
         }
 
         function revealPass() {
             const passEl = document.getElementById('val-pass');
-            const realPass = app.state.currentUser?.pass || '****';
+            const realPass = (window.app && window.app.state && window.app.state.currentUser) ? window.app.state.currentUser.pass : '****';
             passEl.textContent = (passEl.textContent === '••••••••') ? realPass : '••••••••';
         }
     </script>
