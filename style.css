@@ -68,6 +68,12 @@ body {
     color: #ef4444; /* Lógica Nueva: Rojo Alerta */
 }
 
+/* [LÓGICA NUEVA: ESTILO LOGOUT] */
+.logout-link { 
+    color: #ff4d4d !important; 
+    text-decoration: none !important; /* Esto quita la línea de abajo */
+}
+
 /* ==========================================================================
    LÓGICA UNIFICADA: PANTALLA DE ACCESO (FUERZA CENTRADO TOTAL V4.0)
    ========================================================================== */

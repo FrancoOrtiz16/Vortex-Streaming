@@ -224,7 +224,9 @@
 
                 <div class="footer-menu">
                     <hr class="menu-divider" />
-                    <a href="#" onclick="app.handleLogout()" class="logout-link"><span class="emoji">❌</span> Cerrar Sesión</a>
+                    <a href="javascript:void(0)" onclick="window.logoutVortex ? window.logoutVortex() : app.handleLogout()" class="logout-link">
+                        <span class="emoji">❌</span> Cerrar Sesión
+                    </a>
                 </div>
             </div>
         </aside>
