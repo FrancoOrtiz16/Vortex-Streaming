@@ -4,28 +4,28 @@
 
 import { state, saveToDisk } from './data.js';
 
-// --- CONFIGURACIÓN Y HEARTBEAT ---
-const STREAM_SERVER_URL = "URL_DE_TU_SERVIDOR_DE_STREAMING"; 
+// --- CONFIGURACIÓN Y HEARTBEAT (LÓGICA NUEVA ACTUALIZADA) ---
+const STREAM_SERVER_URL = "https://vortex-streaming-psi.vercel.app"; 
 
 export async function checkServerStatus() {
-    const statusElement = document.getElementById('val-server');
+    // Intenta encontrar ambos IDs para compatibilidad de versiones
+    const statusElement = document.getElementById('val-server') || document.getElementById('server-status-val');
     if (!statusElement) return;
 
     try {
         await fetch(STREAM_SERVER_URL, { method: 'HEAD', mode: 'no-cors' });
         statusElement.textContent = "ONLINE";
         statusElement.style.color = "#00ffcc";
-        statusElement.classList.add('status-online');
-        statusElement.classList.remove('status-offline');
+        statusElement.className = "text-3xl font-black status-online"; // Clase de Lógica Nueva
     } catch (error) {
         statusElement.textContent = "OFFLINE";
         statusElement.style.color = "#ff4d4d";
-        statusElement.classList.add('status-offline');
-        statusElement.classList.remove('status-online');
+        statusElement.className = "text-3xl font-black status-offline"; // Clase de Lógica Nueva
         console.error("Alerta: El servidor de streaming no responde.");
     }
 }
 
+// Intervalo global de monitoreo
 setInterval(checkServerStatus, 30000);
 
 /**
@@ -42,6 +42,36 @@ export const logActivity = (type, message) => {
     if (state.data.logs.length > 15) state.data.logs.pop(); 
     saveToDisk();
 };
+
+// --- GESTIÓN DE RENOVACIONES (LÓGICA NUEVA INTEGRADA) ---
+
+export function renderRenewalsPanel(salesOrUsers) {
+    // Usamos el contenedor unificado de la lógica inicial o el nuevo
+    const container = document.getElementById('vortex-renewals-list') || document.getElementById('renovations-list');
+    if (!container) return;
+
+    const today = new Date();
+    const sevenDaysFromNow = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000));
+
+    // Si recibimos ventas (Lógica Nueva) las filtramos por fecha de expiración
+    const sales = state.data.sales || [];
+    const expiring = sales.filter(s => new Date(s.exp) <= sevenDaysFromNow);
+
+    if (expiring.length > 0) {
+        container.innerHTML = `<h3 style="font-size:14px; color:#f43f5e; margin-bottom:10px;">ACCIONES REQUERIDAS (RENOVACIONES)</h3>` + 
+        expiring.map(s => `
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 mb-3" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); padding:10px; border-radius:10px;">
+                <div>
+                    <p class="text-xs font-bold text-white" style="font-size:12px; font-weight:bold;">${s.client}</p>
+                    <p class="text-[10px] text-red-400 font-black uppercase" style="font-size:10px; color:#f87171; font-weight:900;">${s.service} - VENCE: ${s.exp}</p>
+                </div>
+                <button onclick="app.notifyUser('${s.client}')" class="bg-red-500 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase" style="background:#f43f5e; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">NOTIFICAR</button>
+            </div>
+        `).join('');
+    } else {
+        container.innerHTML = '<div style="padding:10px; opacity:0.5; font-size:11px;">No hay renovaciones urgentes.</div>';
+    }
+}
 
 // --- GESTIÓN DE TICKETS Y SOPORTE ---
 
@@ -101,17 +131,6 @@ export const toggleUserBan = (userId) => {
     }
 };
 
-export function updateUserStatus(userId, newStatus) {
-    const user = state.data.users.find(u => u.id === userId);
-    if (user && user.role !== 'ADMIN') {
-        user.status = newStatus;
-        saveToDisk();
-        logActivity('WARN', `Usuario ${user.email} cambiado a ${newStatus}`);
-        if (window.app && window.app.router) window.app.router('admin');
-        if (window.app?.showToast) window.app.showToast(`Estado de ${user.name}: ${newStatus}`);
-    }
-}
-
 // --- GESTIÓN DE STOCK Y CATÁLOGO ---
 
 export const editProduct = (category, index) => {
@@ -135,8 +154,6 @@ export const toggleStock = (category, index) => {
     logActivity('INFO', `${item.name} ahora está ${item.status}`);
     if (window.app && window.app.router) window.app.router('admin'); 
 };
-
-export const toggleServiceStatus = (category, index) => toggleStock(category, index);
 
 export const addService = (category) => {
     const name = prompt(`Nombre del nuevo servicio para ${category.toUpperCase()}:`);
@@ -169,52 +186,41 @@ export const deleteService = (category, index) => {
     }
 };
 
-// --- NUEVA LÓGICA DE RENDERING Y KPIs ---
+// --- LÓGICA DE KPIs Y DASHBOARD (UNIFICADA) ---
 
-export function calculateKPIs(users) {
-    const totalUsers = users.length;
-    const expiringSoon = users.filter(u => u.daysLeft !== undefined && u.daysLeft <= 7).length;
-    // Cálculo de ingresos basado en ventas reales o estimación
-    const totalSales = (state.data.sales || []).reduce((acc, s) => acc + s.amount, 0);
-
-    if(document.getElementById('val-usuarios')) document.getElementById('val-usuarios').textContent = totalUsers;
-    if(document.getElementById('val-exp')) document.getElementById('val-exp').textContent = expiringSoon;
-    if(document.getElementById('val-ingresos')) document.getElementById('val-ingresos').textContent = `$${totalSales.toFixed(2)}`;
+export function calculateKPIs(data) {
+    const totalUsers = data.users.length;
+    const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0);
     
-    // Si usas los nuevos IDs del panel:
-    if(document.getElementById('kpi-usuarios')) document.getElementById('kpi-usuarios').textContent = totalUsers;
-    if(document.getElementById('kpi-expiraciones')) document.getElementById('kpi-expiraciones').textContent = expiringSoon;
-    if(document.getElementById('kpi-ingresos')) document.getElementById('kpi-ingresos').textContent = `$${totalSales.toFixed(2)}`;
+    // Filtro para expiraciones (7 días)
+    const today = new Date();
+    const sevenDaysFromNow = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000));
+    const expiringSoonCount = (data.sales || []).filter(s => new Date(s.exp) <= sevenDaysFromNow).length;
+
+    // Actualizar elementos (Compatibilidad con todos los IDs posibles)
+    const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).textContent = val; };
+    
+    setVal('val-usuarios', totalUsers);
+    setVal('total-users', totalUsers);
+    setVal('val-ingresos', `$${totalSales.toFixed(2)}`);
+    setVal('total-income', `$${totalSales.toFixed(2)}`);
+    setVal('val-exp', expiringSoonCount);
+    setVal('kpi-expiraciones', expiringSoonCount);
 }
 
-export function renderRenewalsPanel(users) {
-    const container = document.getElementById('vortex-renewals-list');
-    if (!container) return;
-
-    const critical = users.filter(u => u.status === 'Suspendido' || (u.daysLeft !== undefined && u.daysLeft <= 5));
-
-    if (critical.length > 0) {
-        container.innerHTML = `<h3 style="font-size:14px; color:#f43f5e; margin-bottom:10px;">ACCIONES REQUERIDAS</h3>` + 
-        critical.map(user => `
-            <div class="renewal-card" style="background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div class="renewal-info">
-                    <strong style="font-size:12px;">${user.email || user.name}</strong><br>
-                    <span style="font-size:10px; opacity:0.7;">${user.plan || 'Plan Standard'} - Vence: ${user.expiryDate || 'N/A'}</span>
-                </div>
-                <button class="btn-notify" onclick="app.notifyUser('${user.id}')" style="background:#f43f5e; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">NOTIFICAR</button>
-            </div>
-        `).join('');
-    } else {
-        container.innerHTML = '<div style="padding:10px; opacity:0.5; font-size:11px;">No hay renovaciones urgentes.</div>';
-    }
+// Inicialización del Panel (Lógica Nueva + Inicial)
+export function initAdminPanel(data) {
+    checkServerStatus();
+    calculateKPIs(data);
+    renderRenewalsPanel(data.sales);
 }
 
-export function notifyUser(userId) {
-    console.log("Enviando recordatorio al usuario:", userId);
+export function notifyUser(clientName) {
+    console.log("Notificando a cliente:", clientName);
     if (window.app?.showToast) {
-        window.app.showToast("Recordatorio enviado con éxito");
+        window.app.showToast(`Recordatorio enviado a ${clientName}`);
     } else {
-        alert("Recordatorio de pago enviado con éxito.");
+        alert(`Recordatorio de pago enviado con éxito a ${clientName}.`);
     }
 }
 
@@ -227,26 +233,26 @@ export function renderAdmin(container) {
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h2 style="color:var(--primary); font-family:Orbitron;">DASHBOARD VORTEX</h2>
                 <div style="font-size:10px; background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:20px; border:1px solid rgba(0,242,255,0.2);">
-                    SERVER: <span id="val-server" style="font-weight:bold;">COMPROBANDO...</span>
+                    SERVER: <span id="val-server" class="status-online" style="font-weight:bold;">COMPROBANDO...</span>
                 </div>
             </div>
             
             <div style="display:flex; gap:15px; margin:20px 0;">
                 <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
-                    <small>VENTAS TOTALES</small>
-                    <div id="val-ingresos" style="font-size:20px; color:#4ade80;">$0.00</div>
+                    <small>INGRESOS TOTALES</small>
+                    <div id="total-income" style="font-size:20px; color:#4ade80; font-weight:bold;">$0.00</div>
                 </div>
                 <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
                     <small>USUARIOS</small>
-                    <div id="val-usuarios" style="font-size:20px;">0</div>
+                    <div id="total-users" style="font-size:20px; font-weight:bold;">0</div>
                 </div>
                 <div class="stat-box" style="background:rgba(0,242,255,0.1); padding:15px; border-radius:12px; flex:1; border:1px solid var(--primary);">
-                    <small>EXPIRACIONES</small>
-                    <div id="val-exp" style="font-size:20px; color:var(--primary);">0</div>
+                    <small>VENCIMIENTOS</small>
+                    <div id="val-exp" style="font-size:20px; color:var(--primary); font-weight:bold;">0</div>
                 </div>
             </div>
 
-            <h3 style="margin-top:20px; font-size:14px; color:#00f2ff;">MONITOR DE SISTEMA</h3>
+            <h3 style="margin-top:20px; font-size:14px; color:#00f2ff;">MONITOR DE ACTIVIDAD</h3>
             <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; font-family:monospace; font-size:11px; margin-bottom:20px; border-left:3px solid #00f2ff;">
                 ${(data.logs || []).length > 0 ? data.logs.map(l => `
                     <div style="margin-bottom:4px;">
@@ -341,13 +347,5 @@ export function renderAdmin(container) {
     `;
 
     // INYECCIÓN DE LA LÓGICA DE MONITOREO Y KPIs AL CARGAR
-    checkServerStatus();
-    calculateKPIs(data.users);
-    renderRenewalsPanel(data.users);
-}
-
-// Alias para mantener compatibilidad si se llama con el nombre antiguo
-export function updateAdminDashboard(users) {
-    calculateKPIs(users);
-    renderRenewalsPanel(users);
+    initAdminPanel(data);
 }

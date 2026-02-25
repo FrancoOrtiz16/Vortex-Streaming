@@ -100,6 +100,12 @@
         /* Logo Vortex Global */
         .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: white; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-size: 0.8rem; margin-left: 2px; }
+
+        /* --- ESTILOS LÓGICA NUEVA (KPIs y Renovaciones) --- */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .status-online { color: #10b981; }
+        .status-offline { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -216,22 +222,25 @@
     <main id="app-content" class="main-viewport">
         <section id="admin-vortex-root">
             <div id="vortex-admin-panel" class="admin-wrapper">
-                <div class="command-center-grid">
-                    <div class="kpi-card" style="border-left: 4px solid #00ffcc;">
-                        <span class="kpi-label">INGRESOS TOTALES</span>
-                        <span id="kpi-ingresos" class="kpi-value">$0.00</span>
+                <div class="kpi-grid">
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-emerald-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #10b981;">
+                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Ingresos Totales</p>
+                        <p id="total-income" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">$0.00</p>
+                        <span id="kpi-ingresos" style="display:none;"></span>
                     </div>
-                    <div class="kpi-card" style="border-left: 4px solid #00d9ff;">
-                        <span class="kpi-label">USUARIOS ACTIVOS</span>
-                        <span id="kpi-usuarios" class="kpi-value">0</span>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-cyan-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #06b6d4;">
+                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Usuarios</p>
+                        <p id="total-users" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">0</p>
+                        <span id="kpi-usuarios" style="display:none;"></span>
                     </div>
-                    <div class="kpi-card" style="border-left: 4px solid #ff4d4d;">
-                        <span class="kpi-label">EXPIRACIONES (7D)</span>
-                        <span id="kpi-expiraciones" class="kpi-value">0</span>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-red-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #ef4444;">
+                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Expiraciones (7D)</p>
+                        <p id="kpi-expiraciones" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">0</p>
                     </div>
-                    <div class="kpi-card" style="border-left: 4px solid #3f4451;">
-                        <span class="kpi-label">STATUS SERVIDOR</span>
-                        <span id="val-server" class="kpi-value status-checking">CHECKING...</span>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-white/20" style="padding: 20px; border-radius: 20px; border-left: 4px solid rgba(255,255,255,0.2);">
+                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Status Servidor</p>
+                        <p id="server-status-val" style="font-size: 1.5rem; font-weight: 900; margin: 5px 0;">CHECKING...</p>
+                        <span id="val-server" style="display:none;"></span>
                     </div>
                 </div>
 
@@ -256,8 +265,9 @@
 
                     <div class="renewals-panel">
                         <h3>PANEL DE RENOVACIONES</h3>
-                        <div id="vortex-renewals-list" class="renewals-scroll">
+                        <div id="renovations-list" class="renewals-scroll">
                         </div>
+                        <div id="vortex-renewals-list" style="display:none;"></div>
                     </div>
                 </div>
             </div>

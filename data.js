@@ -10,14 +10,21 @@ export const state = {
     view: 'login',
     currentUser: null,
     isRegisterMode: false, // Control de interfaz para Auth
+    // Lógica Nueva: Metadatos del sistema
+    adminStats: {
+        income: 9.50,
+        serverStatus: "ONLINE"
+    },
     data: (function() {
         const defaultData = {
             users: [
                 { id: 1, name: "Admin Principal", email: "admin", pass: "admin", role: "ADMIN", status: "Activo" },
                 { id: 2, name: "Juan Perez", email: "juan@mail.com", pass: "123", role: "USER", status: "Activo" }
             ],
+            // Lógica Nueva: Ventas actualizadas con fechas de expiración (exp)
             sales: [
-                { id: 101, client: "Admin Principal", service: "NETFLIX 4K", amount: 5.50, date: "2026-02-12", type: "streaming" }
+                { id: 501, client: "Juan Perez", service: "Netflix 4K", amount: 5.50, date: "2026-02-12", exp: "2024-03-08", type: "streaming" },
+                { id: 502, client: "Carlos Ruiz", service: "Disney+", amount: 4.00, date: "2026-02-12", exp: "2024-02-12", type: "streaming" }
             ],
             logs: [], // Lógica Nueva: Para el monitor en tiempo real y auditoría
             catalog: {
@@ -51,6 +58,14 @@ export const state = {
             if (!parsed.logs) parsed.logs = []; // Garantiza que el monitor tenga donde escribir
             if (!parsed.tickets) parsed.tickets = []; // <--- Lógica Nueva: Garantiza que el almacén de reportes exista tras la carga
             
+            // Lógica Nueva: Asegurar que las ventas existentes tengan el campo exp si se cargan de disco
+            if (parsed.sales) {
+                parsed.sales = parsed.sales.map((sale, index) => ({
+                    ...sale,
+                    exp: sale.exp || (index % 2 === 0 ? "2024-03-08" : "2024-02-12")
+                }));
+            }
+
             return parsed;
         } catch (e) {
             console.error("Vortex Data Error: Fallo en parsing, restaurando valores de fábrica.");
@@ -64,6 +79,10 @@ export const state = {
         gaming: ["Free Fire", "Roblox", "Valorant", "Mobile Legends", "Genshin Impact"]
     }
 };
+
+// Lógica Nueva: Alias para compatibilidad con cálculos externos de ventas
+export const salesData = state.data.sales;
+export const adminStats = state.adminStats;
 
 /**
  * Lógica Nueva: Persistencia en disco local.
