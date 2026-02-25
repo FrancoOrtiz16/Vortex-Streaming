@@ -6,12 +6,15 @@
     
     <title>Vortex Streaming | Plataforma Elite</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="stylesheet" href="style.css?v=3.0">
     
     <style>
         /* --- ESTILOS CRÍTICOS (Lógica Inicial) --- */
         :root { --primary: #00f2ff; --border: rgba(255, 255, 255, 0.1); }
+        body { background-color: #05060b; color: white; }
         .auth-overlay {
             position: fixed; inset: 0; background: rgba(10, 11, 14, 0.98);
             backdrop-filter: blur(20px); display: flex; justify-content: center;
@@ -50,7 +53,6 @@
         }
         #side-menu-vortex.active { right: 0; box-shadow: -20px 0 50px rgba(0,0,0,0.8); }
         
-        /* BLOQUE COMÚN: BOTONES DE MENÚ */
         .menu-item-btn {
             width: 100%; display: flex; align-items: center; gap: 15px; background: none;
             border: none; color: white; padding: 15px; border-radius: 12px; cursor: pointer;
@@ -59,7 +61,6 @@
         .menu-item-btn:hover { background: rgba(0,242,255,0.1); color: var(--primary); }
 
         /* ESTILOS: CREDENTIAL CARD */
-        .user-credential-section { margin-bottom: 5px; }
         .credential-card { margin-top: 5px; padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; }
         
         /* INTEGRACIÓN: ESTILOS HISTORIAL */
@@ -73,15 +74,11 @@
             text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border);
             padding-bottom: 5px;
         }
-        .empty-log { color: #475569; font-style: italic; text-align: center; padding: 10px 0; }
 
         /* UTILIDADES */
-        .card-inner .field { margin-bottom: 12px; }
         .card-inner label { display: block; font-size: 10px; color: var(--primary); letter-spacing: 1px; margin-bottom: 4px; }
         .card-inner span { font-family: 'monospace'; font-size: 14px; color: #fff; }
         .pass-wrapper { display: flex; justify-content: space-between; align-items: center; }
-        .view-btn { background: none; border: none; cursor: pointer; filter: grayscale(1); transition: 0.3s; }
-        .view-btn:hover { filter: grayscale(0); transform: scale(1.2); }
         .hidden { display: none !important; }
 
         .menu-items-vertical a, .menu-items-vertical button.nav-link-btn {
@@ -92,20 +89,16 @@
         }
         .menu-items-vertical a:hover, .menu-items-vertical button.nav-link-btn:hover { background: rgba(0,242,255,0.1); color: var(--primary); }
         .menu-divider { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
-        .logout-link { color: #ff4d4d !important; }
 
         .menu-hamburguer { background: none; border: none; cursor: pointer; display: grid; gap: 5px; }
         .bar { width: 25px; height: 2px; background: var(--primary); transition: 0.3s; }
         
-        /* Logo Vortex Global */
         .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: white; letter-spacing: 2px; }
         .logo span { color: var(--primary); font-size: 0.8rem; margin-left: 2px; }
 
-        /* --- ESTILOS LÓGICA NUEVA (KPIs y Renovaciones) --- */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        /* --- ESTILOS LÓGICA NUEVA (Sincronizados) --- */
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
-        .status-online { color: #10b981; }
-        .status-offline { color: #ef4444; }
+        .admin-wrapper { padding: 40px 5%; }
     </style>
 </head>
 <body>
@@ -116,24 +109,15 @@
             <div class="logo" style="text-align: center; margin-bottom: 30px; font-size: 1.5rem; letter-spacing: 2px;">
                 VORTEX<span style="color:var(--primary); font-size: 0.9rem;">STREAMING</span>
             </div>
-            
             <h2 id="auth-title" style="text-align: center; margin-bottom: 25px; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 1.2rem;">Acceso al Sistema</h2>
-            
             <div id="auth-msg" style="color: #ff4d4d; font-size: 0.75rem; text-align: center; margin-bottom: 15px; min-height: 1em; font-weight: 600;"></div>
-            
             <div style="display: grid; gap: 15px;" class="vortex-input-group">
-                <input type="text" id="auth-email" placeholder="Correo Electrónico" 
-                       style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;"> 
-                
-                <input type="password" id="auth-pass" placeholder="Contraseña" 
-                       style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;">
+                <input type="text" id="auth-email" placeholder="Correo Electrónico" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;"> 
+                <input type="password" id="auth-pass" placeholder="Contraseña" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;">
             </div>
-
-            <button id="btn-main-auth" class="btn-neon-pulse" onclick="app.handleAuth(event)" 
-                    style="width:100%; margin-top: 25px; height: 50px; text-transform: uppercase; letter-spacing: 2px;">
+            <button id="btn-main-auth" class="btn-neon-pulse" onclick="app.handleAuth(event)" style="width:100%; margin-top: 25px; height: 50px; text-transform: uppercase; letter-spacing: 2px;">
                 <span>Entrar</span>
             </button>
-            
             <p id="auth-switch" style="text-align: center; font-size: 0.8rem; margin-top: 20px; color: #888;">
                 ¿No tienes Cuenta? <a href="#" onclick="app.toggleAuthMode()" style="color: var(--primary); text-decoration: none; font-weight: 700;">Regístrate aquí</a>
             </p>
@@ -150,9 +134,7 @@
                 <button class="icon-btn search-trigger" onclick="toggleSearchField()" style="background: none; border: none; cursor: pointer; color: var(--primary); font-size: 1.2rem;"> 🔍 </button>
             </div>
             <button class="menu-hamburguer" onclick="toggleModernMenu()">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
             </button>
         </div>
 
@@ -163,57 +145,32 @@
                     <span class="user-role-tag" id="user-role-display" style="color: var(--primary); font-size: 0.8rem;">USUARIO</span>
                 </div>
                 <hr class="menu-divider" />
-                
                 <nav class="menu-items-vertical">
-                    <div class="user-credential-section">
-                        <button class="menu-item-btn" onclick="toggleUserCard()">
-                            <span class="emoji">👤</span> Mi Usuario
-                        </button>
-                        <div id="user-info-card" class="credential-card hidden">
-                            <div class="card-inner">
-                                <div class="field">
-                                    <label>USUARIO</label>
-                                    <span id="val-user">Cargando...</span>
-                                </div>
-                                <div class="field">
-                                    <label>CONTRASEÑA</label>
-                                    <div class="pass-wrapper">
-                                        <span id="val-pass">••••••••</span>
-                                        <button class="view-btn" onclick="revealPass()">👁️</button>
-                                    </div>
-                                </div>
+                    <button class="menu-item-btn" onclick="toggleUserCard()">
+                        <span class="emoji">👤</span> Mi Usuario
+                    </button>
+                    <div id="user-info-card" class="credential-card hidden">
+                        <div class="card-inner">
+                            <div class="field"><label>USUARIO</label><span id="val-user">Cargando...</span></div>
+                            <div class="field"><label>CONTRASEÑA</label>
+                                <div class="pass-wrapper"><span id="val-pass">••••••••</span><button class="view-btn" onclick="revealPass()">👁️</button></div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="user-history-section">
-                        <button class="menu-item-btn" onclick="app.toggleHistory()">
-                            <span class="emoji">📜</span> Historial de Compras
-                        </button>
-                        <div id="user-history-list" class="history-panel hidden">
-                            <div class="history-header">
-                                <span>Servicio / Recarga</span>
-                                <span>Precio</span>
-                            </div>
-                            <div id="history-items-container">
-                                <p class="empty-log">Aún no has realizado compras.</p>
-                            </div>
-                        </div>
+                    <button class="menu-item-btn" onclick="app.toggleHistory()">
+                        <span class="emoji">📜</span> Historial de Compras
+                    </button>
+                    <div id="user-history-list" class="history-panel hidden">
+                        <div class="history-header"><span>Servicio</span><span>Precio</span></div>
+                        <div id="history-items-container"><p class="empty-log">Aún no has realizado compras.</p></div>
                     </div>
-
                     <a href="#" onclick="app.router('streaming')"><span class="emoji">📺</span> Servicios Streaming</a> 
                     <a href="#" onclick="app.router('gaming')"><span class="emoji">🎮</span> Recargas Gaming</a> 
-                    
-                    <button class="nav-link-btn" onclick="app.router('admin')">
-                        <span class="emoji">🛠️</span> PANEL CONTROL
-                    </button>
-
-                    <a href="#" id="admin-link-el" style="display: none; color: var(--primary);" onclick="app.router('admin')"><span class="emoji">🔐</span> Panel de Control</a>
+                    <button class="nav-link-btn" onclick="app.router('admin')"><span class="emoji">🛠️</span> PANEL CONTROL</button>
                 </nav>
-
                 <div class="footer-menu">
                     <hr class="menu-divider" />
-                    <a href="#" onclick="location.reload()" class="logout-link"><span class="emoji">🚪</span> Cerrar Sesión</a>
+                    <a href="#" onclick="location.reload()" class="logout-link" style="color: #ff4d4d; text-decoration: none;"><span class="emoji">🚪</span> Cerrar Sesión</a>
                 </div>
             </div>
         </aside>
@@ -221,53 +178,61 @@
 
     <main id="app-content" class="main-viewport">
         <section id="admin-vortex-root">
-            <div id="vortex-admin-panel" class="admin-wrapper">
-                <div class="kpi-grid">
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-emerald-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #10b981;">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Ingresos Totales</p>
-                        <p id="total-income" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">$0.00</p>
-                        <span id="kpi-ingresos" style="display:none;"></span>
+            <div id="vortex-admin-panel" class="admin-wrapper animate__animated animate__fadeIn space-y-10">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-3xl font-black uppercase italic tracking-tighter text-white">ENTERPRISE COMMAND CENTER</h2>
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel('users')" class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-cyan-500/20 text-white transition">Exp. Usuarios</button>
+                        <button onclick="exportToExcel('sales')" class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-cyan-500/20 text-white transition">Exp. Ventas</button>
                     </div>
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-cyan-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #06b6d4;">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Usuarios</p>
-                        <p id="total-users" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">0</p>
-                        <span id="kpi-usuarios" style="display:none;"></span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-emerald-500 shadow-lg shadow-emerald-500/10">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ingresos Totales</p>
+                        <p id="total-income" class="text-3xl font-black text-white">$0.00</p>
                     </div>
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-red-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #ef4444;">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Expiraciones (7D)</p>
-                        <p id="kpi-expiraciones" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">0</p>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-cyan-500 shadow-lg shadow-cyan-500/10">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Usuarios</p>
+                        <p id="total-users" class="text-3xl font-black text-white">0</p>
                     </div>
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-white/20" style="padding: 20px; border-radius: 20px; border-left: 4px solid rgba(255,255,255,0.2);">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Status Servidor</p>
-                        <p id="server-status-val" style="font-size: 1.5rem; font-weight: 900; margin: 5px 0;">CHECKING...</p>
-                        <span id="val-server" style="display:none;"></span>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-red-500 shadow-lg shadow-red-500/10">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Expiraciones 7d</p>
+                        <p id="kpi-expiraciones" class="text-3xl font-black text-red-500">0</p>
+                    </div>
+                    <div id="server-status-card" class="glass-card p-6 rounded-3xl border-l-4 border-white/20 transition-all">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Status Servidor</p>
+                        <p id="server-status-val" class="text-3xl font-black">CHECKING...</p>
                     </div>
                 </div>
 
-                <div class="admin-content-layout">
-                    <div class="main-management">
-                        <h3>GESTIÓN DE USUARIOS DETALLADA</h3>
-                        <div class="table-responsive">
-                            <table class="vortex-table">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-card rounded-[2.5rem] p-8">
+                        <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest flex items-center gap-2">
+                            <span class="w-2 h-2 bg-cyan-500 rounded-full shadow-[0_0_8px_#22d3ee]"></span> Gestión de Usuarios
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-[11px]">
                                 <thead>
-                                    <tr>
-                                        <th>Info</th>
-                                        <th>Pass</th>
-                                        <th>Estado</th>
-                                        <th>Acción</th>
+                                    <tr class="text-slate-500 border-b border-white/5 uppercase tracking-tighter font-black">
+                                        <th class="pb-4">Info</th>
+                                        <th class="pb-4">Pass</th>
+                                        <th class="pb-4 text-center">Estado</th>
+                                        <th class="pb-2 text-right">Acción</th>
                                     </tr>
                                 </thead>
-                                <tbody id="vortex-user-table-body">
-                                </tbody>
+                                <tbody id="vortex-user-table-body" class="divide-y divide-white/5">
+                                    </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <div class="renewals-panel">
-                        <h3>PANEL DE RENOVACIONES</h3>
-                        <div id="renovations-list" class="renewals-scroll">
-                        </div>
-                        <div id="vortex-renewals-list" style="display:none;"></div>
+                    <div class="glass-card rounded-[2.5rem] p-8">
+                        <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest flex items-center gap-2">
+                            <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_#ef4444]"></span> Panel de Renovaciones
+                        </h3>
+                        <div id="renovations-list" class="space-y-4">
+                            </div>
                     </div>
                 </div>
             </div>
@@ -284,11 +249,9 @@
                 container.querySelector('input').focus();
             }
         }
-
         function toggleModernMenu() {
             document.getElementById('side-menu-vortex').classList.toggle('active');
         }
-
         function toggleUserCard() {
             const card = document.getElementById('user-info-card');
             card.classList.toggle('hidden');
@@ -296,15 +259,12 @@
                 document.getElementById('val-user').textContent = app.state.currentUser?.email || 'Invitado';
             }
         }
-
         function revealPass() {
             const passEl = document.getElementById('val-pass');
             const realPass = app.state.currentUser?.pass || '****';
             passEl.textContent = (passEl.textContent === '••••••••') ? realPass : '••••••••';
         }
     </script>
-    
     <script type="module" src="app.js?v=5.0"></script>
-
 </body>
 </html>

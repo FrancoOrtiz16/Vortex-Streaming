@@ -30,6 +30,24 @@ Object.assign(app, {
     // --- Funciones Administrativas (Lógica Nueva Integrada) ---
     ...admin,
 
+    // [LÓGICA NUEVA: HEARTBEAT INTEGRADA]
+    checkHeartbeat: async function() {
+        const statusVal = document.getElementById('server-status-val');
+        try {
+            // Ping silencioso al servidor de streaming
+            await fetch('https://vortex-streaming-psi.vercel.app', { method: 'HEAD', mode: 'no-cors' });
+            if (statusVal) {
+                statusVal.innerText = 'ONLINE';
+                statusVal.style.color = '#10b981';
+            }
+        } catch (e) {
+            if (statusVal) {
+                statusVal.innerText = 'OFFLINE';
+                statusVal.style.color = '#ef4444';
+            }
+        }
+    },
+
     // --- Lógica de Compras y Notificaciones (Infraestructura Inicial) ---
     registrarCompra(nombreProducto, precio, tipo) {
         const activeUser = this.state.currentUser;
@@ -203,6 +221,13 @@ Object.assign(app, {
         } else {
             this.router(this.state.view || 'market');
             this.updateHeaderUI(this.state.currentUser);
+        }
+
+        // [LÓGICA NUEVA: INICIO DEL MONITOREO DEL SERVIDOR]
+        if (this.state.currentUser?.role === 'ADMIN') {
+            this.checkHeartbeat();
+            if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = setInterval(() => this.checkHeartbeat(), 30000);
         }
 
         // 4. Listeners globales para UX
