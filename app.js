@@ -37,6 +37,25 @@ Object.assign(app, {
     // --- Funciones Administrativas (Lógica Nueva Integrada) ---
     ...admin,
 
+    // [LÓGICA NUEVA: MÉTODOS DE ELIMINACIÓN]
+    deleteUser: function(id) {
+        // Filtramos los usuarios en el estado global
+        this.state.data.users = this.state.data.users.filter(u => u.id !== id);
+        this.saveToDisk();
+        // Si estamos en la vista admin, refrescamos para ver los cambios
+        if (this.state.currentRoute === 'admin') this.renderAdmin();
+        this.showToast("Usuario eliminado correctamente");
+    },
+
+    deleteProduct: function(id) {
+        // Lógica para filtrar el array de servicios/productos
+        this.state.data.services = this.state.data.services.filter(p => p.id !== id);
+        this.saveToDisk();
+        // Refrescar vista si es necesario
+        if (this.state.currentRoute === 'admin') this.renderAdmin();
+        this.showToast("Producto eliminado correctamente");
+    },
+
     // [LÓGICA NUEVA: HEARTBEAT INTEGRADA]
     checkHeartbeat: async function() {
         const statusVal = document.getElementById('server-status-val');

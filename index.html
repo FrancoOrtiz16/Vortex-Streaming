@@ -28,11 +28,13 @@
 
         /* --- ESTILOS NAVEGACIÓN MODERNA --- */
         .vortex-nav-modern {
-            position: sticky; top: 0; z-index: 1000; background: rgba(5, 6, 11, 0.9);
-            backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
-            padding: 10px 5%; display: flex; justify-content: space-between; align-items: center;
+            position: fixed; top: 0; width: 100%; z-index: 50; 
+            background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(20px); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+            padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+            box-sizing: border-box;
         }
-        .nav-right-group { display: flex; align-items: center; gap: 20px; }
+        .nav-right-group { display: flex; align-items: center; gap: 16px; }
         
         .vortex-search-wrapper { display: flex; align-items: center; gap: 10px; }
         .search-field-hidden { width: 0; opacity: 0; overflow: hidden; transition: 0.4s ease; }
@@ -90,12 +92,6 @@
         .menu-divider { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
         .logout-link { color: #ff4d4d !important; }
 
-        .menu-hamburguer { background: none; border: none; cursor: pointer; display: grid; gap: 5px; }
-        .bar { width: 25px; height: 2px; background: var(--primary); transition: 0.3s; }
-        
-        .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: white; letter-spacing: 2px; }
-        .logo span { color: var(--primary); font-size: 0.8rem; margin-left: 2px; }
-
         /* --- ESTILOS LÓGICA NUEVA --- */
         .logout-btn-new {
             padding: 8px; background: transparent; border-radius: 8px; transition: all 0.3s;
@@ -105,13 +101,18 @@
         .logout-btn-new span { transition: transform 0.3s; display: inline-block; font-size: 1.2rem; }
         .logout-btn-new:hover span { transform: scale(1.1); }
         
-        /* Estilos del botón de Toggle Admin */
         .admin-toggle-btn {
-            background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 10px;
+            background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 12px;
             text-transform: uppercase; font-size: 10px; font-weight: 900; color: white;
-            border: 1px solid var(--border); cursor: pointer; transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s;
         }
-        .admin-toggle-btn:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--primary); }
+        .admin-toggle-btn:hover { background: rgba(6, 182, 212, 0.2); border-color: #22d3ee; }
+
+        .hamburguer-btn {
+            padding: 8px; border-radius: 8px; transition: 0.3s; background: none; border: none; cursor: pointer;
+        }
+        .hamburguer-btn:hover { background: rgba(255,255,255,0.1); }
+        .bar-new { width: 24px; height: 2px; background: #22d3ee; margin: 4px 0; transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -147,14 +148,14 @@
     </div>
 
     <nav class="vortex-nav-modern">
-        <div class="logo" onclick="app.router('market')" style="cursor: pointer;">VORTEX<span>STREAMING</span></div>
+        <span style="font-size: 1.5rem; font-weight: 900; font-style: italic; letter-spacing: -0.05em; color: white; cursor: pointer;" onclick="app.router('market')">
+            STREAM<span style="color: #22d3ee;">HUB</span>
+        </span>
         
         <div class="nav-right-group">
             <button id="admin-view-toggle" class="admin-toggle-btn" style="display: none;" onclick="app.toggleAdminView()">
                 Ver Panel Admin
             </button>
-
-            <span id="nav-user-name" style="text-transform: uppercase; font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 1px;" class="hidden-mobile"></span>
 
             <div class="vortex-search-wrapper">
                 <div id="search-input-container" class="search-field-hidden">
@@ -167,10 +168,12 @@
                 <span>🚪</span>
             </button>
 
-            <button class="menu-hamburguer" onclick="toggleModernMenu()">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
+            <button class="hamburguer-btn" onclick="toggleModernMenu()">
+                <div class="space-y-1">
+                    <div class="bar-new"></div>
+                    <div class="bar-new"></div>
+                    <div class="bar-new"></div>
+                </div>
             </button>
         </div>
 
@@ -247,25 +250,19 @@
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
-                
-                // Actualizar nombre en nav
                 const navName = document.getElementById('nav-user-name');
                 if(navName) navName.textContent = user.name || user.email.split('@')[0];
 
-                // Mostrar botón de admin si el rol es correcto
                 const adminBtn = document.getElementById('admin-view-toggle');
                 if(adminBtn && user.role === 'ADMIN') {
                     adminBtn.style.display = 'block';
                 }
-
-                // Ocultar auth screen
                 document.getElementById('auth-screen').classList.add('hidden');
             }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             updateUIFromSession();
-            // Observador para cuando la app cambie de vista
             if(window.app) {
                 const originalRouter = app.router;
                 app.router = function(route) {
@@ -281,7 +278,6 @@
             }
         });
 
-        // --- FUNCIONES DE UI ORIGINALES ---
         function toggleSearchField() {
             const container = document.getElementById('search-input-container');
             container.classList.toggle('search-field-visible');

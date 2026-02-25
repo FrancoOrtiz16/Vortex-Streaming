@@ -131,6 +131,21 @@ export const toggleUserBan = (userId) => {
     }
 };
 
+// NUEVA FUNCIÓN DE ELIMINACIÓN
+export const deleteUser = (userId) => {
+    if (confirm("¿Estás seguro de que deseas eliminar permanentemente a este usuario?")) {
+        const userIndex = state.data.users.findIndex(u => u.id === userId);
+        if (userIndex !== -1) {
+            const userEmail = state.data.users[userIndex].email;
+            state.data.users.splice(userIndex, 1);
+            saveToDisk();
+            logActivity('WARN', `Usuario eliminado: ${userEmail}`);
+            if (window.app && window.app.router) window.app.router('admin');
+            if (window.app?.showToast) window.app.showToast("Usuario eliminado correctamente");
+        }
+    }
+};
+
 // --- GESTIÓN DE STOCK Y CATÁLOGO ---
 export const editProduct = (category, index) => {
     const item = state.data.catalog[category][index];
@@ -312,12 +327,16 @@ export function renderAdmin(container) {
                         <tr style="border-top:1px solid rgba(255,255,255,0.05);">
                             <td style="padding:10px;">${u.email}</td>
                             <td style="padding:10px;"><span style="color:${u.status === 'Activo' ? '#4ade80' : '#ff4d4d'}">${u.status}</span></td>
-                            <td style="padding:10px;">
+                            <td style="padding:10px; display:flex; gap:5px;">
                                 <button onclick="app.changeUserPass(${u.id})" style="background:#555; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">LLAVE</button>
                                 ${u.role !== 'ADMIN' ? `
                                     <button onclick="app.toggleUserBan(${u.id})" 
                                             style="background:${u.status === 'Activo' ? '#ff4d4d' : '#4ade80'}; color:black; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">
                                         ${u.status === 'Activo' ? 'BAN' : 'ALTA'}
+                                    </button>
+                                    <button onclick="app.deleteUser(${u.id})" 
+                                            style="background:rgba(244,63,94,0.1); color:#f43f5e; border:1px solid rgba(244,63,94,0.3); padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">
+                                        🗑️
                                     </button>
                                 ` : ''}
                             </td>

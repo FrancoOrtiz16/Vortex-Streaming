@@ -26,17 +26,17 @@ export const enterSystem = () => {
 };
 
 /**
- * Lógica Nueva: Componente de Bienvenida (Adaptado para Inserción en DOM)
+ * Lógica Nueva: Componente de Bienvenida con Animación (Adaptado para Inserción en DOM)
  */
 const renderWelcomeMessage = (name) => `
-    <div class="mb-8 animate__animated animate__fadeInDown">
+    <div class="mb-8 animate__animated animate__fadeInDown" style="margin-bottom: 32px;">
         <div style="display: flex; align-items: center; gap: 12px;">
             <div style="height: 40px; width: 4px; background: #06b6d4; box-shadow: 0 0 15px #22d3ee;"></div>
             <div>
                 <h1 style="color: white; font-weight: 900; font-style: italic; letter-spacing: -0.05em; font-size: 30px; text-transform: uppercase; margin: 0; line-height: 1;">
                     BIENVENIDO, ${name}
                 </h1>
-                <p class="animate__animated animate__fadeIn animate__delay-1s" style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5em; margin: 4px 0 0 0;">
+                <p style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5em; margin: 4px 0 0 0;">
                     Sistema de Control Operativo Activo
                 </p>
             </div>
