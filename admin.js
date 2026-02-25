@@ -4,24 +4,20 @@
 
 import { state, saveToDisk } from './data.js';
 
-// --- NUEVA LÓGICA: SISTEMA DE MONITOREO DE SALUD (HEARTBEAT) ---
-const STREAM_SERVER_URL = "URL_DE_TU_SERVIDOR_DE_STREAMING"; // Reemplaza con tu IP o dominio
+// --- CONFIGURACIÓN Y HEARTBEAT ---
+const STREAM_SERVER_URL = "URL_DE_TU_SERVIDOR_DE_STREAMING"; 
 
 export async function checkServerStatus() {
     const statusElement = document.getElementById('val-server');
     if (!statusElement) return;
 
     try {
-        // Hacemos una petición rápida (HEAD) para no consumir ancho de banda
-        const response = await fetch(STREAM_SERVER_URL, { method: 'HEAD', mode: 'no-cors' });
-        
-        // Si llegamos aquí, el servidor está arriba
+        await fetch(STREAM_SERVER_URL, { method: 'HEAD', mode: 'no-cors' });
         statusElement.textContent = "ONLINE";
         statusElement.style.color = "#00ffcc";
         statusElement.classList.add('status-online');
         statusElement.classList.remove('status-offline');
     } catch (error) {
-        // Si hay error de conexión
         statusElement.textContent = "OFFLINE";
         statusElement.style.color = "#ff4d4d";
         statusElement.classList.add('status-offline');
@@ -30,37 +26,32 @@ export async function checkServerStatus() {
     }
 }
 
-// Iniciar el monitoreo cada 30 segundos
 setInterval(checkServerStatus, 30000);
 
 /**
- * Registro de logs (Conexiones, fallos, ventas)
- * Mantiene un límite de 15 entradas para optimizar el almacenamiento.
+ * Registro de logs
  */
 export const logActivity = (type, message) => {
     if (!state.data.logs) state.data.logs = [];
     const newLog = {
         time: new Date().toLocaleTimeString(),
-        type: type, // 'SALE', 'WARN', 'INFO'
+        type: type, 
         msg: message
     };
-    state.data.logs.unshift(newLog); // El más nuevo arriba
+    state.data.logs.unshift(newLog);
     if (state.data.logs.length > 15) state.data.logs.pop(); 
     saveToDisk();
 };
 
-// --- GESTIÓN DE TICKETS Y SOPORTE (Lógica Nueva Integrada) ---
+// --- GESTIÓN DE TICKETS Y SOPORTE ---
 
-/**
- * Para el Usuario: Crear un nuevo reporte de soporte
- */
 export const createTicket = (subject, message) => {
     const newTicket = {
         id: Date.now(),
         user: state.currentUser.email,
         subject: subject,
         message: message,
-        status: 'Abierto', // Abierto, Respondido, Cerrado
+        status: 'Abierto',
         reply: '',
         date: new Date().toLocaleDateString()
     };
@@ -68,35 +59,23 @@ export const createTicket = (subject, message) => {
     state.data.tickets.unshift(newTicket);
     saveToDisk();
     logActivity('INFO', `Nuevo ticket de ${state.currentUser.email}`);
-    if (window.app && window.app.router) window.app.router('support'); // Refresca vista de soporte
+    if (window.app && window.app.router) window.app.router('support');
 };
 
-/**
- * Para el Admin: Respuesta rápida a un ticket (Lógica Nueva Optimizada)
- */
 export const quickReply = (ticketId, replyText) => {
     const ticket = state.data.tickets.find(t => t.id === ticketId);
     if (ticket) {
         ticket.reply = replyText;
         ticket.status = 'Respondido';
         saveToDisk();
-        
-        // Integración de log con la infraestructura inicial
-        logActivity('INFO', `Ticket #${ticketId} respondido`);
-        
-        if (window.app && window.app.router) {
-            window.app.router('admin'); // Refresca para ver que el ticket se fue/actualizó
-        }
-        
+        logActivity('INFO', `Ticket #${ticketId} responded`);
+        if (window.app && window.app.router) window.app.router('admin');
         if (window.app?.showToast) window.app.showToast("Respuesta enviada con éxito");
     }
 };
 
-// --- GESTIÓN DE USUARIOS (Lógica Nueva Integrada) ---
+// --- GESTIÓN DE USUARIOS ---
 
-/**
- * Modifica la contraseña de un usuario desde el panel
- */
 export const changeUserPass = (userId) => {
     const user = state.data.users.find(u => u.id === userId);
     if (user) {
@@ -111,9 +90,6 @@ export const changeUserPass = (userId) => {
     }
 };
 
-/**
- * Alterna el baneo de un usuario
- */
 export const toggleUserBan = (userId) => {
     const user = state.data.users.find(u => u.id === userId);
     if (user && user.role !== 'ADMIN') {
@@ -125,9 +101,6 @@ export const toggleUserBan = (userId) => {
     }
 };
 
-/**
- * Función heredada para compatibilidad de estados específicos
- */
 export function updateUserStatus(userId, newStatus) {
     const user = state.data.users.find(u => u.id === userId);
     if (user && user.role !== 'ADMIN') {
@@ -139,11 +112,8 @@ export function updateUserStatus(userId, newStatus) {
     }
 }
 
-// --- GESTIÓN DE STOCK Y CATÁLOGO (Lógica Nueva Integrada) ---
+// --- GESTIÓN DE STOCK Y CATÁLOGO ---
 
-/**
- * Editor de precio e imagen: Permite actualizar metadatos del producto
- */
 export const editProduct = (category, index) => {
     const item = state.data.catalog[category][index];
     const newPrice = prompt(`Nuevo precio para ${item.name}:`, item.price);
@@ -158,9 +128,6 @@ export const editProduct = (category, index) => {
     }
 };
 
-/**
- * Alterna entre Disponible y Agotado (Lógica Nueva)
- */
 export const toggleStock = (category, index) => {
     const item = state.data.catalog[category][index];
     item.status = item.status === 'Disponible' ? 'Agotado' : 'Disponible';
@@ -169,14 +136,8 @@ export const toggleStock = (category, index) => {
     if (window.app && window.app.router) window.app.router('admin'); 
 };
 
-/**
- * Alias para compatibilidad con lógica inicial
- */
 export const toggleServiceStatus = (category, index) => toggleStock(category, index);
 
-/**
- * Agrega un nuevo servicio al catálogo (Streaming o Gaming)
- */
 export const addService = (category) => {
     const name = prompt(`Nombre del nuevo servicio para ${category.toUpperCase()}:`);
     const price = prompt(`Precio para ${name}:`, "5.00");
@@ -193,16 +154,11 @@ export const addService = (category) => {
         
         saveToDisk();
         logActivity('INFO', `Nuevo servicio: ${name}`);
-        if (window.app && window.app.router) {
-            window.app.router('admin');
-        }
+        if (window.app && window.app.router) window.app.router('admin');
         if (window.app?.showToast) window.app.showToast(`${name} agregado al catálogo`);
     }
 };
 
-/**
- * Elimina un servicio del catálogo
- */
 export const deleteService = (category, index) => {
     if (confirm("¿Seguro que quieres eliminar este servicio?")) {
         const item = state.data.catalog[category][index];
@@ -213,15 +169,58 @@ export const deleteService = (category, index) => {
     }
 };
 
-/**
- * Renderiza la interfaz completa del Dashboard Administrativo
- */
+// --- NUEVA LÓGICA DE RENDERING Y KPIs ---
+
+export function calculateKPIs(users) {
+    const totalUsers = users.length;
+    const expiringSoon = users.filter(u => u.daysLeft !== undefined && u.daysLeft <= 7).length;
+    // Cálculo de ingresos basado en ventas reales o estimación
+    const totalSales = (state.data.sales || []).reduce((acc, s) => acc + s.amount, 0);
+
+    if(document.getElementById('val-usuarios')) document.getElementById('val-usuarios').textContent = totalUsers;
+    if(document.getElementById('val-exp')) document.getElementById('val-exp').textContent = expiringSoon;
+    if(document.getElementById('val-ingresos')) document.getElementById('val-ingresos').textContent = `$${totalSales.toFixed(2)}`;
+    
+    // Si usas los nuevos IDs del panel:
+    if(document.getElementById('kpi-usuarios')) document.getElementById('kpi-usuarios').textContent = totalUsers;
+    if(document.getElementById('kpi-expiraciones')) document.getElementById('kpi-expiraciones').textContent = expiringSoon;
+    if(document.getElementById('kpi-ingresos')) document.getElementById('kpi-ingresos').textContent = `$${totalSales.toFixed(2)}`;
+}
+
+export function renderRenewalsPanel(users) {
+    const container = document.getElementById('vortex-renewals-list');
+    if (!container) return;
+
+    const critical = users.filter(u => u.status === 'Suspendido' || (u.daysLeft !== undefined && u.daysLeft <= 5));
+
+    if (critical.length > 0) {
+        container.innerHTML = `<h3 style="font-size:14px; color:#f43f5e; margin-bottom:10px;">ACCIONES REQUERIDAS</h3>` + 
+        critical.map(user => `
+            <div class="renewal-card" style="background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div class="renewal-info">
+                    <strong style="font-size:12px;">${user.email || user.name}</strong><br>
+                    <span style="font-size:10px; opacity:0.7;">${user.plan || 'Plan Standard'} - Vence: ${user.expiryDate || 'N/A'}</span>
+                </div>
+                <button class="btn-notify" onclick="app.notifyUser('${user.id}')" style="background:#f43f5e; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">NOTIFICAR</button>
+            </div>
+        `).join('');
+    } else {
+        container.innerHTML = '<div style="padding:10px; opacity:0.5; font-size:11px;">No hay renovaciones urgentes.</div>';
+    }
+}
+
+export function notifyUser(userId) {
+    console.log("Enviando recordatorio al usuario:", userId);
+    if (window.app?.showToast) {
+        window.app.showToast("Recordatorio enviado con éxito");
+    } else {
+        alert("Recordatorio de pago enviado con éxito.");
+    }
+}
+
 export function renderAdmin(container) {
     if (!container) return;
     const data = state.data;
-    const totalSales = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
-    const totalUsers = data.users.length;
-    const pendingTickets = (data.tickets || []).filter(t => t.status === 'Abierto').length;
 
     container.innerHTML = `
         <div class="admin-view fade-in" style="padding:20px; color:white;">
@@ -235,11 +234,11 @@ export function renderAdmin(container) {
             <div style="display:flex; gap:15px; margin:20px 0;">
                 <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
                     <small>VENTAS TOTALES</small>
-                    <div id="val-ingresos" style="font-size:20px; color:#4ade80;">$${totalSales}</div>
+                    <div id="val-ingresos" style="font-size:20px; color:#4ade80;">$0.00</div>
                 </div>
                 <div class="stat-box" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; flex:1;">
                     <small>USUARIOS</small>
-                    <div id="val-usuarios" style="font-size:20px;">${totalUsers}</div>
+                    <div id="val-usuarios" style="font-size:20px;">0</div>
                 </div>
                 <div class="stat-box" style="background:rgba(0,242,255,0.1); padding:15px; border-radius:12px; flex:1; border:1px solid var(--primary);">
                     <small>EXPIRACIONES</small>
@@ -257,8 +256,7 @@ export function renderAdmin(container) {
                 `).join('') : '<span style="opacity:0.5;">Esperando actividad...</span>'}
             </div>
 
-            <div id="vortex-renewals-list" style="margin-bottom:30px;">
-                </div>
+            <div id="vortex-renewals-list" style="margin-bottom:30px;"></div>
 
             <h3 style="margin-top:30px; font-size:14px; color:var(--primary); font-family:Orbitron;">BANDEJA DE SOPORTE</h3>
             <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:10px; margin-bottom:30px;">
@@ -342,48 +340,14 @@ export function renderAdmin(container) {
         </div>
     `;
 
-    // INYECCIÓN DE LA LÓGICA DE MONITOREO AL CARGAR
+    // INYECCIÓN DE LA LÓGICA DE MONITOREO Y KPIs AL CARGAR
     checkServerStatus();
-    updateAdminDashboard(data.users);
+    calculateKPIs(data.users);
+    renderRenewalsPanel(data.users);
 }
 
-// --- NUEVAS FUNCIONES DE MONITOREO INTEGRADAS ---
-
+// Alias para mantener compatibilidad si se llama con el nombre antiguo
 export function updateAdminDashboard(users) {
-    const totalUsers = users.length;
-    const expiringSoon = users.filter(u => u.daysLeft !== undefined && u.daysLeft <= 7).length; 
-
-    if(document.getElementById('val-usuarios')) document.getElementById('val-usuarios').textContent = totalUsers;
-    if(document.getElementById('val-exp')) document.getElementById('val-exp').textContent = expiringSoon;
-    
+    calculateKPIs(users);
     renderRenewalsPanel(users);
-}
-
-export function renderRenewalsPanel(users) {
-    const container = document.getElementById('vortex-renewals-list');
-    if (!container) return;
-
-    const needyUsers = users.filter(u => u.status === 'Suspendido' || (u.daysLeft !== undefined && u.daysLeft <= 5));
-
-    if (needyUsers.length > 0) {
-        container.innerHTML = `<h3 style="font-size:14px; color:#f43f5e; margin-bottom:10px;">ACCIONES REQUERIDAS</h3>` + 
-        needyUsers.map(user => `
-            <div class="renewal-card" style="background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div class="renewal-info">
-                    <strong style="font-size:12px;">${user.email}</strong><br>
-                    <span style="font-size:10px; opacity:0.7;">${user.plan || 'Plan Standard'} - Vence: ${user.expiryDate || 'N/A'}</span>
-                </div>
-                <button class="btn-notify" onclick="app.notifyUser('${user.id}')" style="background:#f43f5e; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">NOTIFICAR</button>
-            </div>
-        `).join('');
-    }
-}
-
-export function notifyUser(userId) {
-    console.log("Enviando recordatorio al usuario:", userId);
-    if (window.app?.showToast) {
-        window.app.showToast("Recordatorio enviado con éxito");
-    } else {
-        alert("Recordatorio de pago enviado con éxito.");
-    }
 }

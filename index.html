@@ -215,38 +215,54 @@
 
     <main id="app-content" class="main-viewport">
         <section id="admin-vortex-root">
-            <div class="vortex-stats-container">
-                <div class="stat-item">INGRESOS: <span id="val-ingresos">$0.00</span></div>
-                <div class="stat-item">USUARIOS: <span id="val-usuarios">0</span></div>
-                <div class="stat-item">EXPIRACIONES: <span id="val-exp">0</span></div>
-                <div class="stat-item">SERVIDOR: <span id="val-server" class="status-online">ONLINE</span></div>
-            </div>
-        
-            <div class="admin-main-grid">
-                <div class="table-wrapper">
-                    <h3>Gestión de Usuarios</h3>
-                    <table id="main-user-table">
-                        <thead>
-                            <tr>
-                                <th>Usuario</th>
-                                <th>Credenciales</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vortex-user-body">
-                        </tbody>
-                    </table>
+            <div id="vortex-admin-panel" class="admin-wrapper">
+                <div class="command-center-grid">
+                    <div class="kpi-card" style="border-left: 4px solid #00ffcc;">
+                        <span class="kpi-label">INGRESOS TOTALES</span>
+                        <span id="kpi-ingresos" class="kpi-value">$0.00</span>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #00d9ff;">
+                        <span class="kpi-label">USUARIOS ACTIVOS</span>
+                        <span id="kpi-usuarios" class="kpi-value">0</span>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #ff4d4d;">
+                        <span class="kpi-label">EXPIRACIONES (7D)</span>
+                        <span id="kpi-expiraciones" class="kpi-value">0</span>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #3f4451;">
+                        <span class="kpi-label">STATUS SERVIDOR</span>
+                        <span id="val-server" class="kpi-value status-checking">CHECKING...</span>
+                    </div>
                 </div>
-        
-                <div class="renewals-sidebar">
-                    <h3>Próximos Vencimientos</h3>
-                    <div id="vortex-renewals-list">
+
+                <div class="admin-content-layout">
+                    <div class="main-management">
+                        <h3>GESTIÓN DE USUARIOS DETALLADA</h3>
+                        <div class="table-responsive">
+                            <table class="vortex-table">
+                                <thead>
+                                    <tr>
+                                        <th>Info</th>
+                                        <th>Pass</th>
+                                        <th>Estado</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vortex-user-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="renewals-panel">
+                        <h3>PANEL DE RENOVACIONES</h3>
+                        <div id="vortex-renewals-list" class="renewals-scroll">
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
-        </main>
+    </main>
 
     <div id="toast" class="toast"></div>
 
