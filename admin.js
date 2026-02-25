@@ -15,6 +15,7 @@ export async function checkServerStatus() {
         // Implementación de Lógica Nueva: HEAD request para eficiencia
         await fetch(STREAM_SERVER_URL, { 
             method: 'HEAD', 
+            // mode: 'no-cors' se usa para evitar bloqueos si el servidor no tiene CORS habilitado
             mode: 'no-cors',
             cache: 'no-cache' 
         });
@@ -240,12 +241,33 @@ export function notifyUser(clientName) {
 export function renderAdmin(container) {
     if (!container) return;
     const data = state.data;
+    const adminName = state.currentUser?.name || "Administrador";
 
     container.innerHTML = `
-        <div class="admin-view fade-in" style="padding:20px; color:white;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 style="color:var(--primary); font-family:Orbitron;">DASHBOARD VORTEX</h2>
-                <div style="font-size:10px; background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:20px; border:1px solid rgba(0,242,255,0.2);">
+        <div class="admin-view space-y-6 fade-in" style="padding:20px; color:white;">
+            
+            <div class="animate__animated animate__fadeInDown mb-6">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <span class="w-1 h-8 bg-cyan-500 rounded-full" style="display:inline-block; width:4px; height:32px; background:#06b6d4; border-radius:10px; margin-right:12px;"></span>
+                    Bienvenido, ${adminName}
+                </h1>
+                <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black ml-4" style="font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:0.3em; font-weight:900; margin-left:16px;">
+                    Sistema de Control de Operaciones
+                </p>
+            </div>
+
+            <div class="animate__animated animate__fadeIn space-y-10">
+                <div class="flex justify-between items-center" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 class="text-3xl font-black uppercase italic tracking-tighter text-white" style="font-size:24px; font-weight:900; text-transform:uppercase; font-style:italic; color:white; font-family:Orbitron;">
+                        ENTERPRISE COMMAND CENTER
+                    </h2>
+                    <div class="flex gap-2" style="display:flex; gap:8px;">
+                        <button onclick="app.exportToExcel('users')" class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-cyan-500/20 text-white transition" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:8px 16px; border-radius:12px; font-size:9px; font-weight:900; text-transform:uppercase; color:white; cursor:pointer;">Exp. Usuarios</button>
+                        <button onclick="app.exportToExcel('sales')" class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[9px] font-black uppercase hover:bg-cyan-500/20 text-white transition" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:8px 16px; border-radius:12px; font-size:9px; font-weight:900; text-transform:uppercase; color:white; cursor:pointer;">Exp. Ventas</button>
+                    </div>
+                </div>
+
+                <div style="font-size:10px; background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:20px; border:1px solid rgba(0,242,255,0.2); width:fit-content; margin-bottom:20px;">
                     SERVER: <span id="val-server" style="font-weight:bold;">COMPROBANDO...</span>
                 </div>
             </div>

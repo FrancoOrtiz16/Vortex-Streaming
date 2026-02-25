@@ -218,63 +218,8 @@
     </nav>
 
     <main id="app-content" class="pt-28 px-6 max-w-7xl mx-auto main-viewport">
-        
-        <section id="vortex-store-view" class="view-section">
-            <div id="market-grid-container">
-                </div>
-        </section>
-
-        <section id="admin-vortex-root" class="view-section hidden">
-            <div id="vortex-admin-panel" class="admin-wrapper">
-                <div class="kpi-grid">
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-emerald-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #10b981;">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Ingresos Totales</p>
-                        <p id="total-income" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">$0.00</p>
-                    </div>
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-cyan-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #06b6d4;">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Usuarios</p>
-                        <p id="total-users" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">0</p>
-                    </div>
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-red-500" style="padding: 20px; border-radius: 20px; border-left: 4px solid #ef4444;">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Expiraciones (7D)</p>
-                        <p id="kpi-expiraciones" style="font-size: 1.8rem; font-weight: 900; margin: 5px 0;">0</p>
-                    </div>
-                    <div class="glass-card p-6 rounded-3xl border-l-4 border-white/20" style="padding: 20px; border-radius: 20px; border-left: 4px solid rgba(255,255,255,0.2);">
-                        <p style="font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; margin: 0;">Status Servidor</p>
-                        <p id="server-status-val" style="font-size: 1.5rem; font-weight: 900; margin: 5px 0;">CHECKING...</p>
-                    </div>
-                </div>
-
-                <div class="admin-content-layout">
-                    <div class="main-management">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h3 style="margin:0;">GESTIÓN DE USUARIOS DETALLADA</h3>
-                            <button onclick="app.exportToExcel()" class="glass-card" style="padding: 5px 15px; border-radius: 8px; cursor: pointer; color: var(--primary); font-size: 10px; font-weight: 800;">EXPORTAR EXCEL</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="vortex-table">
-                                <thead>
-                                    <tr>
-                                        <th>Info</th>
-                                        <th>Pass</th>
-                                        <th>Estado</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="vortex-user-table-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="renewals-panel">
-                        <h3>PANEL DE RENOVACIONES</h3>
-                        <div id="renovations-list" class="renewals-scroll">
-                        </div>
-                    </div>
-                </div>
+        <div id="vortex-main-container">
             </div>
-        </section>
     </main>
 
     <div id="toast" class="toast"></div>

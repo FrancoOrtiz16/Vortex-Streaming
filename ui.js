@@ -220,7 +220,7 @@ export const addService = (category) => {
  * Lógica Nueva Unificada: Renderizado administrativo (ENTERPRISE COMMAND CENTER)
  */
 export const renderAdmin = (container) => {
-    const { data } = window.app.state; 
+    const { data, currentUser } = window.app.state; 
     const totalIncome = (data.sales || []).reduce((acc, s) => acc + s.amount, 0).toFixed(2);
     const totalUsers = data.users.length;
     const openTickets = (data.tickets || []).filter(t => t.status === 'Abierto');
@@ -229,8 +229,22 @@ export const renderAdmin = (container) => {
     const limit = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const upcomingExpirations = (data.sales || []).filter(s => new Date(s.exp) < limit);
 
+    // Integración de Lógica Nueva: WelcomeHeader
+    const adminName = currentUser ? currentUser.name || currentUser.email.split('@')[0] : "Administrador";
+
     container.innerHTML = `
         <div class="animate__animated animate__fadeIn space-y-10" style="padding:20px; color:white;">
+            
+            <div class="animate__animated animate__fadeInDown mb-6" style="margin-bottom: 24px;">
+                <h1 style="font-size: 24px; font-weight: 700; color: white; display: flex; align-items: center; gap: 12px; margin: 0;">
+                    <span style="width: 4px; height: 32px; background-color: #06b6d4; border-radius: 9999px; display: inline-block;"></span>
+                    Bienvenido, ${adminName}
+                </h1>
+                <p style="font-size: 10px; color: #64748b; text-transform: uppercase; tracking: 0.3em; font-weight: 900; margin-left: 16px; letter-spacing: 0.3em;">
+                    Sistema de Control de Operaciones
+                </p>
+            </div>
+
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
                 <h2 style="font-size:24px; font-weight:900; text-transform:uppercase; font-style:italic; letter-spacing:-0.05em; color:white;">ENTERPRISE COMMAND CENTER</h2>
                 <div style="display:flex; gap:8px;">
