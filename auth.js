@@ -146,7 +146,16 @@ export function enterSystem(user) {
         
         setTimeout(() => {
             overlay.classList.add('hidden');
-            if (window.app?.router) window.app.router('market'); 
+            
+            // LÓGICA NUEVA INTEGRADA: Prioridad de ruteo según ROL
+            if (window.app && window.app.router) {
+                if (user.role === 'ADMIN') {
+                    window.app.router('admin'); // Ir directo al Command Center
+                } else {
+                    window.app.router('market'); // Ir a la tienda
+                }
+            }
+
             if (window.app?.showToast) window.app.showToast(`Bienvenido, ${user.name}`);
         }, 500);
     }
@@ -157,7 +166,7 @@ export function enterSystem(user) {
  */
 export function logout() {
     if (state.currentUser && window.app?.logActivity) {
-        window.app.logActivity('INFO', `Sesión cerrada: ${state.currentUser.email}`);
+        window.app.logActivity('INFO', `Sesión cerrara: ${state.currentUser.email}`);
     }
 
     // Integración Lógica Nueva: Limpieza de persistencia y recarga global

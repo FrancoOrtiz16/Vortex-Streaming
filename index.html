@@ -150,7 +150,7 @@
         <div class="logo" onclick="app.router('market')" style="cursor: pointer;">VORTEX<span>STREAMING</span></div>
         
         <div class="nav-right-group">
-            <button id="admin-view-toggle" class="admin-toggle-btn" style="display: none;" onclick="app.toggleAdminView()">
+            <button id="admin-view-toggle" class="admin-toggle-btn" style="display: none;">
                 Ver Panel Admin
             </button>
 
@@ -239,63 +239,72 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (NUEVA LÓGICA INTEGRADA) ---
+        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (LÓGICA NUEVA INTEGRADA) ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
                 const isAdmin = user.role === 'ADMIN';
 
-                // Actualizar textos de identidad
-                const userName = user.name || user.email.split('@')[0];
-                const elements = {
-                    'nav-user-name': userName.toUpperCase(),
-                    'display-username': userName.toUpperCase(),
-                    'user-role-display': user.role || 'USUARIO',
-                    'val-user': user.email
-                };
-
-                for (let [id, val] of Object.entries(elements)) {
-                    const el = document.getElementById(id);
-                    if(el) el.textContent = val;
-                }
-
-                // 1. Mostrar controles de Admin
-                const adminToggle = document.getElementById('admin-view-toggle');
-                const adminLink = document.getElementById('admin-link-el');
-                if (isAdmin) {
-                    if(adminToggle) adminToggle.style.display = 'block';
-                    if(adminLink) adminLink.style.display = 'flex';
-                }
-
-                // 2. Sincronizar estado
+                // Sincronizar estado global inmediatamente
                 if (window.app && window.app.state) {
                     window.app.state.currentUser = user;
                 }
 
-                // 3. PRIORIDAD DE VISTA AL INICIAR/RECARGAR
+                // Actualizar UI del Menú y Nav
+                const userName = user.name || user.email.split('@')[0];
+                if(document.getElementById('nav-user-name')) document.getElementById('nav-user-name').textContent = userName.toUpperCase();
+                if(document.getElementById('display-username')) document.getElementById('display-username').textContent = userName.toUpperCase();
+                if(document.getElementById('user-role-display')) document.getElementById('user-role-display').textContent = user.role;
+                if(document.getElementById('val-user')) document.getElementById('val-user').textContent = user.email;
+
+                // Mostrar botones de Admin
+                const adminToggle = document.getElementById('admin-view-toggle');
+                const adminLink = document.getElementById('admin-link-el');
+                if (isAdmin) {
+                    if (adminToggle) adminToggle.style.display = 'block';
+                    if (adminLink) adminLink.style.display = 'flex';
+                }
+
+                // OCULTAR LOGIN Y CARGAR DASHBOARD
+                document.getElementById('auth-screen').classList.add('hidden');
+                
                 setTimeout(() => {
                     if (window.app && window.app.router) {
-                        // Si es Admin y no hay una vista específica guardada, forzamos 'admin'
-                        const targetView = isAdmin ? 'admin' : 'market';
-                        window.app.router(targetView);
+                        // PRIORIDAD TOTAL AL ADMIN PANEL
+                        const startRoute = isAdmin ? 'admin' : 'market';
+                        window.app.router(startRoute);
                     }
-                }, 100);
-
-                document.getElementById('auth-screen').classList.add('hidden');
+                }, 50);
             }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             updateUIFromSession();
             
+            // --- INTEGRACIÓN LÓGICA NUEVA: OBSERVADOR Y CLIC DINÁMICO ---
+            const adminBtn = document.getElementById('admin-view-toggle');
+            if(adminBtn) {
+                adminBtn.onclick = () => {
+                    const isCurrentlyAdmin = window.app.state.view === 'admin';
+                    window.app.router(isCurrentlyAdmin ? 'market' : 'admin');
+                };
+                
+                // Actualizar texto del botón según la ruta activa
+                const observer = new MutationObserver(() => {
+                    const isViewAdmin = window.app.state.view === 'admin';
+                    adminBtn.textContent = isViewAdmin ? 'VER TIENDA' : 'VER PANEL ADMIN';
+                });
+                observer.observe(document.getElementById('app-content'), { childList: true });
+            }
+            // ----------------------------------------------------------
+
             if(window.app) {
                 const originalRouter = app.router;
                 app.router = function(route) {
                     const adminBtn = document.getElementById('admin-view-toggle');
                     if(adminBtn) {
-                        // Si estamos en el panel, el botón invita a ir a la tienda
-                        // Si estamos en la tienda, el botón invita a ir al panel
+                        // Sincronización extra para garantizar coherencia
                         adminBtn.textContent = (route === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
                     }
                     return originalRouter.apply(this, arguments);
