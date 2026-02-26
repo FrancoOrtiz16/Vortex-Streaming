@@ -307,7 +307,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- Lógica Nueva Integrada ---
+        // --- Lógica Nueva Integrada como Estado ---
         let servicios = [
             { id: 1, name: 'Netflix', price: 5.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
             { id: 2, name: 'Disney+', price: 4.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg' },
@@ -316,17 +316,19 @@
             { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
         ];
 
-        // Función para actualizar la URL desde el Admin (Lógica Nueva)
+        // Función para actualizar el estado y refrescar la vista (Equivalente al setServicios)
         function updateServiceLogo(id, newLogo) {
             servicios = servicios.map(s => s.id === id ? { ...s, logo: newLogo } : s);
+            
+            // Refresco inteligente según la vista actual
             if(window.app && window.app.state && window.app.state.view === 'admin') {
-                renderAdminConfig();
+                renderAdminConfig(); // Refresca inputs en admin
             } else {
-                renderServicios();
+                renderServicios(); // Refresca cards en tienda
             }
         };
 
-        // Renderiza los servicios en la tienda (Lógica Nueva Mapeada)
+        // Renderiza los servicios en la tienda (Mapeo de datos)
         function renderServicios() {
             const container = document.getElementById('grid-servicios');
             if(!container) return;
@@ -354,8 +356,9 @@
             `).join('');
         }
 
-        // --- Lógica Nueva: Inyectar Configuración en el Panel Admin ---
+        // --- Inyectar Configuración en el Panel Admin ---
         function renderAdminConfig() {
+            // Buscamos el contenedor principal de administración
             const adminContainer = document.querySelector('.admin-content-vortex'); 
             if(!adminContainer) return;
 
@@ -364,23 +367,23 @@
 
             const configSection = document.createElement('div');
             configSection.id = 'config-catalogo-vortex';
-            configSection.className = "glass-card rounded-[2.5rem] p-8 mt-8 animate__animated animate__fadeIn";
+            configSection.className = "glass-card rounded-[2.5rem] p-8 mt-8 animate__animated animate__fadeIn border-t-4 border-cyan-500";
             configSection.innerHTML = `
-                <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest">
-                    Configuración de Catálogo (Imágenes)
+                <h3 class="text-xl font-black mb-6 uppercase italic text-white">
+                    Gestión de Catálogo (Imágenes)
                 </h3>
-                <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     ${servicios.map(s => `
-                        <div class="flex items-center gap-4 bg-white/5 p-3 rounded-2xl">
-                            <img src="${s.logo}" class="w-10 h-10 object-contain" alt="preview" />
+                        <div class="bg-white/5 p-4 rounded-3xl flex items-center gap-4">
+                            <img src="${s.logo}" class="w-12 h-12 object-contain" alt="preview" />
                             <div class="flex-1">
-                                <p class="text-[10px] font-bold text-white uppercase">${s.name}</p>
+                                <label class="text-[10px] font-black text-slate-500 uppercase">${s.name}</label>
                                 <input 
                                     type="text" 
+                                    class="w-full bg-transparent border-b border-white/10 text-cyan-400 text-xs py-1 outline-none focus:border-cyan-500"
                                     value="${s.logo}" 
                                     onchange="updateServiceLogo(${s.id}, this.value)"
-                                    class="w-full bg-transparent text-[10px] text-cyan-400 outline-none border-b border-white/10 focus:border-cyan-500"
-                                    placeholder="Pegar URL de la imagen aquí"
+                                    placeholder="URL del logo..."
                                 />
                             </div>
                         </div>
