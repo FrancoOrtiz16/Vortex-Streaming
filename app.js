@@ -1,5 +1,5 @@
 /* ==========================================================================
-   VORTEX STREAMING - CORE V3.2 (MODULAR CONSOLIDADO)
+   VORTEX STREAMING - CORE V3.2 (MODULAR CONSOLIDADO + LÓGICA DE SERVICIOS)
    ========================================================================== */
 
 import { state, saveToDisk } from './data.js';
@@ -19,19 +19,41 @@ Object.assign(app, {
     state,
     saveToDisk,
 
+    // [LÓGICA NUEVA: ESTADO DE SERVICIOS INICIALIZADO EN EL STATE]
+    // Se integra en el state global para que persista y sea reactivo en la UI
+    servicios: [
+        { id: 1, name: 'Netflix', price: 5.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
+        { id: 2, name: 'Disney+', price: 4.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg' },
+        { id: 3, name: 'Max', price: 3.80, logo: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Max_logo.svg' },
+        { id: 4, name: 'Crunchyroll', price: 3.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Crunchyroll_Logo.svg', highlight: true },
+        { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
+    ],
+
+    // [LÓGICA NUEVA: FUNCIÓN DE ACTUALIZACIÓN DE LOGOS]
+    updateServiceLogo: function(id, newLogo) {
+        this.servicios = this.servicios.map(s => s.id === id ? { ...s, logo: newLogo } : s);
+        // Sincronizamos con el estado de datos para persistencia
+        if (this.state.data) {
+            this.state.data.servicios = this.servicios;
+            this.saveToDisk();
+        }
+        // Forzamos re-render del market si estamos en esa vista para ver el cambio
+        if (this.state.view === 'market') this.router('market');
+        console.log(`Logo actualizado para servicio ID: ${id}`);
+    },
+
     // --- Autenticación y Navegación (Lógica Unificada Integrada) ---
     handleAuth: auth.handleAuth,
     logout: auth.logout,
     toggleAuthMode: auth.toggleAuthMode,
     
     // [LÓGICA NUEVA: SETVIEW / DASHBOARD]
-    // Mapeamos setView al router existente para compatibilidad con la nueva lógica del Nav
     setView: function(viewName) {
         this.router(viewName);
     },
 
-    router: ui.router,           // <--- Lógica unificada: Mapeado desde ui.js
-    renderAdmin: ui.renderAdmin, // <--- Lógica unificada: Vital para el acceso administrativo
+    router: ui.router, 
+    renderAdmin: ui.renderAdmin, 
     enterSystem: ui.enterSystem,
 
     // --- Funciones Administrativas (Lógica Nueva Integrada) ---
@@ -41,7 +63,6 @@ Object.assign(app, {
     checkHeartbeat: async function() {
         const statusVal = document.getElementById('server-status-val');
         try {
-            // Ping silencioso al servidor de streaming
             await fetch('https://vortex-streaming-psi.vercel.app', { method: 'HEAD', mode: 'no-cors' });
             if (statusVal) {
                 statusVal.innerText = 'ONLINE';
@@ -75,7 +96,6 @@ Object.assign(app, {
         if (!this.state.data.sales) this.state.data.sales = [];
         this.state.data.sales.push(nuevaVenta);
         
-        // Log activity (Lógica Nueva aplicada a compras)
         if (this.logActivity) {
             this.logActivity('SALE', `Venta: ${nombreProducto} ($${precio}) - ${activeUser.name}`);
         }
@@ -152,7 +172,6 @@ Object.assign(app, {
         if(nameDisp) nameDisp.innerText = user.name;
         if(adminTag) adminTag.style.display = (user.role === 'ADMIN') ? 'block' : 'none';
         
-        // [LÓGICA NUEVA: Actualización de estados activos en botones Nav]
         const currentView = this.state.view || 'market';
         document.querySelectorAll('.nav-btn-vortex').forEach(btn => {
             if (btn.getAttribute('onclick')?.includes(currentView)) {
@@ -218,39 +237,35 @@ Object.assign(app, {
     init() {
         console.log("Vortex Core 3.2: Sistema Restablecido.");
         
-        // 1. Cargamos datos del disco (Persistencia con Garantía de Infraestructura)
         const saved = localStorage.getItem('vortex_v3_data');
         if (saved) {
             try {
                 const parsedData = JSON.parse(saved);
                 if (!parsedData.tickets) parsedData.tickets = [];
+                // [LÓGICA NUEVA: Restaurar servicios guardados si existen]
+                if (parsedData.servicios) this.servicios = parsedData.servicios;
                 this.state.data = parsedData;
             } catch(e) {
                 console.error("Error al cargar persistencia inicial.");
             }
         }
 
-        // 2. Fondo neural y UI estética
         this.renderNeuralBackground();
         
-        // 3. Enrutamiento inicial inteligente (Lógica Nueva)
         if (!this.state.currentUser) {
             this.router('login');
         } else {
-            // Se sincroniza con 'admin' si el botón de la nueva lógica solicita 'dashboard'
             const startView = this.state.view === 'dashboard' ? 'admin' : (this.state.view || 'market');
             this.router(startView);
             this.updateHeaderUI(this.state.currentUser);
         }
 
-        // [LÓGICA NUEVA: INICIO DEL MONITOREO DEL SERVIDOR]
         if (this.state.currentUser?.role === 'ADMIN') {
             this.checkHeartbeat();
             if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
             this.heartbeatTimer = setInterval(() => this.checkHeartbeat(), 30000);
         }
 
-        // 4. Listeners globales para UX
         document.addEventListener('mousedown', (e) => {
             const menu = document.getElementById('side-menu-vortex');
             const sc = document.getElementById('search-input-container');
@@ -258,7 +273,6 @@ Object.assign(app, {
             if (sc && sc.classList.contains('active') && !sc.contains(e.target) && !e.target.closest('.vortex-search-wrapper')) sc.classList.remove('active');
         });
 
-        // 5. Delegación de eventos para compras dinámicas
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.btn-adquirir, .btn-recarga, .pay-btn'); 
             if (btn && !btn.hasAttribute('onclick') && (btn.innerText.includes('ADQUIERE') || btn.innerText.includes('ADQUIRIR') || btn.innerText.includes('RECARGA'))) {
@@ -280,14 +294,11 @@ Object.assign(app, {
     }
 });
 
-// LÓGICA NUEVA: Asegurar que el catálogo se dibuje si hay sesión activa
 document.addEventListener('DOMContentLoaded', () => {
     const session = localStorage.getItem('vortex_session');
     if (session) {
-        // Si hay sesión, forzamos al enrutador a ir al market para que dibuje todo
         app.router('market');
     }
 });
 
-// 4. Lanzamiento oficial
 app.init();

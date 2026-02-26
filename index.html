@@ -319,14 +319,14 @@
         // Función para actualizar la URL desde el Admin (Lógica Nueva)
         function updateServiceLogo(id, newLogo) {
             servicios = servicios.map(s => s.id === id ? { ...s, logo: newLogo } : s);
-            if(window.app.state.view === 'admin') {
+            if(window.app && window.app.state && window.app.state.view === 'admin') {
                 renderAdminConfig();
             } else {
                 renderServicios();
             }
         };
 
-        // Renderiza los servicios en la tienda
+        // Renderiza los servicios en la tienda (Lógica Nueva Mapeada)
         function renderServicios() {
             const container = document.getElementById('grid-servicios');
             if(!container) return;
@@ -346,7 +346,7 @@
                     <button 
                         class="btn-adquirir"
                         style="${s.highlight ? 'background: #22d3ee' : ''}"
-                        onclick="app.buyService(${s.id})"
+                        onclick="app.registrarCompra('${s.name}', ${s.price}, 'streaming')"
                     >
                         Adquirir
                     </button>
@@ -359,20 +359,19 @@
             const adminContainer = document.querySelector('.admin-content-vortex'); 
             if(!adminContainer) return;
 
-            // Evitar duplicados si ya existe
             const existing = document.getElementById('config-catalogo-vortex');
             if(existing) existing.remove();
 
             const configSection = document.createElement('div');
             configSection.id = 'config-catalogo-vortex';
-            configSection.className = "glass-card rounded-[2.5rem] p-8 mt-8";
+            configSection.className = "glass-card rounded-[2.5rem] p-8 mt-8 animate__animated animate__fadeIn";
             configSection.innerHTML = `
                 <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest">
                     Configuración de Catálogo (Imágenes)
                 </h3>
                 <div class="space-y-4">
                     ${servicios.map(s => `
-                        <div key="${s.id}" class="flex items-center gap-4 bg-white/5 p-3 rounded-2xl">
+                        <div class="flex items-center gap-4 bg-white/5 p-3 rounded-2xl">
                             <img src="${s.logo}" class="w-10 h-10 object-contain" alt="preview" />
                             <div class="flex-1">
                                 <p class="text-[10px] font-bold text-white uppercase">${s.name}</p>

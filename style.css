@@ -499,11 +499,11 @@ body {
 .history-panel::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 10px; }
 
 /* ==========================================================================
-   LÓGICA NUEVA: TARJETAS DE SERVICIO PREMIUM (VORTEX-ITEM)
+   LÓGICA NUEVA: TARJETAS DE SERVICIO PREMIUM (DISEÑO EXACTO)
    ========================================================================== */
 
 .service-card, .card.vortex-item {
-    background: var(--card-bg) !important; /* Azul oscuro profundo */
+    background: #0b1120 !important; /* Azul oscuro profundo exacto */
     border-radius: 2.5rem !important; /* Bordes extra redondeados */
     padding: 2.5rem 1.5rem !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -529,16 +529,17 @@ body {
     align-items: center;
     justify-content: center;
     margin-bottom: 2rem;
+    width: 100%;
 }
 
 .logo-wrapper img, .logo-container img {
     max-height: 100%;
-    max-width: 140px;
+    max-width: 80%;
     object-fit: contain;
     filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
 }
 
-/* Botón Adquirir estilo Píldora Premium */
+/* Botón Adquirir estilo Píldora Premium Exacto */
 .btn-adquirir, .vortex-item button {
     background: white !important;
     color: black !important;
@@ -552,11 +553,12 @@ body {
     margin-top: 1.5rem !important;
     border: none;
     cursor: pointer;
-    transition: 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .btn-adquirir:hover, .vortex-item button:hover {
     background: #22d3ee !important;
+    transform: scale(1.02);
 }
 
 /* ==========================================================================
