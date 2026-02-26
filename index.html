@@ -245,17 +245,16 @@
             if (saved) {
                 const user = JSON.parse(saved);
                 
-                // Actualizar nombre en nav
+                // Solo actualizar el nombre en el NAV
                 const navName = document.getElementById('nav-user-name');
                 if(navName) navName.textContent = user.name || user.email.split('@')[0];
 
-                // Mostrar botón de admin si el rol es correcto
+                // --- BORRA CUALQUIER OTRA LÍNEA QUE DIGA document.write O document.body.innerHTML += ---
+                
                 const adminBtn = document.getElementById('admin-view-toggle');
                 if(adminBtn && user.role === 'ADMIN') {
                     adminBtn.style.display = 'block';
                 }
-
-                // Ocultar auth screen
                 document.getElementById('auth-screen').classList.add('hidden');
             }
         }

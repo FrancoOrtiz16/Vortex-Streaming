@@ -414,3 +414,19 @@ export function revealPass() {
         ps.style.color = '#e2e8f0';
     }
 }
+
+/**
+ * Monitor de limpieza automática: Elimina textos sueltos de bienvenida
+ * que no formen parte del componente animado oficial.
+ */
+const vortexCleaner = new MutationObserver(() => {
+    const elements = document.querySelectorAll('p, span, div');
+    elements.forEach(el => {
+        // Si el elemento es un texto suelto (no el banner principal) lo borramos
+        if (el.textContent.trim().startsWith('Bienvenido,') && !el.classList.contains('animate__animated')) {
+            el.remove();
+        }
+    });
+});
+
+vortexCleaner.observe(document.body, { childList: true, subtree: true });
