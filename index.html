@@ -201,7 +201,7 @@
 
                     <div class="user-history-section">
                         <button class="menu-item-btn" onclick="app.toggleHistory()">
-                            <span class="emoji">📜</span> Historial de Compras
+                            <span class="emoji">📜</span>Historial de Compras
                         </button>
                         <div id="user-history-list" class="history-panel hidden">
                             <div class="history-header">
@@ -239,16 +239,38 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (LÓGICA NUEVA INTEGRADA) ---
+        // --- LÓGICA NUEVA: SINCRONIZACIÓN DE INTERFAZ ---
+        const syncAdminInterface = (user) => {
+            const isAdmin = user && user.role === 'ADMIN';
+            const adminBtn = document.getElementById('admin-view-toggle');
+            const adminLink = document.getElementById('admin-link-el');
+
+            if (isAdmin) {
+                if (adminBtn) adminBtn.style.display = 'block';
+                if (adminLink) adminLink.style.display = 'flex';
+            }
+        };
+
+        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
-                const isAdmin = user.role === 'ADMIN';
-
-                // Sincronizar estado global inmediatamente
+                
+                // Sincronizar estado y botones de admin
+                localStorage.setItem('vortex_session', JSON.stringify(user));
                 if (window.app && window.app.state) {
                     window.app.state.currentUser = user;
+                }
+                
+                // Llamada a la nueva lógica
+                syncAdminInterface(user);
+
+                if (user.role === 'ADMIN') {
+                    const adminToggle = document.getElementById('admin-view-toggle');
+                    if (adminToggle) {
+                        adminToggle.textContent = 'VER TIENDA'; 
+                    }
                 }
 
                 // Actualizar UI del Menú y Nav
@@ -258,21 +280,12 @@
                 if(document.getElementById('user-role-display')) document.getElementById('user-role-display').textContent = user.role;
                 if(document.getElementById('val-user')) document.getElementById('val-user').textContent = user.email;
 
-                // Mostrar botones de Admin
-                const adminToggle = document.getElementById('admin-view-toggle');
-                const adminLink = document.getElementById('admin-link-el');
-                if (isAdmin) {
-                    if (adminToggle) adminToggle.style.display = 'block';
-                    if (adminLink) adminLink.style.display = 'flex';
-                }
-
                 // OCULTAR LOGIN Y CARGAR DASHBOARD
                 document.getElementById('auth-screen').classList.add('hidden');
                 
                 setTimeout(() => {
                     if (window.app && window.app.router) {
-                        // PRIORIDAD TOTAL AL ADMIN PANEL
-                        const startRoute = isAdmin ? 'admin' : 'market';
+                        const startRoute = (user.role === 'ADMIN') ? 'admin' : 'market';
                         window.app.router(startRoute);
                     }
                 }, 50);
@@ -282,7 +295,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateUIFromSession();
             
-            // --- INTEGRACIÓN LÓGICA NUEVA: OBSERVADOR Y CLIC DINÁMICO ---
+            // --- INTEGRACIÓN LÓGICA DE OBSERVACIÓN Y BOTÓN ---
             const adminBtn = document.getElementById('admin-view-toggle');
             if(adminBtn) {
                 adminBtn.onclick = () => {
@@ -290,21 +303,18 @@
                     window.app.router(isCurrentlyAdmin ? 'market' : 'admin');
                 };
                 
-                // Actualizar texto del botón según la ruta activa
                 const observer = new MutationObserver(() => {
                     const isViewAdmin = window.app.state.view === 'admin';
                     adminBtn.textContent = isViewAdmin ? 'VER TIENDA' : 'VER PANEL ADMIN';
                 });
                 observer.observe(document.getElementById('app-content'), { childList: true });
             }
-            // ----------------------------------------------------------
 
             if(window.app) {
                 const originalRouter = app.router;
                 app.router = function(route) {
                     const adminBtn = document.getElementById('admin-view-toggle');
                     if(adminBtn) {
-                        // Sincronización extra para garantizar coherencia
                         adminBtn.textContent = (route === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
                     }
                     return originalRouter.apply(this, arguments);
