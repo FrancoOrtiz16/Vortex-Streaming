@@ -1,4 +1,4 @@
-//* ==========================================================================
+/* ==========================================================================
    VORTEX STREAMING - UI & ROUTING (MODULAR UNIFICADO)
    ========================================================================== */
 
@@ -148,29 +148,6 @@ export const router = (view) => {
 };
 
 // --- LÓGICA DE ADMINISTRACIÓN UNIFICADA (NUEVA ESTÉTICA) ---
-
-// --- FUNCIONES DE ELIMINACIÓN ---
-export const deleteUser = (userId) => {
-    if (confirm("¿ESTÁS SEGURO DE ELIMINAR ESTE USUARIO? ESTA ACCIÓN NO SE PUEDE DESHACER.")) {
-        state.data.users = state.data.users.filter(u => u.id !== userId);
-        saveToDisk();
-        logActivity('WARN', `Usuario eliminado ID: ${userId}`);
-        router('admin'); 
-    }
-};
-
-export const deleteProduct = (category, index) => {
-    if (confirm("¿ELIMINAR ESTE PRODUCTO DEL CATÁLOGO?")) {
-        state.data.catalog[category].splice(index, 1);
-        saveToDisk();
-        logActivity('WARN', `Producto eliminado de ${category}`);
-        router('admin');
-    }
-};
-
-// Hacerlas accesibles para los botones del HTML
-window.app.deleteUser = deleteUser;
-window.app.deleteProduct = deleteProduct;
 
 export const createTicket = (subject, message) => {
     const newTicket = {
@@ -332,7 +309,6 @@ export const renderAdmin = (container) => {
                                     <td style="padding:12px 5px;">
                                         <button onclick="app.changeUserPass(${u.id})" style="background:#334155; color:white; border:none; padding:5px 10px; border-radius:8px; cursor:pointer; font-size:10px;">✎</button>
                                         ${u.role !== 'ADMIN' ? `<button onclick="app.toggleUserBan(${u.id})" style="background:${u.status === 'Activo' ? '#f43f5e' : '#10b981'}; color:black; border:none; padding:5px 10px; border-radius:8px; cursor:pointer; font-weight:bold; margin-left:5px; font-size:9px;">${u.status === 'Activo' ? 'BAN' : 'ALTA'}</button>` : ''}
-                                        ${u.role !== 'ADMIN' ? `<button onclick="app.deleteUser(${u.id})" style="background:#450a0a; color:#f87171; border:none; padding:5px 10px; border-radius:8px; cursor:pointer; font-weight:bold; margin-left:5px; font-size:10px;">✕</button>` : ''}
                                     </td>
                                 </tr>
                             `).join('')}
@@ -356,7 +332,6 @@ export const renderAdmin = (container) => {
                                     <div style="display:flex; gap:5px;">
                                         <button onclick="app.toggleStock('${cat}', ${i})" style="background:${item.status === 'Disponible' ? '#10b981' : '#f43f5e'}; color:white; border:none; padding:4px 8px; border-radius:6px; font-size:8px; font-weight:900; cursor:pointer;">${item.status === 'Disponible' ? 'ON' : 'OFF'}</button>
                                         <button onclick="app.editProduct('${cat}', ${i})" style="background:none; border:1px solid rgba(255,255,255,0.1); color:white; padding:4px 8px; border-radius:6px; font-size:8px; cursor:pointer;">EDIT</button>
-                                        <button onclick="app.deleteProduct('${cat}', ${i})" style="background:#450a0a; border:none; color:#f87171; padding:4px 8px; border-radius:6px; font-size:8px; font-weight:900; cursor:pointer;">✕</button>
                                     </div>
                                 </div>
                             `).join('')}
