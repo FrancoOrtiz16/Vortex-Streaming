@@ -200,7 +200,7 @@
                     </div>
 
                     <a href="#" onclick="app.router('market')" class="only-user-nav">
-                        <span class="emoji">🏠</span> Inicio / Streaming
+                        <span class="emoji">📺</span> Servicios Streaming
                     </a>
 
                     <div class="user-history-section">
@@ -244,43 +244,32 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- LÓGICA NUEVA: SINCRONIZACIÓN DE INTERFAZ ---
-        const syncAdminInterface = (user) => {
-            const isAdmin = user && user.role === 'ADMIN';
-            const adminToggle = document.getElementById('admin-view-toggle');
-
-            // Solo validamos el botón superior
-            if (isAdmin && adminToggle) adminToggle.style.display = 'block';
-        };
-
         // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
-                
-                // NUEVA LÓGICA: Agrega una clase al body para controlar el menú por CSS
                 const isAdmin = user.role === 'ADMIN';
+
+                // LÓGICA NUEVA: Marcamos el cuerpo del documento según el rol
                 if (isAdmin) {
                     document.body.classList.add('is-admin');
                 } else {
                     document.body.classList.remove('is-admin');
                 }
                 
-                // Sincronizar estado y botones de admin
-                localStorage.setItem('vortex_session', JSON.stringify(user));
+                // Sincronizar estado y datos de sesión
                 if (window.app && window.app.state) {
                     window.app.state.currentUser = user;
                 }
                 
-                // Llamada a la nueva lógica
-                syncAdminInterface(user);
-
-                if (user.role === 'ADMIN') {
-                    const adminToggle = document.getElementById('admin-view-toggle');
-                    if (adminToggle) {
-                        adminToggle.textContent = 'VER TIENDA'; 
-                    }
+                // LÓGICA NUEVA: Sincronizar el botón superior dinámico
+                const adminToggle = document.getElementById('admin-view-toggle');
+                if (isAdmin && adminToggle) {
+                    adminToggle.style.display = 'block';
+                    // Aseguramos el texto inicial según la ruta actual si existiera
+                    const currentView = (window.app && window.app.state) ? window.app.state.view : null;
+                    adminToggle.textContent = (currentView === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
                 }
 
                 // Actualizar UI del Menú y Nav
