@@ -280,5 +280,14 @@ Object.assign(app, {
     }
 });
 
+// LÓGICA NUEVA: Asegurar que el catálogo se dibuje si hay sesión activa
+document.addEventListener('DOMContentLoaded', () => {
+    const session = localStorage.getItem('vortex_session');
+    if (session) {
+        // Si hay sesión, forzamos al enrutador a ir al market para que dibuje todo
+        app.router('market');
+    }
+});
+
 // 4. Lanzamiento oficial
 app.init();

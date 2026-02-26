@@ -245,17 +245,27 @@
             if (saved) {
                 const user = JSON.parse(saved);
                 
-                // Solo actualizar el nombre en el NAV
+                // Actualizar interfaz
                 const navName = document.getElementById('nav-user-name');
                 if(navName) navName.textContent = user.name || user.email.split('@')[0];
 
-                // --- BORRA CUALQUIER OTRA LÍNEA QUE DIGA document.write O document.body.innerHTML += ---
-                
                 const adminBtn = document.getElementById('admin-view-toggle');
                 if(adminBtn && user.role === 'ADMIN') {
                     adminBtn.style.display = 'block';
                 }
+
+                // 1. Quitar pantalla de carga
                 document.getElementById('auth-screen').classList.add('hidden');
+
+                // 2. IMPORTANTE: Forzar la carga del catálogo inicial
+                // Esperamos un momento a que el módulo app.js esté listo
+                setTimeout(() => {
+                    if (window.app && window.app.router) {
+                        // Si ya estábamos en admin, volvemos a admin, si no, al market
+                        const currentView = window.app.state.view || 'market';
+                        window.app.router(currentView);
+                    }
+                }, 100);
             }
         }
 
