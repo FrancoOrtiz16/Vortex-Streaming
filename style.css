@@ -24,7 +24,7 @@ body:not(.is-admin) #admin-link-el {
     --primary-glow: rgba(0, 242, 255, 0.5);
     --secondary: #7000ff;
     --dark-bg: #05060b;
-    --card-bg: #0f172a; /* Lógica Nueva: Fondo oscuro sólido premium */
+    --card-bg: #0b1120; /* Lógica Nueva: Azul oscuro profundo para tarjetas */
     --glass: rgba(255, 255, 255, 0.05);
     --border: rgba(255, 255, 255, 0.1);
     --text-muted: #a0aec0;
@@ -502,61 +502,61 @@ body {
    LÓGICA NUEVA: TARJETAS DE SERVICIO PREMIUM (VORTEX-ITEM)
    ========================================================================== */
 
-.service-card {
-    background: var(--card-bg) !important; /* #0f172a sólido */
-    border-radius: 2rem !important;
-    padding: 2rem !important;
+.service-card, .card.vortex-item {
+    background: var(--card-bg) !important; /* Azul oscuro profundo */
+    border-radius: 2.5rem !important; /* Bordes extra redondeados */
+    padding: 2.5rem 1.5rem !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     position: relative;
     overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 
-.service-card:hover {
-    transform: translateY(-10px) !important;
-    border-color: #22d3ee !important; /* Brillo cyan */
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+.service-card:hover, .card.vortex-item:hover {
+    transform: translateY(-12px) !important;
+    border-color: #22d3ee !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Contenedor del Logo */
 .logo-wrapper, .logo-container {
-    height: 80px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .logo-wrapper img, .logo-container img {
     max-height: 100%;
     max-width: 140px;
     object-fit: contain;
-    filter: drop-shadow(0 0 8px rgba(255,255,255,0.2));
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
 }
 
-/* Botón Adquirir estilo Píldora */
+/* Botón Adquirir estilo Píldora Premium */
 .btn-adquirir, .vortex-item button {
-    width: 100%;
     background: white !important;
     color: black !important;
     font-weight: 900 !important;
-    font-size: 0.75rem !important;
-    padding: 0.8rem !important;
-    border-radius: 9999px !important; 
+    width: 100%;
+    padding: 0.85rem !important;
+    border-radius: 9999px !important;
+    font-size: 0.7rem !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
-    transition: background 0.3s ease !important;
+    letter-spacing: 0.15em !important;
+    margin-top: 1.5rem !important;
     border: none;
     cursor: pointer;
-    margin-top: auto;
+    transition: 0.3s ease;
 }
 
 .btn-adquirir:hover, .vortex-item button:hover {
-    background: #22d3ee !important; /* Cambio a cyan */
+    background: #22d3ee !important;
 }
 
 /* ==========================================================================
@@ -606,18 +606,6 @@ body {
     display: grid; 
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
     gap: 25px; 
-}
-
-/* Compatibilidad con clase .card antigua para mantener estructura */
-.card.vortex-item {
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: var(--card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 2rem;
-    padding: 2rem;
 }
 
 .badge {

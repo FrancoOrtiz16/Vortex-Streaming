@@ -246,68 +246,50 @@
         </div>
 
         <div id="vortex-main-container">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                <div class="service-card">
-                    <div class="logo-wrapper">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix">
-                    </div>
-                    <h3 class="text-white font-bold text-lg">Netflix</h3>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-6">Premium Mensual</p>
-                    <div class="w-full h-[1px] bg-white/5 mb-6"></div>
-                    <span class="text-3xl font-black text-white mb-4">$5.50</span>
-                    <button class="btn-adquirir">Adquirir</button>
+            <div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 </div>
-
-                <div class="service-card">
-                    <div class="logo-wrapper">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" alt="Disney+">
-                    </div>
-                    <h3 class="text-white font-bold text-lg">Disney+</h3>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-6">Premium Mensual</p>
-                    <div class="w-full h-[1px] bg-white/5 mb-6"></div>
-                    <span class="text-3xl font-black text-white mb-4">$4.00</span>
-                    <button class="btn-adquirir">Adquirir</button>
-                </div>
-
-                <div class="service-card">
-                    <div class="logo-wrapper">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/ce/Max_logo.svg" alt="Max">
-                    </div>
-                    <h3 class="text-white font-bold text-lg">Max</h3>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-6">Premium Mensual</p>
-                    <div class="w-full h-[1px] bg-white/5 mb-6"></div>
-                    <span class="text-3xl font-black text-white mb-4">$3.80</span>
-                    <button class="btn-adquirir">Adquirir</button>
-                </div>
-
-                <div class="service-card" style="border-color: #22d3ee20;">
-                    <div class="logo-wrapper">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Crunchyroll_Logo.svg" alt="Crunchyroll">
-                    </div>
-                    <h3 class="text-white font-bold text-lg">Crunchyroll</h3>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-6">Premium Mensual</p>
-                    <div class="w-full h-[1px] bg-white/5 mb-6"></div>
-                    <span class="text-3xl font-black text-white mb-4">$3.00</span>
-                    <button class="btn-adquirir" style="background: #22d3ee;">Adquirir</button>
-                </div>
-
-                <div class="service-card">
-                    <div class="logo-wrapper">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg" alt="Paramount+">
-                    </div>
-                    <h3 class="text-white font-bold text-lg">Paramount+</h3>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-6">Premium Mensual</p>
-                    <div class="w-full h-[1px] bg-white/5 mb-6"></div>
-                    <span class="text-3xl font-black text-white mb-4">$2.50</span>
-                    <button class="btn-adquirir">Adquirir</button>
-                </div>
-            </div>
         </div>
     </main>
 
     <div id="toast" class="toast"></div>
 
     <script>
+        // --- Lógica Nueva: Array de servicios y renderizado ---
+        const servicios = [
+            { id: 1, name: 'Netflix', price: 5.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
+            { id: 2, name: 'Disney+', price: 4.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg' },
+            { id: 3, name: 'Max', price: 3.80, logo: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Max_logo.svg' },
+            { id: 4, name: 'Crunchyroll', price: 3.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Crunchyroll_Logo.svg', highlight: true },
+            { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
+        ];
+
+        function renderServicios() {
+            const container = document.getElementById('grid-servicios');
+            if(!container) return;
+            
+            container.innerHTML = servicios.map(s => `
+                <div class="service-card animate__animated animate__fadeInUp">
+                    <div class="logo-wrapper">
+                        <img src="${s.logo}" alt="${s.name}" />
+                    </div>
+                    <h3 class="text-white font-bold text-xl mb-1">${s.name}</h3>
+                    <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Premium Mensual</p>
+                    
+                    <div class="w-full h-[1px] bg-white/5 my-6"></div>
+                    
+                    <span class="text-4xl font-black text-white">$${s.price.toFixed(2)}</span>
+                    
+                    <button 
+                        class="btn-adquirir"
+                        style="${s.highlight ? 'background: #22d3ee' : ''}"
+                        onclick="app.buyService(${s.id})"
+                    >
+                        Adquirir
+                    </button>
+                </div>
+            `).join('');
+        }
+
         // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (ACTUALIZADA V.NUEVA) ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
@@ -353,6 +335,8 @@
                         const startRoute = (user.role === 'ADMIN') ? 'admin' : 'market';
                         window.app.router(startRoute);
                     }
+                    // Renderizamos los servicios al iniciar sesión
+                    renderServicios();
                 }, 50);
             }
         }
@@ -370,6 +354,8 @@
                 const observer = new MutationObserver(() => {
                     const isViewAdmin = window.app.state.view === 'admin';
                     adminBtn.textContent = isViewAdmin ? 'VER TIENDA' : 'VER PANEL ADMIN';
+                    // Si volvemos a market, nos aseguramos que se rendericen los servicios
+                    if(!isViewAdmin) renderServicios();
                 });
                 observer.observe(document.getElementById('app-content'), { childList: true });
             }
