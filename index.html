@@ -199,9 +199,13 @@
                         </div>
                     </div>
 
+                    <a href="#" onclick="app.router('market')" class="only-user-nav">
+                        <span class="emoji">🏠</span> Inicio / Streaming
+                    </a>
+
                     <div class="user-history-section">
                         <button class="menu-item-btn" onclick="app.toggleHistory()">
-                            <span class="emoji">📜</span>Historial de Compras
+                            <span class="emoji">📜</span> Historial de Compras
                         </button>
                         <div id="user-history-list" class="history-panel hidden">
                             <div class="history-header">
@@ -214,7 +218,9 @@
                         </div>
                     </div>
 
-                    <a href="#" onclick="app.router('gaming')"><span class="emoji">🎮</span> Recargas Gaming</a> 
+                    <a href="#" onclick="app.router('gaming')">
+                        <span class="emoji">🎮</span> Recargas Gaming
+                    </a> 
                     
                     <button class="nav-link-btn" id="admin-link-el" style="display: none;" onclick="app.router('admin')">
                         <span class="emoji">🛠️</span> PANEL CONTROL
@@ -252,6 +258,14 @@
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
+                
+                // NUEVA LÓGICA: Agrega una clase al body para controlar el menú por CSS
+                const isAdmin = user.role === 'ADMIN';
+                if (isAdmin) {
+                    document.body.classList.add('is-admin');
+                } else {
+                    document.body.classList.remove('is-admin');
+                }
                 
                 // Sincronizar estado y botones de admin
                 localStorage.setItem('vortex_session', JSON.stringify(user));

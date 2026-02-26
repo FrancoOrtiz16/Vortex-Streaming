@@ -1,3 +1,8 @@
+/* Si el usuario es ADMIN, ocultamos elementos específicos del menú lateral */
+body.is-admin .only-user-nav {
+    display: none !important;
+}
+
 /* ==========================================================================
    VORTEX STREAMING - DESIGN SYSTEM ELITE (UNIFICADO V3.2 + SEGURIDAD MÓVIL)
    ========================================================================== */
