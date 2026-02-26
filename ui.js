@@ -52,6 +52,13 @@ export const router = (view) => {
     if (window.app && window.app.state) window.app.state.view = view;
 
     const container = document.getElementById('app-content');
+    
+    // --- LÍNEA DE LIMPIEZA DE SEGURIDAD ---
+    // Esto elimina cualquier texto o elemento inyectado accidentalmente fuera del contenedor
+    const looseText = document.querySelectorAll('body > p, body > span');
+    looseText.forEach(el => { if(el.textContent.includes('Bienvenido')) el.remove(); });
+    // --------------------------------------
+
     const menu = document.getElementById('side-menu-vortex');
     
     if(!container) return;
