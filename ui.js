@@ -48,6 +48,12 @@ const renderWelcomeMessage = (name) => `
  * Enrutador principal del sistema.
  */
 export const router = (view) => {
+    // REFUERZO: Si el estado está vacío pero hay sesión, re-hidratar
+    if (!state.currentUser) {
+        const saved = localStorage.getItem('vortex_session');
+        if (saved) state.currentUser = JSON.parse(saved);
+    }
+    
     state.view = view;
     if (window.app && window.app.state) window.app.state.view = view;
 

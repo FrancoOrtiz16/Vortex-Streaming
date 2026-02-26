@@ -245,7 +245,12 @@
             if (saved) {
                 const user = JSON.parse(saved);
                 
-                // Actualizar interfaz
+                // 1. Asegurar que el estado global reconozca al usuario INMEDIATAMENTE
+                if (window.app && window.app.state) {
+                    window.app.state.currentUser = user;
+                }
+
+                // 2. Actualizar textos de la interfaz
                 const navName = document.getElementById('nav-user-name');
                 if(navName) navName.textContent = user.name || user.email.split('@')[0];
 
@@ -254,18 +259,17 @@
                     adminBtn.style.display = 'block';
                 }
 
-                // 1. Quitar pantalla de carga
+                // 3. Quitar el bloqueo visual
                 document.getElementById('auth-screen').classList.add('hidden');
 
-                // 2. IMPORTANTE: Forzar la carga del catálogo inicial
-                // Esperamos un momento a que el módulo app.js esté listo
+                // 4. Cargar la vista con los datos ya inyectados
                 setTimeout(() => {
                     if (window.app && window.app.router) {
-                        // Si ya estábamos en admin, volvemos a admin, si no, al market
-                        const currentView = window.app.state.view || 'market';
-                        window.app.router(currentView);
+                        // Esto garantiza que el router lea el nombre real y no "Invitado"
+                        const lastView = window.app.state.view || 'market';
+                        window.app.router(lastView);
                     }
-                }, 100);
+                }, 50); 
             }
         }
 
