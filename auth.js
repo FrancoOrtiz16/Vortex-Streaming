@@ -147,9 +147,19 @@ export function enterSystem(user) {
         setTimeout(() => {
             overlay.classList.add('hidden');
             
-            // LÓGICA NUEVA INTEGRADA: Prioridad de ruteo según ROL
+            // LÓGICA NUEVA INTEGRADA: Prioridad de ruteo según ROL y FORZADO DE INTERFAZ
             if (window.app && window.app.router) {
                 if (user.role === 'ADMIN') {
+                    // FORZADO MANUAL DE INTERFAZ (Lógica Nueva Solicitada):
+                    const adminBtn = document.getElementById('admin-view-toggle');
+                    if (adminBtn) {
+                        adminBtn.style.setProperty('display', 'block', 'important'); 
+                        adminBtn.textContent = 'VER TIENDA';
+                    }
+                    
+                    const adminLink = document.getElementById('admin-link-el');
+                    if (adminLink) adminLink.style.display = 'flex';
+
                     window.app.router('admin'); // Ir directo al Command Center
                 } else {
                     window.app.router('market'); // Ir a la tienda
