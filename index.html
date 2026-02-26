@@ -107,7 +107,6 @@
         .logout-btn-new span { transition: transform 0.3s; display: inline-block; font-size: 1.2rem; }
         .logout-btn-new:hover span { transform: scale(1.1); }
         
-        /* Estilos del botón de Toggle Admin */
         .admin-toggle-btn {
             background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 10px;
             text-transform: uppercase; font-size: 10px; font-weight: 900; color: white;
@@ -115,14 +114,12 @@
         }
         .admin-toggle-btn:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--primary); }
 
-        /* Estilos Glass Card para Admin */
         .glass-card {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Estilos para las tarjetas de servicio */
         .service-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
@@ -293,16 +290,7 @@
     </nav>
 
     <main id="app-content" class="pt-28 px-6 max-w-7xl mx-auto main-viewport">
-        <div class="mb-10 text-center sm:text-left animate__animated animate__fadeIn">
-            <h2 class="text-4xl font-black text-white">Servicios Streaming</h2>
-            <p class="text-slate-500 uppercase text-xs font-bold tracking-[0.2em] mt-2">Cuentas 100% personales con garantía</p>
-        </div>
-
-        <div id="vortex-main-container">
-            <div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                </div>
-        </div>
-    </main>
+        </main>
 
     <div id="toast" class="toast"></div>
 
@@ -316,30 +304,43 @@
             { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
         ];
 
-        // Función para actualizar el estado y refrescar la vista (Equivalente al setServicios)
+        // Función para actualizar el estado y refrescar la vista
         function updateServiceLogo(id, newLogo) {
             servicios = servicios.map(s => s.id === id ? { ...s, logo: newLogo } : s);
             
-            // Refresco inteligente según la vista actual
             if(window.app && window.app.state && window.app.state.view === 'admin') {
-                renderAdminConfig(); // Refresca inputs en admin
+                renderAdminConfig(); 
             } else {
-                renderServicios(); // Refresca cards en tienda
+                renderServicios();
             }
         };
 
-        // Renderiza los servicios en la tienda (Mapeo de datos)
+        // Renderiza los servicios en la tienda
         function renderServicios() {
             const container = document.getElementById('grid-servicios');
-            if(!container) return;
+            if(!container) {
+                // Si no existe el grid, lo creamos dentro del main-viewport
+                const content = document.getElementById('app-content');
+                content.innerHTML = `
+                    <div class="mb-10 text-center sm:text-left animate__animated animate__fadeIn">
+                        <h2 class="text-4xl font-black text-white">Servicios Streaming</h2>
+                        <p class="text-slate-500 uppercase text-xs font-bold tracking-[0.2em] mt-2">Cuentas 100% personales con garantía</p>
+                    </div>
+                    <div id="vortex-main-container">
+                        <div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8"></div>
+                    </div>
+                `;
+                renderServicios(); // Recursión para llenar el container recién creado
+                return;
+            }
             
             container.innerHTML = servicios.map(s => `
-                <div class="service-card animate__animated animate__fadeInUp">
+                <div key="${s.id}" class="service-card animate__animated animate__fadeInUp">
                     <div class="logo-wrapper">
                         <img src="${s.logo}" alt="${s.name}" />
                     </div>
-                    <h3 class="text-white font-bold text-xl mb-1">${s.name}</h3>
-                    <p class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Premium Mensual</p>
+                    <h3 class="text-white font-extrabold text-xl mb-1">${s.name}</h3>
+                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Premium Mensual</p>
                     
                     <div class="w-full h-[1px] bg-white/5 my-6"></div>
                     
@@ -358,7 +359,6 @@
 
         // --- Inyectar Configuración en el Panel Admin ---
         function renderAdminConfig() {
-            // Buscamos el contenedor principal de administración
             const adminContainer = document.querySelector('.admin-content-vortex'); 
             if(!adminContainer) return;
 
@@ -369,21 +369,20 @@
             configSection.id = 'config-catalogo-vortex';
             configSection.className = "glass-card rounded-[2.5rem] p-8 mt-8 animate__animated animate__fadeIn border-t-4 border-cyan-500";
             configSection.innerHTML = `
-                <h3 class="text-xl font-black mb-6 uppercase italic text-white">
-                    Gestión de Catálogo (Imágenes)
+                <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest italic">
+                    Gestión de Catálogo (Editor de URLs)
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     ${servicios.map(s => `
-                        <div class="bg-white/5 p-4 rounded-3xl flex items-center gap-4">
-                            <img src="${s.logo}" class="w-12 h-12 object-contain" alt="preview" />
+                        <div class="bg-black/40 p-4 rounded-3xl flex items-center gap-4 border border-white/5">
+                            <img src="${s.logo}" class="w-12 h-12 object-contain bg-white/5 rounded-xl p-1" />
                             <div class="flex-1">
-                                <label class="text-[10px] font-black text-slate-500 uppercase">${s.name}</label>
+                                <p class="text-[10px] font-black text-slate-400 uppercase">${s.name}</p>
                                 <input 
                                     type="text" 
-                                    class="w-full bg-transparent border-b border-white/10 text-cyan-400 text-xs py-1 outline-none focus:border-cyan-500"
+                                    class="w-full bg-transparent border-b border-cyan-500/30 text-cyan-400 text-[10px] py-1 outline-none focus:border-cyan-500"
                                     value="${s.logo}" 
                                     onchange="updateServiceLogo(${s.id}, this.value)"
-                                    placeholder="URL del logo..."
                                 />
                             </div>
                         </div>
