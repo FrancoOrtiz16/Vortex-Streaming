@@ -239,38 +239,44 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (ACTUALIZADA) ---
+        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (NUEVA LÓGICA INTEGRADA) ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
+                const isAdmin = user.role === 'ADMIN'; // Validación de rol inmediata
+
+                // 1. Actualizar identidad en el Nav y Menú
                 const userName = user.name || user.email.split('@')[0];
+                const elements = {
+                    'nav-user-name': userName.toUpperCase(),
+                    'display-username': userName.toUpperCase(),
+                    'user-role-display': user.role || 'USUARIO',
+                    'val-user': user.email
+                };
 
-                // 1. Actualizar Nav Superior
-                const navName = document.getElementById('nav-user-name');
-                if(navName) navName.textContent = userName.toUpperCase();
+                for (let [id, val] of Object.entries(elements)) {
+                    const el = document.getElementById(id);
+                    if(el) el.textContent = val;
+                }
 
-                // 2. CORRECCIÓN DEL MENÚ LATERAL
-                const displayUsername = document.getElementById('display-username');
-                const userRoleDisplay = document.getElementById('user-role-display');
-                const valUser = document.getElementById('val-user');
+                // 2. CORRECCIÓN CRÍTICA: Mostrar botón y enlace de Admin al recargar
+                const adminToggle = document.getElementById('admin-view-toggle');
+                const adminLink = document.getElementById('admin-link-el');
+                
+                if (isAdmin) {
+                    if(adminToggle) adminToggle.style.display = 'block';
+                    if(adminLink) adminLink.style.display = 'flex'; // Muestra la opción en el menú lateral
+                }
 
-                if(displayUsername) displayUsername.textContent = userName.toUpperCase();
-                if(userRoleDisplay) userRoleDisplay.textContent = user.role || 'USUARIO';
-                if(valUser) valUser.textContent = user.email;
-
-                // 3. Mostrar botón Admin si aplica
-                const adminBtn = document.getElementById('admin-view-toggle');
-                if(adminBtn && user.role === 'ADMIN') adminBtn.style.display = 'block';
-
-                // 4. Liberar pantalla
-                document.getElementById('auth-screen').classList.add('hidden');
-
-                // Sincronizar con el estado global de la app
+                // 3. Inyectar usuario en el estado global para que el Router no falle
                 if (window.app && window.app.state) {
                     window.app.state.currentUser = user;
+                    // Opcional: sincronizar vista actual
                     setTimeout(() => window.app.router(window.app.state.view || 'market'), 50);
                 }
+
+                document.getElementById('auth-screen').classList.add('hidden');
             }
         }
 
