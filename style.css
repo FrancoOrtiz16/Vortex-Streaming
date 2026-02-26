@@ -3,6 +3,11 @@ body.is-admin .only-user-nav {
     display: none !important;
 }
 
+/* Lógica nueva: RESET DE SEGURIDAD PARA EL PANEL EN NO-ADMINS */
+body:not(.is-admin) #admin-link-el {
+    display: none !important;
+}
+
 /* ==========================================================================
    VORTEX STREAMING - DESIGN SYSTEM ELITE (UNIFICADO V3.2 + SEGURIDAD MÓVIL)
    ========================================================================== */

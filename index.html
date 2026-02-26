@@ -222,7 +222,7 @@
                         <span class="emoji">🎮</span> Recargas Gaming
                     </a> 
                     
-                    <button class="nav-link-btn only-user-nav" id="admin-link-el" onclick="app.router('admin')">
+                    <button class="nav-link-btn only-user-nav" id="admin-link-el" style="display: none;" onclick="app.router('admin')">
                         <span class="emoji">🛠️</span> PANEL CONTROL
                     </button>
                 </nav>
@@ -244,24 +244,30 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
+        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (ACTUALIZADA V.NUEVA) ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
                 const isAdmin = user.role === 'ADMIN';
 
-                // Aplicamos la clase al body para que el CSS funcione
+                // 1. Aplicamos la clase al body inmediatamente
                 if (isAdmin) {
                     document.body.classList.add('is-admin');
                 } else {
                     document.body.classList.remove('is-admin');
                 }
 
-                // El Admin verá el botón superior para alternar vistas
+                // 2. Controlamos el botón dinámico superior
                 const adminBtn = document.getElementById('admin-view-toggle');
-                if (isAdmin && adminBtn) {
-                    adminBtn.style.display = 'block';
+                if (adminBtn) {
+                    adminBtn.style.display = isAdmin ? 'block' : 'none';
+                }
+
+                // 3. Limpiamos cualquier rastro del botón admin viejo en el menú para el User
+                const oldAdminLink = document.getElementById('admin-link-el');
+                if (oldAdminLink && !isAdmin) {
+                    oldAdminLink.style.setProperty('display', 'none', 'important');
                 }
                 
                 // Sincronizar estado y datos de sesión
