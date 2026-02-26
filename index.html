@@ -172,8 +172,8 @@
         <aside id="side-menu-vortex">
             <div class="menu-content-vortex">
                 <div class="user-info-section">
-                    <h2 class="user-name-title" id="display-username">Cargando...</h2>
-                    <span class="user-role-tag" id="user-role-display" style="color: var(--primary); font-size: 0.8rem;">USUARIO</span>
+                    <h2 class="user-name-title" id="display-username">—</h2>
+                    <span class="user-role-tag" id="user-role-display" style="color: var(--primary); font-size: 0.8rem;">—</span>
                 </div>
                 <hr class="menu-divider" />
                 
@@ -239,37 +239,38 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
+        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN (ACTUALIZADA) ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
-                
-                // 1. Asegurar que el estado global reconozca al usuario INMEDIATAMENTE
-                if (window.app && window.app.state) {
-                    window.app.state.currentUser = user;
-                }
+                const userName = user.name || user.email.split('@')[0];
 
-                // 2. Actualizar textos de la interfaz
+                // 1. Actualizar Nav Superior
                 const navName = document.getElementById('nav-user-name');
-                if(navName) navName.textContent = user.name || user.email.split('@')[0];
+                if(navName) navName.textContent = userName.toUpperCase();
 
+                // 2. CORRECCIÓN DEL MENÚ LATERAL
+                const displayUsername = document.getElementById('display-username');
+                const userRoleDisplay = document.getElementById('user-role-display');
+                const valUser = document.getElementById('val-user');
+
+                if(displayUsername) displayUsername.textContent = userName.toUpperCase();
+                if(userRoleDisplay) userRoleDisplay.textContent = user.role || 'USUARIO';
+                if(valUser) valUser.textContent = user.email;
+
+                // 3. Mostrar botón Admin si aplica
                 const adminBtn = document.getElementById('admin-view-toggle');
-                if(adminBtn && user.role === 'ADMIN') {
-                    adminBtn.style.display = 'block';
-                }
+                if(adminBtn && user.role === 'ADMIN') adminBtn.style.display = 'block';
 
-                // 3. Quitar el bloqueo visual
+                // 4. Liberar pantalla
                 document.getElementById('auth-screen').classList.add('hidden');
 
-                // 4. Cargar la vista con los datos ya inyectados
-                setTimeout(() => {
-                    if (window.app && window.app.router) {
-                        // Esto garantiza que el router lea el nombre real y no "Invitado"
-                        const lastView = window.app.state.view || 'market';
-                        window.app.router(lastView);
-                    }
-                }, 50); 
+                // Sincronizar con el estado global de la app
+                if (window.app && window.app.state) {
+                    window.app.state.currentUser = user;
+                    setTimeout(() => window.app.router(window.app.state.view || 'market'), 50);
+                }
             }
         }
 
