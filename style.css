@@ -393,6 +393,7 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.08); 
     border-radius: 16px;
     padding: 20px;
+    transition: all 0.3s ease;
 }
 
 /* Lógica Nueva: Grid de KPIs */
@@ -504,8 +505,32 @@ body {
 .history-panel::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 10px; }
 
 /* ==========================================================================
-   COMPONENTES DE ACCESO Y GRID
+   COMPONENTES DE ACCESO Y GRID (CON LÓGICA DE SERVICIO NUEVA)
    ========================================================================== */
+
+.service-card { 
+    transition: all 0.3s ease; 
+}
+
+.service-card:hover { 
+    transform: translateY(-8px); 
+    border-color: rgba(34, 211, 238, 0.4); 
+}
+
+.logo-container { 
+    height: 60px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 1.5rem; 
+}
+
+.logo-container img { 
+    max-height: 100%; 
+    max-width: 80%; 
+    object-fit: contain; 
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.2)); 
+}
 
 .menu-items-vertical {
     display: flex;

@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>Vortex Streaming | Plataforma Elite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <link rel="stylesheet" href="style.css?v=3.0">
     
@@ -238,7 +240,13 @@
     </nav>
 
     <main id="app-content" class="pt-28 px-6 max-w-7xl mx-auto main-viewport">
-        <div id="vortex-main-container"></div>
+        <div class="mb-10 text-center sm:text-left animate__animated animate__fadeIn">
+            <h2 class="text-4xl font-black text-white">Servicios Streaming</h2>
+            <p class="text-slate-500 uppercase text-xs font-bold tracking-[0.2em] mt-2">Cuentas 100% personales con garantía</p>
+        </div>
+
+        <div id="vortex-main-container">
+            </div>
     </main>
 
     <div id="toast" class="toast"></div>
@@ -251,44 +259,37 @@
                 const user = JSON.parse(saved);
                 const isAdmin = user.role === 'ADMIN';
 
-                // 1. Aplicamos la clase al body inmediatamente
                 if (isAdmin) {
                     document.body.classList.add('is-admin');
                 } else {
                     document.body.classList.remove('is-admin');
                 }
 
-                // 2. Controlamos el botón dinámico superior
                 const adminBtn = document.getElementById('admin-view-toggle');
                 if (adminBtn) {
                     adminBtn.style.display = isAdmin ? 'block' : 'none';
                 }
 
-                // 3. Limpiamos cualquier rastro del botón admin viejo en el menú para el User
                 const oldAdminLink = document.getElementById('admin-link-el');
                 if (oldAdminLink && !isAdmin) {
                     oldAdminLink.style.setProperty('display', 'none', 'important');
                 }
                 
-                // Sincronizar estado y datos de sesión
                 if (window.app && window.app.state) {
                     window.app.state.currentUser = user;
                 }
                 
-                // Sincronizar el texto del botón superior dinámico si existe
                 if (isAdmin && adminBtn) {
                     const currentView = (window.app && window.app.state) ? window.app.state.view : null;
                     adminBtn.textContent = (currentView === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
                 }
 
-                // Actualizar UI del Menú y Nav
                 const userName = user.name || user.email.split('@')[0];
                 if(document.getElementById('nav-user-name')) document.getElementById('nav-user-name').textContent = userName.toUpperCase();
                 if(document.getElementById('display-username')) document.getElementById('display-username').textContent = userName.toUpperCase();
                 if(document.getElementById('user-role-display')) document.getElementById('user-role-display').textContent = user.role;
                 if(document.getElementById('val-user')) document.getElementById('val-user').textContent = user.email;
 
-                // OCULTAR LOGIN Y CARGAR DASHBOARD
                 document.getElementById('auth-screen').classList.add('hidden');
                 
                 setTimeout(() => {
@@ -303,7 +304,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateUIFromSession();
             
-            // --- INTEGRACIÓN LÓGICA DE OBSERVACIÓN Y BOTÓN ---
             const adminBtn = document.getElementById('admin-view-toggle');
             if(adminBtn) {
                 adminBtn.onclick = () => {
@@ -327,15 +327,9 @@
                     }
                     return originalRouter.apply(this, arguments);
                 };
-                
-                app.toggleAdminView = function() {
-                    const currentRoute = this.state.view || 'market';
-                    this.router(currentRoute === 'admin' ? 'market' : 'admin');
-                };
             }
         });
 
-        // --- FUNCIONES DE UI ORIGINALES ---
         function toggleSearchField() {
             const container = document.getElementById('search-input-container');
             container.classList.toggle('search-field-visible');
@@ -351,9 +345,6 @@
         function toggleUserCard() {
             const card = document.getElementById('user-info-card');
             card.classList.toggle('hidden');
-            if(!card.classList.contains('hidden')) {
-                document.getElementById('val-user').textContent = (window.app && window.app.state && window.app.state.currentUser) ? window.app.state.currentUser.email : 'Invitado';
-            }
         }
 
         function revealPass() {
