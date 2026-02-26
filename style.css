@@ -1,4 +1,4 @@
-/* Cuando el body tiene la clase 'is-admin', ocultamos el botón de streaming del menú */
+/* Lógica nueva: Oculta CUALQUIER elemento con esta clase si el body tiene 'is-admin' */
 body.is-admin .only-user-nav {
     display: none !important;
 }

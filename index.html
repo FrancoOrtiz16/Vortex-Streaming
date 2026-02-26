@@ -222,7 +222,7 @@
                         <span class="emoji">🎮</span> Recargas Gaming
                     </a> 
                     
-                    <button class="nav-link-btn" id="admin-link-el" style="display: none;" onclick="app.router('admin')">
+                    <button class="nav-link-btn only-user-nav" id="admin-link-el" onclick="app.router('admin')">
                         <span class="emoji">🛠️</span> PANEL CONTROL
                     </button>
                 </nav>
@@ -251,11 +251,17 @@
                 const user = JSON.parse(saved);
                 const isAdmin = user.role === 'ADMIN';
 
-                // LÓGICA NUEVA: Marcamos el cuerpo del documento según el rol
+                // Aplicamos la clase al body para que el CSS funcione
                 if (isAdmin) {
                     document.body.classList.add('is-admin');
                 } else {
                     document.body.classList.remove('is-admin');
+                }
+
+                // El Admin verá el botón superior para alternar vistas
+                const adminBtn = document.getElementById('admin-view-toggle');
+                if (isAdmin && adminBtn) {
+                    adminBtn.style.display = 'block';
                 }
                 
                 // Sincronizar estado y datos de sesión
@@ -263,13 +269,10 @@
                     window.app.state.currentUser = user;
                 }
                 
-                // LÓGICA NUEVA: Sincronizar el botón superior dinámico
-                const adminToggle = document.getElementById('admin-view-toggle');
-                if (isAdmin && adminToggle) {
-                    adminToggle.style.display = 'block';
-                    // Aseguramos el texto inicial según la ruta actual si existiera
+                // Sincronizar el texto del botón superior dinámico si existe
+                if (isAdmin && adminBtn) {
                     const currentView = (window.app && window.app.state) ? window.app.state.view : null;
-                    adminToggle.textContent = (currentView === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
+                    adminBtn.textContent = (currentView === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
                 }
 
                 // Actualizar UI del Menú y Nav
