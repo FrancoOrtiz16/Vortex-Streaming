@@ -244,9 +244,9 @@
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
-                const isAdmin = user.role === 'ADMIN'; // Validación de rol inmediata
+                const isAdmin = user.role === 'ADMIN';
 
-                // 1. Actualizar identidad en el Nav y Menú
+                // Actualizar textos de identidad
                 const userName = user.name || user.email.split('@')[0];
                 const elements = {
                     'nav-user-name': userName.toUpperCase(),
@@ -260,21 +260,27 @@
                     if(el) el.textContent = val;
                 }
 
-                // 2. CORRECCIÓN CRÍTICA: Mostrar botón y enlace de Admin al recargar
+                // 1. Mostrar controles de Admin
                 const adminToggle = document.getElementById('admin-view-toggle');
                 const adminLink = document.getElementById('admin-link-el');
-                
                 if (isAdmin) {
                     if(adminToggle) adminToggle.style.display = 'block';
-                    if(adminLink) adminLink.style.display = 'flex'; // Muestra la opción en el menú lateral
+                    if(adminLink) adminLink.style.display = 'flex';
                 }
 
-                // 3. Inyectar usuario en el estado global para que el Router no falle
+                // 2. Sincronizar estado
                 if (window.app && window.app.state) {
                     window.app.state.currentUser = user;
-                    // Opcional: sincronizar vista actual
-                    setTimeout(() => window.app.router(window.app.state.view || 'market'), 50);
                 }
+
+                // 3. PRIORIDAD DE VISTA AL INICIAR/RECARGAR
+                setTimeout(() => {
+                    if (window.app && window.app.router) {
+                        // Si es Admin y no hay una vista específica guardada, forzamos 'admin'
+                        const targetView = isAdmin ? 'admin' : 'market';
+                        window.app.router(targetView);
+                    }
+                }, 100);
 
                 document.getElementById('auth-screen').classList.add('hidden');
             }
@@ -282,17 +288,21 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             updateUIFromSession();
-            // Observador para cuando la app cambie de vista
+            
             if(window.app) {
                 const originalRouter = app.router;
                 app.router = function(route) {
                     const adminBtn = document.getElementById('admin-view-toggle');
-                    if(adminBtn) adminBtn.textContent = route === 'admin' ? 'Ver Tienda' : 'Ver Panel Admin';
+                    if(adminBtn) {
+                        // Si estamos en el panel, el botón invita a ir a la tienda
+                        // Si estamos en la tienda, el botón invita a ir al panel
+                        adminBtn.textContent = (route === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
+                    }
                     return originalRouter.apply(this, arguments);
                 };
                 
                 app.toggleAdminView = function() {
-                    const currentRoute = this.state.currentRoute || 'market';
+                    const currentRoute = this.state.view || 'market';
                     this.router(currentRoute === 'admin' ? 'market' : 'admin');
                 };
             }
