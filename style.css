@@ -21,6 +21,18 @@
     --menu-bg: #0b0e14;
 }
 
+/* Lógica Nueva: RESET DE SEGURIDAD PARA ELEMENTOS INYECTADOS */
+/* Oculta específicamente el texto de bienvenida que NO esté dentro del banner animado */
+body > p, 
+#app-content + p, 
+#vortex-main-container + p {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute;
+    pointer-events: none;
+}
+
 body { 
     background: var(--dark-bg); 
     color: white; 
