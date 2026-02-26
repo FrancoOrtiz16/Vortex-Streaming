@@ -214,7 +214,6 @@
                         </div>
                     </div>
 
-                    <a href="#" onclick="app.router('market')"><span class="emoji">📺</span> Servicios Streaming</a> 
                     <a href="#" onclick="app.router('gaming')"><span class="emoji">🎮</span> Recargas Gaming</a> 
                     
                     <button class="nav-link-btn" id="admin-link-el" style="display: none;" onclick="app.router('admin')">
@@ -242,13 +241,10 @@
         // --- LÓGICA NUEVA: SINCRONIZACIÓN DE INTERFAZ ---
         const syncAdminInterface = (user) => {
             const isAdmin = user && user.role === 'ADMIN';
-            const adminBtn = document.getElementById('admin-view-toggle');
-            const adminLink = document.getElementById('admin-link-el');
+            const adminToggle = document.getElementById('admin-view-toggle');
 
-            if (isAdmin) {
-                if (adminBtn) adminBtn.style.display = 'block';
-                if (adminLink) adminLink.style.display = 'flex';
-            }
+            // Solo validamos el botón superior
+            if (isAdmin && adminToggle) adminToggle.style.display = 'block';
         };
 
         // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
