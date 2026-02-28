@@ -1,16 +1,17 @@
-/* Lógica nueva: Oculta CUALQUIER elemento con esta clase si el body tiene 'is-admin' */
-body.is-admin .only-user-nav {
-    display: none !important;
-}
-
-/* Lógica nueva: RESET DE SEGURIDAD PARA EL PANEL EN NO-ADMINS */
-body:not(.is-admin) #admin-link-el {
-    display: none !important;
-}
+/* UBICACIÓN: En tu archivo style.css */
 
 /* ==========================================================================
    VORTEX STREAMING - DESIGN SYSTEM ELITE (UNIFICADO V3.2 + SEGURIDAD MÓVIL)
    ========================================================================== */
+
+/* LÓGICA INICIAL: SEGURIDAD Y VISIBILIDAD */
+body.is-admin .only-user-nav {
+    display: none !important;
+}
+
+body:not(.is-admin) #admin-link-el {
+    display: none !important;
+}
 
 /* Lógica Nueva: RESET DE SEGURIDAD PARA MÓVILES */
 * {
@@ -499,8 +500,16 @@ body {
 .history-panel::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 10px; }
 
 /* ==========================================================================
-   LÓGICA NUEVA: TARJETAS DE SERVICIO PREMIUM (VORTEX-ITEM)
+   LÓGICA NUEVA UNIFICADA: REJILLA Y TARJETAS PREMIUM (VORTEX-ITEM)
    ========================================================================== */
+
+.grid-catalog {
+    display: grid;
+    /* Permite ajuste automático según el ancho */
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+    gap: 2rem;
+    padding: 2rem 0;
+}
 
 .service-card, .card.vortex-item {
     background: linear-gradient(145deg, #0f172a, #020617) !important; /* Lógica Nueva: Graduado Premium */
@@ -649,7 +658,8 @@ body {
         grid-template-columns: repeat(2, 1fr) !important;
     }
 
-    .bento-grid {
+    /* Adaptación de bento-grid y catalog-grid para móviles */
+    .bento-grid, .grid-catalog {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
         gap: 12px !important;
@@ -667,7 +677,7 @@ body {
         grid-template-columns: 1fr !important;
     }
 
-    .bento-grid {
+    .bento-grid, .grid-catalog {
         grid-template-columns: 1fr !important;
         padding: 15px !important;
     }

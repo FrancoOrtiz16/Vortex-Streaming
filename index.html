@@ -304,7 +304,25 @@
             { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
         ];
 
-        // Función para actualizar el estado y refrescar la vista
+        // LÓGICA UNIFICADA: addService (Adaptada de React a Vanilla JS)
+        const addService = (newService) => {
+            const serviceToAdd = { 
+                ...newService, 
+                id: servicios.length + 1, // Genera ID automático
+                price: parseFloat(newService.price) 
+            };
+            
+            servicios.push(serviceToAdd); // Actualiza el "estado" (array global)
+            
+            // Refrescar vistas
+            if(window.app && window.app.state && window.app.state.view === 'admin') {
+                renderAdminConfig(); 
+            } else {
+                renderServicios();
+            }
+        };
+
+        // Función para actualizar el logo existente
         function updateServiceLogo(id, newLogo) {
             servicios = servicios.map(s => s.id === id ? { ...s, logo: newLogo } : s);
             
@@ -319,7 +337,6 @@
         function renderServicios() {
             const container = document.getElementById('grid-servicios');
             if(!container) {
-                // Si no existe el grid, lo creamos dentro del main-viewport
                 const content = document.getElementById('app-content');
                 content.innerHTML = `
                     <div class="mb-10 text-center sm:text-left animate__animated animate__fadeIn">
@@ -330,7 +347,7 @@
                         <div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8"></div>
                     </div>
                 `;
-                renderServicios(); // Recursión para llenar el container recién creado
+                renderServicios(); 
                 return;
             }
             
@@ -357,7 +374,7 @@
             `).join('');
         }
 
-        // --- Inyectar Configuración en el Panel Admin ---
+        // --- Inyectar Configuración en el Panel Admin (Unificada con Lógica Nueva) ---
         function renderAdminConfig() {
             const adminContainer = document.querySelector('.admin-content-vortex'); 
             if(!adminContainer) return;
@@ -367,29 +384,67 @@
 
             const configSection = document.createElement('div');
             configSection.id = 'config-catalogo-vortex';
-            configSection.className = "glass-card rounded-[2.5rem] p-8 mt-8 animate__animated animate__fadeIn border-t-4 border-cyan-500";
+            configSection.className = "mt-8 animate__animated animate__fadeIn";
+            
+            // Integración de la TARJETA GLASS de la Lógica Nueva
             configSection.innerHTML = `
-                <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest italic">
-                    Gestión de Catálogo (Editor de URLs)
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    ${servicios.map(s => `
-                        <div class="bg-black/40 p-4 rounded-3xl flex items-center gap-4 border border-white/5">
-                            <img src="${s.logo}" class="w-12 h-12 object-contain bg-white/5 rounded-xl p-1" />
-                            <div class="flex-1">
-                                <p class="text-[10px] font-black text-slate-400 uppercase">${s.name}</p>
-                                <input 
-                                    type="text" 
-                                    class="w-full bg-transparent border-b border-cyan-500/30 text-cyan-400 text-[10px] py-1 outline-none focus:border-cyan-500"
-                                    value="${s.logo}" 
-                                    onchange="updateServiceLogo(${s.id}, this.value)"
-                                />
+                <div class="glass-card rounded-[2rem] p-6 mb-8 border border-cyan-500/30">
+                    <h4 class="text-white font-black text-xs uppercase mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Añadir Nuevo Producto
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input id="newName" type="text" placeholder="Nombre (Ej: Spotify)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
+                        <input id="newPrice" type="number" placeholder="Precio (Ej: 5.99)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
+                        <input id="newLogo" type="text" placeholder="URL del Logo" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
+                        <button 
+                            onClick="handleSaveNewProduct()"
+                            class="bg-cyan-500 text-black font-black text-[10px] uppercase rounded-lg hover:bg-white transition-colors py-3 md:py-0"
+                        >
+                            Guardar en Catálogo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-[2.5rem] p-8 border-t-4 border-cyan-500">
+                    <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest italic">
+                        Gestión de Catálogo (Editor de Logos)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${servicios.map(s => `
+                            <div class="bg-black/40 p-4 rounded-3xl flex items-center gap-4 border border-white/5">
+                                <img src="${s.logo}" class="w-12 h-12 object-contain bg-white/5 rounded-xl p-1" />
+                                <div class="flex-1">
+                                    <p class="text-[10px] font-black text-slate-400 uppercase">${s.name}</p>
+                                    <input 
+                                        type="text" 
+                                        class="w-full bg-transparent border-b border-cyan-500/30 text-cyan-400 text-[10px] py-1 outline-none focus:border-cyan-500"
+                                        value="${s.logo}" 
+                                        onchange="updateServiceLogo(${s.id}, this.value)"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
             `;
             adminContainer.appendChild(configSection);
+        }
+
+        // Función manejadora para el botón de "Guardar en Catálogo"
+        function handleSaveNewProduct() {
+            const name = document.getElementById('newName').value;
+            const price = document.getElementById('newPrice').value;
+            const logo = document.getElementById('newLogo').value;
+            
+            if(name && price && logo) {
+                addService({ name, price, logo });
+                // Limpiar campos
+                document.getElementById('newName').value = '';
+                document.getElementById('newPrice').value = '';
+                document.getElementById('newLogo').value = '';
+            } else {
+                alert("Por favor rellena todos los campos.");
+            }
         }
 
         // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
