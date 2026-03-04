@@ -193,7 +193,11 @@
             </button>
             
             <p id="auth-switch" style="text-align: center; font-size: 0.8rem; margin-top: 20px; color: #888;">
+<<<<<<< HEAD
+                ¿hola? <a href="#" onclick="app.toggleAuthMode()" style="color: var(--primary); text-decoration: none; font-weight: 700;">Regístrate aquí</a>
+=======
                 ¿No tienes Cuenta? <a href="#" onclick="app.toggleAuthMode()" style="color: var(--primary); text-decoration: none; font-weight: 700;">Regístrate aquí</a>
+>>>>>>> 46416647e9141ecbf831d07933c0f51330550d2a
             </p>
         </form>
     </div>
@@ -295,7 +299,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- Lógica Unificada (Array Global y funciones de estado) ---
+        // --- Lógica Nueva Integrada como Estado ---
         let servicios = [
             { id: 1, name: 'Netflix', price: 5.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
             { id: 2, name: 'Disney+', price: 4.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg' },
@@ -304,18 +308,17 @@
             { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
         ];
 
-        // Función para añadir productos
+        // LÓGICA UNIFICADA: addService (Adaptada de React a Vanilla JS)
         const addService = (newService) => {
             const serviceToAdd = { 
-                id: servicios.length + 1,
-                name: newService.name,
-                price: parseFloat(newService.price),
-                logo: newService.logo || 'https://via.placeholder.com/150'
+                ...newService, 
+                id: servicios.length + 1, // Genera ID automático
+                price: parseFloat(newService.price) 
             };
             
-            servicios.push(serviceToAdd);
+            servicios.push(serviceToAdd); // Actualiza el "estado" (array global)
             
-            // Refrescar la vista actual
+            // Refrescar vistas
             if(window.app && window.app.state && window.app.state.view === 'admin') {
                 renderAdminConfig(); 
             } else {
@@ -334,46 +337,48 @@
             }
         };
 
-        // Renderiza los servicios en la tienda (Unifica la lógica de grid solicitada)
+        // Renderiza los servicios en la tienda
         function renderServicios() {
-            const content = document.getElementById('app-content');
-            if(!content) return;
-
-            // Estructura de cabecera de la tienda
-            content.innerHTML = `
-                <div class="mb-10 text-center sm:text-left animate__animated animate__fadeIn">
-                    <h2 class="text-4xl font-black text-white">Servicios Streaming</h2>
-                    <p class="text-slate-500 uppercase text-xs font-bold tracking-[0.2em] mt-2">Cuentas 100% personales con garantía</p>
-                </div>
-                <div id="vortex-main-container">
-                    <div id="grid-servicios" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
-                        ${servicios.map(s => `
-                            <div class="service-card animate__animated animate__fadeInUp">
-                                <div class="logo-wrapper">
-                                    <img src="${s.logo}" alt="${s.name}" />
-                                </div>
-                                <h3 class="text-white font-bold text-xl">${s.name}</h3>
-                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Premium Mensual</p>
-                                
-                                <div class="w-full h-[1px] bg-white/5 my-6"></div>
-                                
-                                <div class="text-4xl font-black text-white">$${s.price.toFixed(2)}</div>
-                                
-                                <button 
-                                    class="btn-adquirir"
-                                    style="${s.highlight ? 'background: var(--primary); color: #000;' : ''}"
-                                    onclick="app.registrarCompra('${s.name}', ${s.price}, 'streaming')"
-                                >
-                                    Adquirir
-                                </button>
-                            </div>
-                        `).join('')}
+            const container = document.getElementById('grid-servicios');
+            if(!container) {
+                const content = document.getElementById('app-content');
+                content.innerHTML = `
+                    <div class="mb-10 text-center sm:text-left animate__animated animate__fadeIn">
+                        <h2 class="text-4xl font-black text-white">Servicios Streaming</h2>
+                        <p class="text-slate-500 uppercase text-xs font-bold tracking-[0.2em] mt-2">Cuentas 100% personales con garantía</p>
                     </div>
+                    <div id="vortex-main-container">
+                        <div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8"></div>
+                    </div>
+                `;
+                renderServicios(); 
+                return;
+            }
+            
+            container.innerHTML = servicios.map(s => `
+                <div key="${s.id}" class="service-card animate__animated animate__fadeInUp">
+                    <div class="logo-wrapper">
+                        <img src="${s.logo}" alt="${s.name}" />
+                    </div>
+                    <h3 class="text-white font-extrabold text-xl mb-1">${s.name}</h3>
+                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Premium Mensual</p>
+                    
+                    <div class="w-full h-[1px] bg-white/5 my-6"></div>
+                    
+                    <span class="text-4xl font-black text-white">$${s.price.toFixed(2)}</span>
+                    
+                    <button 
+                        class="btn-adquirir"
+                        style="${s.highlight ? 'background: #22d3ee' : ''}"
+                        onclick="app.registrarCompra('${s.name}', ${s.price}, 'streaming')"
+                    >
+                        Adquirir
+                    </button>
                 </div>
-            `;
+            `).join('');
         }
 
-        // --- Inyectar Configuración en el Panel Admin ---
+        // --- Inyectar Configuración en el Panel Admin (Unificada con Lógica Nueva) ---
         function renderAdminConfig() {
             const adminContainer = document.querySelector('.admin-content-vortex'); 
             if(!adminContainer) return;
@@ -385,6 +390,7 @@
             configSection.id = 'config-catalogo-vortex';
             configSection.className = "mt-8 animate__animated animate__fadeIn";
             
+            // Integración de la TARJETA GLASS de la Lógica Nueva
             configSection.innerHTML = `
                 <div class="glass-card rounded-[2rem] p-6 mb-8 border border-cyan-500/30">
                     <h4 class="text-white font-black text-xs uppercase mb-4 flex items-center gap-2">
@@ -428,6 +434,7 @@
             adminContainer.appendChild(configSection);
         }
 
+        // Función manejadora para el botón de "Guardar en Catálogo"
         function handleSaveNewProduct() {
             const name = document.getElementById('newName').value;
             const price = document.getElementById('newPrice').value;
@@ -435,6 +442,7 @@
             
             if(name && price && logo) {
                 addService({ name, price, logo });
+                // Limpiar campos
                 document.getElementById('newName').value = '';
                 document.getElementById('newPrice').value = '';
                 document.getElementById('newLogo').value = '';
@@ -443,7 +451,7 @@
             }
         }
 
-        // --- LÓGICA DE SESIÓN E INTERFAZ ---
+        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
@@ -488,7 +496,7 @@
                         const startRoute = (user.role === 'ADMIN') ? 'admin' : 'market';
                         window.app.router(startRoute);
                     }
-                    if(!window.app || window.app.state.view !== 'admin') renderServicios();
+                    renderServicios();
                 }, 50);
             }
         }
