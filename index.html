@@ -133,14 +133,14 @@
             background: rgba(255, 255, 255, 0.05);
             border-color: var(--primary);
         }
-        .logo-wrapper {
+        .logo-container {
             height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
         }
-        .logo-wrapper img {
+        .logo-container img {
             max-height: 100%;
             max-width: 150px;
             filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
@@ -163,6 +163,12 @@
             background: var(--primary);
             color: #000;
             box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+        .price-text {
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+            font-weight: 900;
+            color: white;
         }
     </style>
 </head>
@@ -295,7 +301,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // --- Lógica Nueva Integrada como Estado ---
+        // --- Lógica Unificada para Vanilla JS (Actualizada con Lógica Nueva) ---
         let servicios = [
             { id: 1, name: 'Netflix', price: 5.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
             { id: 2, name: 'Disney+', price: 4.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg' },
@@ -304,17 +310,14 @@
             { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
         ];
 
-        // LÓGICA UNIFICADA: addService (Adaptada de React a Vanilla JS)
-        const addService = (newService) => {
+        const addProduct = (name, price, logo) => {
             const serviceToAdd = { 
-                ...newService, 
-                id: servicios.length + 1, // Genera ID automático
-                price: parseFloat(newService.price) 
+                id: Date.now(), 
+                name, 
+                price: parseFloat(price), 
+                logo 
             };
-            
-            servicios.push(serviceToAdd); // Actualiza el "estado" (array global)
-            
-            // Refrescar vistas
+            servicios.push(serviceToAdd);
             if(window.app && window.app.state && window.app.state.view === 'admin') {
                 renderAdminConfig(); 
             } else {
@@ -322,10 +325,8 @@
             }
         };
 
-        // Función para actualizar el logo existente
         function updateServiceLogo(id, newLogo) {
             servicios = servicios.map(s => s.id === id ? { ...s, logo: newLogo } : s);
-            
             if(window.app && window.app.state && window.app.state.view === 'admin') {
                 renderAdminConfig(); 
             } else {
@@ -333,7 +334,6 @@
             }
         };
 
-        // Renderiza los servicios en la tienda
         function renderServicios() {
             const container = document.getElementById('grid-servicios');
             if(!container) {
@@ -344,7 +344,7 @@
                         <p class="text-slate-500 uppercase text-xs font-bold tracking-[0.2em] mt-2">Cuentas 100% personales con garantía</p>
                     </div>
                     <div id="vortex-main-container">
-                        <div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8"></div>
+                        <div id="grid-servicios" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8"></div>
                     </div>
                 `;
                 renderServicios(); 
@@ -353,74 +353,65 @@
             
             container.innerHTML = servicios.map(s => `
                 <div key="${s.id}" class="service-card animate__animated animate__fadeInUp">
-                    <div class="logo-wrapper">
+                    <div class="logo-container">
                         <img src="${s.logo}" alt="${s.name}" />
                     </div>
-                    <h3 class="text-white font-extrabold text-xl mb-1">${s.name}</h3>
-                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Premium Mensual</p>
-                    
+                    <h3 class="text-white font-bold text-xl">${s.name}</h3>
+                    <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Premium Mensual</p>
                     <div class="w-full h-[1px] bg-white/5 my-6"></div>
-                    
-                    <span class="text-4xl font-black text-white">$${s.price.toFixed(2)}</span>
-                    
-                    <button 
-                        class="btn-adquirir"
-                        style="${s.highlight ? 'background: #22d3ee' : ''}"
-                        onclick="app.registrarCompra('${s.name}', ${s.price}, 'streaming')"
-                    >
+                    <div class="price-text">$${s.price.toFixed(2)}</div>
+                    <button class="btn-adquirir" style="${s.highlight ? 'background: var(--primary); color: #000;' : ''}" onclick="app.registrarCompra('${s.name}', ${s.price}, 'streaming')">
                         Adquirir
                     </button>
                 </div>
             `).join('');
         }
 
-        // --- Inyectar Configuración en el Panel Admin (Unificada con Lógica Nueva) ---
         function renderAdminConfig() {
             const adminContainer = document.querySelector('.admin-content-vortex'); 
             if(!adminContainer) return;
-
             const existing = document.getElementById('config-catalogo-vortex');
             if(existing) existing.remove();
-
             const configSection = document.createElement('div');
             configSection.id = 'config-catalogo-vortex';
             configSection.className = "mt-8 animate__animated animate__fadeIn";
-            
-            // Integración de la TARJETA GLASS de la Lógica Nueva
             configSection.innerHTML = `
                 <div class="glass-card rounded-[2rem] p-6 mb-8 border border-cyan-500/30">
                     <h4 class="text-white font-black text-xs uppercase mb-4 flex items-center gap-2">
                         <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Añadir Nuevo Producto
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <input id="newName" type="text" placeholder="Nombre (Ej: Spotify)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
-                        <input id="newPrice" type="number" placeholder="Precio (Ej: 5.99)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
-                        <input id="newLogo" type="text" placeholder="URL del Logo" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
+                        <input id="admin-name" type="text" placeholder="Nombre (Ej: Spotify)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
+                        <input id="admin-price" type="number" placeholder="Precio (Ej: 5.99)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
+                        <input id="admin-logo" type="text" placeholder="URL del Logo" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
+                        
                         <button 
-                            onClick="handleSaveNewProduct()"
-                            class="bg-cyan-500 text-black font-black text-[10px] uppercase rounded-lg hover:bg-white transition-colors py-3 md:py-0"
+                            onClick="(() => {
+                                const n = document.getElementById('admin-name').value;
+                                const p = document.getElementById('admin-price').value;
+                                const l = document.getElementById('admin-logo').value;
+                                if(n && p) {
+                                    addProduct(n, p, l);
+                                    document.getElementById('admin-name').value = '';
+                                    document.getElementById('admin-price').value = '';
+                                    document.getElementById('admin-logo').value = '';
+                                }
+                            })()"
+                            class="bg-cyan-500 text-black px-4 py-2 rounded-xl font-black text-xs uppercase hover:bg-white transition-all"
                         >
-                            Guardar en Catálogo
+                            Guardar Producto
                         </button>
                     </div>
                 </div>
-
                 <div class="glass-card rounded-[2.5rem] p-8 border-t-4 border-cyan-500">
-                    <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest italic">
-                        Gestión de Catálogo (Editor de Logos)
-                    </h3>
+                    <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest italic">Gestión de Catálogo</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${servicios.map(s => `
                             <div class="bg-black/40 p-4 rounded-3xl flex items-center gap-4 border border-white/5">
                                 <img src="${s.logo}" class="w-12 h-12 object-contain bg-white/5 rounded-xl p-1" />
                                 <div class="flex-1">
                                     <p class="text-[10px] font-black text-slate-400 uppercase">${s.name}</p>
-                                    <input 
-                                        type="text" 
-                                        class="w-full bg-transparent border-b border-cyan-500/30 text-cyan-400 text-[10px] py-1 outline-none focus:border-cyan-500"
-                                        value="${s.logo}" 
-                                        onchange="updateServiceLogo(${s.id}, this.value)"
-                                    />
+                                    <input type="text" class="w-full bg-transparent border-b border-cyan-500/30 text-cyan-400 text-[10px] py-1 outline-none focus:border-cyan-500" value="${s.logo}" onchange="updateServiceLogo(${s.id}, this.value)" />
                                 </div>
                             </div>
                         `).join('')}
@@ -430,63 +421,21 @@
             adminContainer.appendChild(configSection);
         }
 
-        // Función manejadora para el botón de "Guardar en Catálogo"
-        function handleSaveNewProduct() {
-            const name = document.getElementById('newName').value;
-            const price = document.getElementById('newPrice').value;
-            const logo = document.getElementById('newLogo').value;
-            
-            if(name && price && logo) {
-                addService({ name, price, logo });
-                // Limpiar campos
-                document.getElementById('newName').value = '';
-                document.getElementById('newPrice').value = '';
-                document.getElementById('newLogo').value = '';
-            } else {
-                alert("Por favor rellena todos los campos.");
-            }
-        }
-
-        // --- LÓGICA DE ACTUALIZACIÓN DE INTERFAZ BASADA EN SESIÓN ---
         function updateUIFromSession() {
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
                 const isAdmin = user.role === 'ADMIN';
-
-                if (isAdmin) {
-                    document.body.classList.add('is-admin');
-                } else {
-                    document.body.classList.remove('is-admin');
-                }
-
+                if (isAdmin) document.body.classList.add('is-admin');
                 const adminBtn = document.getElementById('admin-view-toggle');
-                if (adminBtn) {
-                    adminBtn.style.display = isAdmin ? 'block' : 'none';
-                }
-
-                const oldAdminLink = document.getElementById('admin-link-el');
-                if (oldAdminLink && !isAdmin) {
-                    oldAdminLink.style.setProperty('display', 'none', 'important');
-                }
-                
-                if (window.app && window.app.state) {
-                    window.app.state.currentUser = user;
-                }
-                
-                if (isAdmin && adminBtn) {
-                    const currentView = (window.app && window.app.state) ? window.app.state.view : null;
-                    adminBtn.textContent = (currentView === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
-                }
-
+                if (adminBtn) adminBtn.style.display = isAdmin ? 'block' : 'none';
+                if (window.app && window.app.state) window.app.state.currentUser = user;
                 const userName = user.name || user.email.split('@')[0];
                 if(document.getElementById('nav-user-name')) document.getElementById('nav-user-name').textContent = userName.toUpperCase();
                 if(document.getElementById('display-username')) document.getElementById('display-username').textContent = userName.toUpperCase();
                 if(document.getElementById('user-role-display')) document.getElementById('user-role-display').textContent = user.role;
                 if(document.getElementById('val-user')) document.getElementById('val-user').textContent = user.email;
-
                 document.getElementById('auth-screen').classList.add('hidden');
-                
                 setTimeout(() => {
                     if (window.app && window.app.router) {
                         const startRoute = (user.role === 'ADMIN') ? 'admin' : 'market';
@@ -499,33 +448,24 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             updateUIFromSession();
-            
             const adminBtn = document.getElementById('admin-view-toggle');
             if(adminBtn) {
                 adminBtn.onclick = () => {
                     const isCurrentlyAdmin = window.app.state.view === 'admin';
                     window.app.router(isCurrentlyAdmin ? 'market' : 'admin');
                 };
-                
                 const observer = new MutationObserver(() => {
                     const isViewAdmin = window.app.state.view === 'admin';
                     adminBtn.textContent = isViewAdmin ? 'VER TIENDA' : 'VER PANEL ADMIN';
-                    if(!isViewAdmin) {
-                        renderServicios();
-                    } else {
-                        setTimeout(renderAdminConfig, 100);
-                    }
+                    if(!isViewAdmin) renderServicios(); else setTimeout(renderAdminConfig, 100);
                 });
                 observer.observe(document.getElementById('app-content'), { childList: true });
             }
-
             if(window.app) {
                 const originalRouter = app.router;
                 app.router = function(route) {
                     const adminBtn = document.getElementById('admin-view-toggle');
-                    if(adminBtn) {
-                        adminBtn.textContent = (route === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
-                    }
+                    if(adminBtn) adminBtn.textContent = (route === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
                     return originalRouter.apply(this, arguments);
                 };
             }
@@ -534,20 +474,10 @@
         function toggleSearchField() {
             const container = document.getElementById('search-input-container');
             container.classList.toggle('search-field-visible');
-            if(container.classList.contains('search-field-visible')) {
-                container.querySelector('input').focus();
-            }
+            if(container.classList.contains('search-field-visible')) container.querySelector('input').focus();
         }
-
-        function toggleModernMenu() {
-            document.getElementById('side-menu-vortex').classList.toggle('active');
-        }
-
-        function toggleUserCard() {
-            const card = document.getElementById('user-info-card');
-            card.classList.toggle('hidden');
-        }
-
+        function toggleModernMenu() { document.getElementById('side-menu-vortex').classList.toggle('active'); }
+        function toggleUserCard() { document.getElementById('user-info-card').classList.toggle('hidden'); }
         function revealPass() {
             const passEl = document.getElementById('val-pass');
             const realPass = (window.app && window.app.state && window.app.state.currentUser) ? window.app.state.currentUser.pass : '****';
