@@ -500,20 +500,19 @@ body {
 .history-panel::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 10px; }
 
 /* ==========================================================================
-   LÓGICA NUEVA UNIFICADA: REJILLA Y TARJETAS PREMIUM (VORTEX-ITEM)
+   LÓGICA NUEVA: DISEÑO ELITE VORTEX (TARJETAS Y REJILLA)
    ========================================================================== */
 
 .grid-catalog {
     display: grid;
-    /* Permite ajuste automático según el ancho */
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
     gap: 2rem;
     padding: 2rem 0;
 }
 
 .service-card, .card.vortex-item {
-    background: linear-gradient(145deg, #0f172a, #020617) !important; /* Lógica Nueva: Graduado Premium */
-    border-radius: 2.8rem !important; /* Lógica Nueva: Bordes ultra redondeados */
+    background: #0b1120 !important; /* Fondo azul marino profundo */
+    border-radius: 2.5rem !important; /* Bordes ultra redondeados */
     padding: 3rem 1.5rem !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
     display: flex;
@@ -522,53 +521,57 @@ body {
     text-align: center;
     position: relative;
     overflow: hidden;
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) !important;
-    box-shadow: 0 15px 35px -5px rgba(0,0,0,0.5) !important;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
 }
 
 .service-card:hover, .card.vortex-item:hover {
-    transform: translateY(-15px) scale(1.02) !important;
+    transform: translateY(-10px) !important;
     border-color: #22d3ee !important;
-    box-shadow: 0 25px 50px -12px rgba(34, 211, 238, 0.2) !important;
+    box-shadow: 0 20px 40px -10px rgba(34, 211, 238, 0.2) !important;
 }
 
 /* Contenedor del Logo */
-.logo-wrapper, .logo-container {
-    height: 90px;
+.logo-container, .logo-wrapper {
+    height: 80px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
-.logo-wrapper img, .logo-container img {
+.logo-container img, .logo-wrapper img {
     max-height: 100%;
-    max-width: 85%;
+    max-width: 80%;
     object-fit: contain;
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
 }
 
-/* Botón Adquirir estilo Píldora Premium */
+/* Tipografía de Precio */
+.price-text {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: white;
+    margin: 1.5rem 0;
+}
+
+/* Botón Adquirir Estilo Elite */
 .btn-adquirir, .vortex-item button {
-    background: #fff !important;
-    color: #000 !important;
+    background: white !important;
+    color: black !important;
     width: 100%;
-    padding: 1.1rem !important;
-    border-radius: 1.4rem !important;
+    padding: 1rem !important;
+    border-radius: 1.2rem !important;
     font-weight: 900 !important;
     text-transform: uppercase !important;
-    letter-spacing: 1.5px !important;
-    font-size: 0.75rem !important;
-    margin-top: 1.5rem !important;
+    letter-spacing: 1px !important;
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease !important;
+    transition: 0.3s ease !important;
 }
 
 .btn-adquirir:hover, .vortex-item button:hover {
     background: #22d3ee !important;
-    transform: translateY(-2px) !important;
+    transform: scale(1.02) !important;
 }
 
 /* ==========================================================================
@@ -658,7 +661,6 @@ body {
         grid-template-columns: repeat(2, 1fr) !important;
     }
 
-    /* Adaptación de bento-grid y catalog-grid para móviles */
     .bento-grid, .grid-catalog {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
