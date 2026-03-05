@@ -500,7 +500,7 @@ body {
 .history-panel::-webkit-scrollbar-thumb { background: #00f2ff; border-radius: 10px; }
 
 /* ==========================================================================
-   LÓGICA NUEVA: DISEÑO ELITE VORTEX (TARJETAS Y REJILLA)
+   LÓGICA NUEVA UNIFICADA: DISEÑO ELITE VORTEX (TARJETAS Y REJILLA)
    ========================================================================== */
 
 .grid-catalog {
@@ -511,47 +511,50 @@ body {
 }
 
 .service-card, .card.vortex-item {
-    background: #0b1120 !important; /* Fondo azul marino profundo */
-    border-radius: 2.5rem !important; /* Bordes ultra redondeados */
-    padding: 3rem 1.5rem !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: linear-gradient(180deg, #0f172a 0%, #020617 100%) !important;
+    border-radius: 2.8rem !important;
+    padding: 3.5rem 2rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.03) !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     position: relative;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1) !important;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .service-card:hover, .card.vortex-item:hover {
-    transform: translateY(-10px) !important;
-    border-color: #22d3ee !important;
-    box-shadow: 0 20px 40px -10px rgba(34, 211, 238, 0.2) !important;
+    transform: translateY(-20px) !important;
+    border-color: rgba(34, 211, 238, 0.3) !important;
+    box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8), 
+                0 0 50px -10px rgba(34, 211, 238, 0.15) !important;
 }
 
 /* Contenedor del Logo */
 .logo-container, .logo-wrapper {
-    height: 80px;
+    height: 100px;
     width: 100%;
+    margin-bottom: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.5rem;
 }
 
 .logo-container img, .logo-wrapper img {
     max-height: 100%;
-    max-width: 80%;
+    max-width: 90%;
     object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
 }
 
 /* Tipografía de Precio */
 .price-text {
-    font-size: 2.5rem;
-    font-weight: 900;
+    font-size: 3rem;
+    font-weight: 950;
     color: white;
-    margin: 1.5rem 0;
+    letter-spacing: -2px;
+    margin-bottom: 2rem;
 }
 
 /* Botón Adquirir Estilo Elite */
@@ -559,19 +562,20 @@ body {
     background: white !important;
     color: black !important;
     width: 100%;
-    padding: 1rem !important;
-    border-radius: 1.2rem !important;
+    padding: 1.2rem !important;
+    border-radius: 1.5rem !important;
     font-weight: 900 !important;
     text-transform: uppercase !important;
-    letter-spacing: 1px !important;
+    letter-spacing: 2px !important;
+    font-size: 0.7rem !important;
     border: none;
     cursor: pointer;
-    transition: 0.3s ease !important;
+    transition: all 0.3s ease !important;
 }
 
 .btn-adquirir:hover, .vortex-item button:hover {
     background: #22d3ee !important;
-    transform: scale(1.02) !important;
+    transform: scale(1.05) !important;
 }
 
 /* ==========================================================================
@@ -671,6 +675,17 @@ body {
     .card.vortex-item, .service-card {
         min-height: 180px !important;
         padding: 1.5rem !important;
+        border-radius: 2rem !important; /* Ajuste suave para móvil */
+    }
+
+    .price-text {
+        font-size: 2.2rem !important;
+        margin-bottom: 1.2rem !important;
+    }
+
+    .logo-container {
+        height: 70px !important;
+        margin-bottom: 1.5rem !important;
     }
 }
 

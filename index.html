@@ -59,61 +59,7 @@
         }
         .menu-item-btn:hover { background: rgba(0,242,255,0.1); color: var(--primary); }
 
-        .user-credential-section { margin-bottom: 5px; }
-        .credential-card { margin-top: 5px; padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; }
-        
-        .history-panel { 
-            margin-top: 5px; padding: 15px; background: rgba(255,255,255,0.02); 
-            border: 1px solid var(--border); border-radius: 12px; font-size: 13px;
-        }
-        .history-header { 
-            display: flex; justify-content: space-between; color: var(--primary); 
-            font-size: 10px; font-weight: 800; letter-spacing: 1px; 
-            text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid var(--border);
-            padding-bottom: 5px;
-        }
-        .empty-log { color: #475569; font-style: italic; text-align: center; padding: 10px 0; }
-
-        .card-inner .field { margin-bottom: 12px; }
-        .card-inner label { display: block; font-size: 10px; color: var(--primary); letter-spacing: 1px; margin-bottom: 4px; }
-        .card-inner span { font-family: 'monospace'; font-size: 14px; color: #fff; }
-        .pass-wrapper { display: flex; justify-content: space-between; align-items: center; }
-        .view-btn { background: none; border: none; cursor: pointer; filter: grayscale(1); transition: 0.3s; }
-        .view-btn:hover { filter: grayscale(0); transform: scale(1.2); }
-        .hidden { display: none !important; }
-
-        .menu-items-vertical a, .menu-items-vertical button.nav-link-btn {
-            display: flex; align-items: center; gap: 15px; color: white;
-            text-decoration: none; padding: 15px; border-radius: 12px; transition: 0.3s;
-            width: 100%; background: none; border: none; font-size: 1rem; cursor: pointer;
-            text-align: left; font-family: inherit;
-        }
-        .menu-items-vertical a:hover, .menu-items-vertical button.nav-link-btn:hover { background: rgba(0,242,255,0.1); color: var(--primary); }
-        .menu-divider { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
-        .logout-link { color: #ff4d4d !important; }
-
-        .menu-hamburguer { background: none; border: none; cursor: pointer; display: grid; gap: 5px; }
-        .bar { width: 25px; height: 2px; background: var(--primary); transition: 0.3s; }
-        
-        .logo { font-family: 'Orbitron', sans-serif; font-weight: 700; color: white; letter-spacing: 2px; }
-        .logo span { color: var(--primary); font-size: 0.8rem; margin-left: 2px; }
-
         /* --- ESTILOS LÓGICA NUEVA --- */
-        .logout-btn-new {
-            padding: 8px; background: transparent; border-radius: 8px; transition: all 0.3s;
-            border: none; cursor: pointer; display: flex; align-items: center;
-        }
-        .logout-btn-new:hover { background: rgba(239, 68, 68, 0.2); }
-        .logout-btn-new span { transition: transform 0.3s; display: inline-block; font-size: 1.2rem; }
-        .logout-btn-new:hover span { transform: scale(1.1); }
-        
-        .admin-toggle-btn {
-            background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 10px;
-            text-transform: uppercase; font-size: 10px; font-weight: 900; color: white;
-            border: 1px solid var(--border); cursor: pointer; transition: 0.3s;
-        }
-        .admin-toggle-btn:hover { background: rgba(0, 242, 255, 0.15); border-color: var(--primary); }
-
         .glass-card {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
@@ -127,12 +73,17 @@
             padding: 30px;
             text-align: center;
             transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
+        
         .service-card:hover {
             transform: translateY(-10px);
             background: rgba(255, 255, 255, 0.05);
             border-color: var(--primary);
+            box-shadow: 0 10px 40px -10px rgba(0, 242, 255, 0.2);
         }
+
         .logo-container {
             height: 80px;
             display: flex;
@@ -145,6 +96,7 @@
             max-width: 150px;
             filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
         }
+
         .btn-adquirir {
             width: 100%;
             padding: 12px;
@@ -164,67 +116,83 @@
             color: #000;
             box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
         }
+
         .price-text {
             font-size: 2.25rem;
             line-height: 2.5rem;
             font-weight: 900;
             color: white;
         }
+
+        /* --- MODAL DE PAGO --- */
+        .modal-vortex {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px); z-index: 5000; display: none;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-vortex.active { display: flex; animation: fadeIn 0.3s ease; }
+        
+        .admin-toggle-btn {
+            background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 10px;
+            text-transform: uppercase; font-size: 10px; font-weight: 900; color: white;
+            border: 1px solid var(--border); cursor: pointer; transition: 0.3s;
+        }
+
+        /* Reutilización de clases de historial y credenciales */
+        .credential-card { margin-top: 5px; padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; }
+        .history-panel { margin-top: 5px; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <canvas id="canvas-network"></canvas>
+
+    <div id="payment-modal" class="modal-vortex" onclick="closePaymentModal(event)">
+        <div class="glass-card p-8 rounded-[2.5rem] w-full max-w-md border-t-4 border-cyan-500 animate__animated animate__zoomIn" onclick="event.stopPropagation()">
+            <div class="text-center">
+                <div id="modal-service-logo" class="h-20 flex justify-center mb-4"></div>
+                <h3 class="text-white font-black text-2xl uppercase italic">Confirmar <span class="text-cyan-500">Orden</span></h3>
+                <p id="modal-service-name" class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1"></p>
+                
+                <div class="my-6 p-4 bg-white/5 rounded-2xl border border-white/10">
+                    <span class="text-slate-500 text-xs font-bold block uppercase">Total a pagar</span>
+                    <span id="modal-service-price" class="text-white text-4xl font-black"></span>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="confirmOrder()" class="btn-neon-pulse !m-0">Proceder al Pago</button>
+                    <button onclick="closePaymentModal()" class="w-full p-4 text-slate-500 font-black text-[10px] uppercase tracking-widest hover:text-white transition-colors">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="auth-screen" class="auth-overlay">
         <form id="auth-form" class="auth-card" style="padding: 40px; border-radius: 24px; width: 350px;" onsubmit="app.handleAuth(event)">
             <div class="logo" style="text-align: center; margin-bottom: 30px; font-size: 1.5rem; letter-spacing: 2px;">
                 VORTEX<span style="color:var(--primary); font-size: 0.9rem;">STREAMING</span>
             </div>
-            
             <h2 id="auth-title" style="text-align: center; margin-bottom: 25px; font-family: 'Plus Jakarta Sans'; font-weight: 800; font-size: 1.2rem;">Acceso al Sistema</h2>
-            
             <div id="auth-msg" style="color: #ff4d4d; font-size: 0.75rem; text-align: center; margin-bottom: 15px; min-height: 1em; font-weight: 600;"></div>
-            
             <div style="display: grid; gap: 15px;" class="vortex-input-group">
-                <input type="text" id="auth-email" name="email" placeholder="Correo Electrónico" required
-                       style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;"> 
-                
-                <input type="password" id="auth-pass" name="pass" placeholder="Contraseña" required
-                       style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;">
+                <input type="text" id="auth-email" name="email" placeholder="Correo Electrónico" required style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;"> 
+                <input type="password" id="auth-pass" name="pass" placeholder="Contraseña" required style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box;">
             </div>
-
-            <button type="submit" id="btn-main-auth" class="btn-neon-pulse" 
-                    style="width:100%; margin-top: 25px; height: 50px; text-transform: uppercase; letter-spacing: 2px;">
-                <span>Entrar</span>
-            </button>
-            
-            <p id="auth-switch" style="text-align: center; font-size: 0.8rem; margin-top: 20px; color: #888;">
-                ¿No tienes Cuenta? <a href="#" onclick="app.toggleAuthMode()" style="color: var(--primary); text-decoration: none; font-weight: 700;">Regístrate aquí</a>
-            </p>
+            <button type="submit" id="btn-main-auth" class="btn-neon-pulse" style="width:100%; margin-top: 25px; height: 50px; text-transform: uppercase; letter-spacing: 2px;"><span>Entrar</span></button>
+            <p id="auth-switch" style="text-align: center; font-size: 0.8rem; margin-top: 20px; color: #888;">¿No tienes Cuenta? <a href="#" onclick="app.toggleAuthMode()" style="color: var(--primary); text-decoration: none; font-weight: 700;">Regístrate aquí</a></p>
         </form>
     </div>
 
     <nav class="vortex-nav-modern">
         <div class="logo" onclick="app.router('market')" style="cursor: pointer;">VORTEX<span>STREAMING</span></div>
-        
         <div class="nav-right-group">
-            <button id="admin-view-toggle" class="admin-toggle-btn" style="display: none;">
-                VER TIENDA
-            </button>
-
+            <button id="admin-view-toggle" class="admin-toggle-btn" style="display: none;">VER TIENDA</button>
             <span id="nav-user-name" style="text-transform: uppercase; font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 1px;" class="hidden-mobile"></span>
-
             <div class="vortex-search-wrapper">
-                <div id="search-input-container" class="search-field-hidden">
-                    <input type="text" placeholder="Escribe lo que estas buscando..." class="vortex-input-modern" onkeyup="app.filter(this.value)" />
-                </div>
+                <div id="search-input-container" class="search-field-hidden"><input type="text" placeholder="Buscar..." class="vortex-input-modern" onkeyup="app.filter(this.value)" /></div>
                 <button class="icon-btn search-trigger" onclick="toggleSearchField()" style="background: none; border: none; cursor: pointer; color: var(--primary); font-size: 1.2rem;"> 🔍 </button>
             </div>
-            <button class="menu-hamburguer" onclick="toggleModernMenu()">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-            </button>
+            <button class="menu-hamburguer" onclick="toggleModernMenu()"><div class="bar"></div><div class="bar"></div><div class="bar"></div></button>
         </div>
 
         <aside id="side-menu-vortex">
@@ -234,135 +202,88 @@
                     <span class="user-role-tag" id="user-role-display" style="color: var(--primary); font-size: 0.8rem;">—</span>
                 </div>
                 <hr class="menu-divider" />
-                
                 <nav class="menu-items-vertical">
-                    <div class="user-credential-section">
-                        <button class="menu-item-btn" onclick="toggleUserCard()">
-                            <span class="emoji">👤</span> Mi Usuario
-                        </button>
-                        <div id="user-info-card" class="credential-card hidden">
-                            <div class="card-inner">
-                                <div class="field">
-                                    <label>USUARIO</label>
-                                    <span id="val-user">Cargando...</span>
-                                </div>
-                                <div class="field">
-                                    <label>CONTRASEÑA</label>
-                                    <div class="pass-wrapper">
-                                        <span id="val-pass">••••••••</span>
-                                        <button class="view-btn" onclick="revealPass()">👁️</button>
-                                    </div>
-                                </div>
-                            </div>
+                    <button class="menu-item-btn" onclick="toggleUserCard()"><span class="emoji">👤</span> Mi Usuario</button>
+                    <div id="user-info-card" class="credential-card hidden">
+                        <div class="card-inner">
+                            <div class="field"><label>USUARIO</label><span id="val-user">Cargando...</span></div>
+                            <div class="field"><label>CONTRASEÑA</label><div class="pass-wrapper"><span id="val-pass">••••••••</span><button class="view-btn" onclick="revealPass()">👁️</button></div></div>
                         </div>
                     </div>
-
-                    <a href="#" onclick="app.router('market')" class="only-user-nav">
-                        <span class="emoji">📺</span> Servicios Streaming
-                    </a>
-
-                    <div class="user-history-section">
-                        <button class="menu-item-btn" onclick="app.toggleHistory()">
-                            <span class="emoji">📜</span> Historial de Compras
-                        </button>
-                        <div id="user-history-list" class="history-panel hidden">
-                            <div class="history-header">
-                                <span>Servicio / Recarga</span>
-                                <span>Precio</span>
-                            </div>
-                            <div id="history-items-container">
-                                <p class="empty-log">Aún no has realizado compras.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <a href="#" onclick="app.router('gaming')">
-                        <span class="emoji">🎮</span> Recargas Gaming
-                    </a> 
-                    
-                    <button class="nav-link-btn only-user-nav" id="admin-link-el" style="display: none;" onclick="app.router('admin')">
-                        <span class="emoji">🛠️</span> PANEL CONTROL
-                    </button>
+                    <a href="#" onclick="app.router('market')"><span class="emoji">📺</span> Servicios Streaming</a>
+                    <button class="menu-item-btn" onclick="app.toggleHistory()"><span class="emoji">📜</span> Historial</button>
+                    <div id="user-history-list" class="history-panel hidden"><div id="history-items-container"><p class="empty-log">Sin compras.</p></div></div>
+                    <a href="#" onclick="app.router('gaming')"><span class="emoji">🎮</span> Gaming</a> 
+                    <button class="nav-link-btn only-user-nav" id="admin-link-el" style="display: none;" onclick="app.router('admin')"><span class="emoji">🛠️</span> PANEL</button>
                 </nav>
-
-                <div class="footer-menu">
-                    <hr class="menu-divider" />
-                    <a href="javascript:void(0)" onclick="window.logoutVortex ? window.logoutVortex() : app.handleLogout()" class="logout-link">
-                        <span class="emoji">❌</span> Cerrar Sesión
-                    </a>
-                </div>
+                <div class="footer-menu"><hr class="menu-divider" /><a href="javascript:void(0)" onclick="app.handleLogout()" class="logout-link"><span class="emoji">❌</span> Cerrar Sesión</a></div>
             </div>
         </aside>
     </nav>
 
-    <main id="app-content" class="pt-28 px-6 max-w-7xl mx-auto main-viewport">
-        </main>
-
-    <div id="toast" class="toast"></div>
+    <main id="app-content" class="pt-28 px-6 max-w-7xl mx-auto"></main>
 
     <script>
-        // --- Lógica Unificada para Vanilla JS (Actualizada con Lógica Nueva) ---
         let servicios = [
             { id: 1, name: 'Netflix', price: 5.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg' },
             { id: 2, name: 'Disney+', price: 4.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg' },
             { id: 3, name: 'Max', price: 3.80, logo: 'https://upload.wikimedia.org/wikipedia/commons/c/ce/Max_logo.svg' },
-            { id: 4, name: 'Crunchyroll', price: 3.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Crunchyroll_Logo.svg', highlight: true },
+            { id: 4, name: 'Crunchyroll', price: 3.00, logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Crunchyroll_Logo.svg' },
             { id: 5, name: 'Paramount+', price: 2.50, logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Paramount_Plus.svg' }
         ];
 
-        const addProduct = (name, price, logo) => {
-            const serviceToAdd = { 
-                id: Date.now(), 
-                name, 
-                price: parseFloat(price), 
-                logo 
-            };
-            servicios.push(serviceToAdd);
-            if(window.app && window.app.state && window.app.state.view === 'admin') {
-                renderAdminConfig(); 
-            } else {
-                renderServicios();
+        let selectedProduct = null;
+
+        // --- FUNCIONES DE MODAL ---
+        function openPaymentModal(service) {
+            selectedProduct = service;
+            document.getElementById('modal-service-name').textContent = service.name + ' Premium';
+            document.getElementById('modal-service-price').textContent = `$${service.price.toFixed(2)}`;
+            document.getElementById('modal-service-logo').innerHTML = `<img src="${service.logo}" class="max-h-full">`;
+            document.getElementById('payment-modal').classList.add('active');
+        }
+
+        function closePaymentModal(e) {
+            document.getElementById('payment-modal').classList.remove('active');
+            selectedProduct = null;
+        }
+
+        function confirmOrder() {
+            if(selectedProduct) {
+                app.registrarCompra(selectedProduct.name, selectedProduct.price, 'streaming');
+                closePaymentModal();
             }
+        }
+
+        const addProduct = (name, price, logo) => {
+            servicios.push({ id: Date.now(), name, price: parseFloat(price), logo });
+            (window.app.state.view === 'admin') ? renderAdminConfig() : renderServicios();
         };
 
         function updateServiceLogo(id, newLogo) {
             servicios = servicios.map(s => s.id === id ? { ...s, logo: newLogo } : s);
-            if(window.app && window.app.state && window.app.state.view === 'admin') {
-                renderAdminConfig(); 
-            } else {
-                renderServicios();
-            }
-        };
+            (window.app.state.view === 'admin') ? renderAdminConfig() : renderServicios();
+        }
 
         function renderServicios() {
+            const content = document.getElementById('app-content');
+            if(!content) return;
+            content.innerHTML = `
+                <header class="mb-16 animate__animated animate__fadeIn">
+                    <h2 class="text-5xl font-black text-white tracking-tighter mb-4">Marketplace <span class="text-cyan-500">Elite</span></h2>
+                    <p class="text-slate-500 font-bold uppercase text-xs tracking-[0.3em]">Cuentas personales con garantía de por vida</p>
+                </header>
+                <div id="grid-servicios" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8"></div>
+            `;
             const container = document.getElementById('grid-servicios');
-            if(!container) {
-                const content = document.getElementById('app-content');
-                content.innerHTML = `
-                    <div class="mb-10 text-center sm:text-left animate__animated animate__fadeIn">
-                        <h2 class="text-4xl font-black text-white">Servicios Streaming</h2>
-                        <p class="text-slate-500 uppercase text-xs font-bold tracking-[0.2em] mt-2">Cuentas 100% personales con garantía</p>
-                    </div>
-                    <div id="vortex-main-container">
-                        <div id="grid-servicios" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8"></div>
-                    </div>
-                `;
-                renderServicios(); 
-                return;
-            }
-            
             container.innerHTML = servicios.map(s => `
-                <div key="${s.id}" class="service-card animate__animated animate__fadeInUp">
-                    <div class="logo-container">
-                        <img src="${s.logo}" alt="${s.name}" />
-                    </div>
-                    <h3 class="text-white font-bold text-xl">${s.name}</h3>
-                    <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Premium Mensual</p>
-                    <div class="w-full h-[1px] bg-white/5 my-6"></div>
+                <div class="service-card animate__animated animate__fadeInUp">
+                    <div class="logo-container"><img src="${s.logo}" alt="${s.name}" /></div>
+                    <h3 class="text-white font-extrabold text-xl mb-1">${s.name}</h3>
+                    <p class="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em]">Premium Mensual</p>
+                    <div class="w-full h-[1px] bg-white/5 my-8"></div>
                     <div class="price-text">$${s.price.toFixed(2)}</div>
-                    <button class="btn-adquirir" style="${s.highlight ? 'background: var(--primary); color: #000;' : ''}" onclick="app.registrarCompra('${s.name}', ${s.price}, 'streaming')">
-                        Adquirir
-                    </button>
+                    <button class="btn-adquirir" onclick="openPaymentModal(${JSON.stringify(s).replace(/"/g, '&quot;')})">Adquirir Ahora</button>
                 </div>
             `).join('');
         }
@@ -372,47 +293,26 @@
             if(!adminContainer) return;
             const existing = document.getElementById('config-catalogo-vortex');
             if(existing) existing.remove();
+            
             const configSection = document.createElement('div');
             configSection.id = 'config-catalogo-vortex';
             configSection.className = "mt-8 animate__animated animate__fadeIn";
             configSection.innerHTML = `
                 <div class="glass-card rounded-[2rem] p-6 mb-8 border border-cyan-500/30">
-                    <h4 class="text-white font-black text-xs uppercase mb-4 flex items-center gap-2">
-                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Añadir Nuevo Producto
-                    </h4>
+                    <h4 class="text-white font-black text-xs uppercase mb-4 flex items-center gap-2">Añadir Nuevo</h4>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <input id="admin-name" type="text" placeholder="Nombre (Ej: Spotify)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
-                        <input id="admin-price" type="number" placeholder="Precio (Ej: 5.99)" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
-                        <input id="admin-logo" type="text" placeholder="URL del Logo" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none focus:border-cyan-500" />
-                        
-                        <button 
-                            onClick="(() => {
-                                const n = document.getElementById('admin-name').value;
-                                const p = document.getElementById('admin-price').value;
-                                const l = document.getElementById('admin-logo').value;
-                                if(n && p) {
-                                    addProduct(n, p, l);
-                                    document.getElementById('admin-name').value = '';
-                                    document.getElementById('admin-price').value = '';
-                                    document.getElementById('admin-logo').value = '';
-                                }
-                            })()"
-                            class="bg-cyan-500 text-black px-4 py-2 rounded-xl font-black text-xs uppercase hover:bg-white transition-all"
-                        >
-                            Guardar Producto
-                        </button>
+                        <input id="admin-name" type="text" placeholder="Nombre" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none" />
+                        <input id="admin-price" type="number" placeholder="Precio" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none" />
+                        <input id="admin-logo" type="text" placeholder="URL Logo" class="bg-white/5 border-b border-white/10 p-2 text-white text-xs outline-none" />
+                        <button onClick="const n=document.getElementById('admin-name').value, p=document.getElementById('admin-price').value, l=document.getElementById('admin-logo').value; if(n&&p) addProduct(n,p,l);" class="bg-cyan-500 text-black px-4 py-2 rounded-xl font-black text-xs uppercase">Guardar</button>
                     </div>
                 </div>
                 <div class="glass-card rounded-[2.5rem] p-8 border-t-4 border-cyan-500">
-                    <h3 class="text-sm font-black text-slate-400 uppercase mb-6 tracking-widest italic">Gestión de Catálogo</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${servicios.map(s => `
                             <div class="bg-black/40 p-4 rounded-3xl flex items-center gap-4 border border-white/5">
-                                <img src="${s.logo}" class="w-12 h-12 object-contain bg-white/5 rounded-xl p-1" />
-                                <div class="flex-1">
-                                    <p class="text-[10px] font-black text-slate-400 uppercase">${s.name}</p>
-                                    <input type="text" class="w-full bg-transparent border-b border-cyan-500/30 text-cyan-400 text-[10px] py-1 outline-none focus:border-cyan-500" value="${s.logo}" onchange="updateServiceLogo(${s.id}, this.value)" />
-                                </div>
+                                <img src="${s.logo}" class="w-12 h-12 object-contain" />
+                                <div class="flex-1"><p class="text-[10px] font-black text-slate-400 uppercase">${s.name}</p><input type="text" class="w-full bg-transparent border-b border-cyan-500/30 text-cyan-400 text-[10px] py-1 outline-none" value="${s.logo}" onchange="updateServiceLogo(${s.id}, this.value)" /></div>
                             </div>
                         `).join('')}
                     </div>
@@ -425,22 +325,17 @@
             const saved = localStorage.getItem('vortex_session');
             if (saved) {
                 const user = JSON.parse(saved);
-                const isAdmin = user.role === 'ADMIN';
-                if (isAdmin) document.body.classList.add('is-admin');
+                if (user.role === 'ADMIN') document.body.classList.add('is-admin');
                 const adminBtn = document.getElementById('admin-view-toggle');
-                if (adminBtn) adminBtn.style.display = isAdmin ? 'block' : 'none';
-                if (window.app && window.app.state) window.app.state.currentUser = user;
+                if (adminBtn) adminBtn.style.display = user.role === 'ADMIN' ? 'block' : 'none';
                 const userName = user.name || user.email.split('@')[0];
-                if(document.getElementById('nav-user-name')) document.getElementById('nav-user-name').textContent = userName.toUpperCase();
-                if(document.getElementById('display-username')) document.getElementById('display-username').textContent = userName.toUpperCase();
-                if(document.getElementById('user-role-display')) document.getElementById('user-role-display').textContent = user.role;
-                if(document.getElementById('val-user')) document.getElementById('val-user').textContent = user.email;
+                document.getElementById('nav-user-name').textContent = userName.toUpperCase();
+                document.getElementById('display-username').textContent = userName.toUpperCase();
+                document.getElementById('val-user').textContent = user.email;
                 document.getElementById('auth-screen').classList.add('hidden');
                 setTimeout(() => {
-                    if (window.app && window.app.router) {
-                        const startRoute = (user.role === 'ADMIN') ? 'admin' : 'market';
-                        window.app.router(startRoute);
-                    }
+                    const startRoute = (user.role === 'ADMIN') ? 'admin' : 'market';
+                    window.app.router(startRoute);
                     renderServicios();
                 }, 50);
             }
@@ -450,41 +345,21 @@
             updateUIFromSession();
             const adminBtn = document.getElementById('admin-view-toggle');
             if(adminBtn) {
-                adminBtn.onclick = () => {
-                    const isCurrentlyAdmin = window.app.state.view === 'admin';
-                    window.app.router(isCurrentlyAdmin ? 'market' : 'admin');
-                };
+                adminBtn.onclick = () => app.router(app.state.view === 'admin' ? 'market' : 'admin');
                 const observer = new MutationObserver(() => {
-                    const isViewAdmin = window.app.state.view === 'admin';
-                    adminBtn.textContent = isViewAdmin ? 'VER TIENDA' : 'VER PANEL ADMIN';
-                    if(!isViewAdmin) renderServicios(); else setTimeout(renderAdminConfig, 100);
+                    const isA = app.state.view === 'admin';
+                    adminBtn.textContent = isA ? 'VER TIENDA' : 'VER PANEL ADMIN';
+                    if(!isA) renderServicios(); else setTimeout(renderAdminConfig, 100);
                 });
                 observer.observe(document.getElementById('app-content'), { childList: true });
             }
-            if(window.app) {
-                const originalRouter = app.router;
-                app.router = function(route) {
-                    const adminBtn = document.getElementById('admin-view-toggle');
-                    if(adminBtn) adminBtn.textContent = (route === 'admin') ? 'VER TIENDA' : 'VER PANEL ADMIN';
-                    return originalRouter.apply(this, arguments);
-                };
-            }
         });
 
-        function toggleSearchField() {
-            const container = document.getElementById('search-input-container');
-            container.classList.toggle('search-field-visible');
-            if(container.classList.contains('search-field-visible')) container.querySelector('input').focus();
-        }
+        function toggleSearchField() { const c = document.getElementById('search-input-container'); c.classList.toggle('search-field-visible'); if(c.classList.contains('search-field-visible')) c.querySelector('input').focus(); }
         function toggleModernMenu() { document.getElementById('side-menu-vortex').classList.toggle('active'); }
         function toggleUserCard() { document.getElementById('user-info-card').classList.toggle('hidden'); }
-        function revealPass() {
-            const passEl = document.getElementById('val-pass');
-            const realPass = (window.app && window.app.state && window.app.state.currentUser) ? window.app.state.currentUser.pass : '****';
-            passEl.textContent = (passEl.textContent === '••••••••') ? realPass : '••••••••';
-        }
+        function revealPass() { const p = document.getElementById('val-pass'); p.textContent = (p.textContent === '••••••••') ? (app.state.currentUser.pass) : '••••••••'; }
     </script>
-    
     <script type="module" src="app.js?v=5.0"></script>
 </body>
 </html>
